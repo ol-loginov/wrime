@@ -1,0 +1,4 @@
+${param java.lang.String b}
+${for(ch:b.toCharArray())}
+${include("000-include.txt", ch, ch2=ch)}
+${for}

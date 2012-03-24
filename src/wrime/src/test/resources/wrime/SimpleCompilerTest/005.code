@@ -1,0 +1,21 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+
+public class W$SimpleCompilerTest$005_txt extends wrime.WrimeWriter {
+  public W$SimpleCompilerTest$005_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+  }
+
+  protected void renderContent() throws Exception {
+    write("OGA!");
+  }
+}

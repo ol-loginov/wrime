@@ -1,0 +1,2 @@
+${param wrime.model.Bean2 bean}
+A${bean.varg(bean.integer,bean.string,bean.string)}G

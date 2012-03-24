@@ -1,0 +1,4 @@
+[enter resource SimpleScannerTest/005.txt][expr][$i18n][:][$translate][list]['call me'][/list][/expr][write] 
+[expr][$i18n][:][$translate][list]['with ' inside'][/list][/expr][write] 
+[expr][$i18n][:][$translate][list]['with " inside'][/list][/expr][write] 
+[expr][$i18n][:][$translate][list]['slash \'][/list][/expr][leave resource]

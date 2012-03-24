@@ -1,0 +1,2 @@
+${param wrime.model.Bean2 bean}
+${bean.call(bean.integer,bean.string)}

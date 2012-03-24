@@ -1,0 +1,21 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+
+public class W$IncludeSimpleTest$000_txt extends wrime.WrimeWriter {
+  public W$IncludeSimpleTest$000_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+  }
+
+  protected void renderContent() throws Exception {
+    this.include("000-include.txt", null);
+  }
+}

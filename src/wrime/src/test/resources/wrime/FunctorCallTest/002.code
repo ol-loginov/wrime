@@ -1,0 +1,27 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+
+public class W$FunctorCallTest$002_txt extends wrime.WrimeWriter {
+  private wrime.functor.I18Nizer $i18n;
+
+  public W$FunctorCallTest$002_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    this.$i18n=null;
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+    this.$i18n=(wrime.functor.I18Nizer)model.get("functor:i18n");
+  }
+
+  protected void renderContent() throws Exception {
+    write(this.$i18n.translate("Call me the greatest!"));
+    write(this.$i18n.translate("Call me the greatest!","бугагашеньки"));
+    write(this.$i18n.translate("\\\\b"));
+  }
+}

@@ -1,0 +1,1 @@
+[enter resource SimpleScannerTest/003.txt][expr][$c][:][$loop][list][$e][$in][$toggles][/list][/expr][expr][$loop][list][$e][,][$b][/list][/expr][expr][$c][:][$loop][/expr][leave resource]

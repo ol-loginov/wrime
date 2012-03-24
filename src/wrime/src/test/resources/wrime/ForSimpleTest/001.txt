@@ -1,0 +1,12 @@
+${import wrime.model.*}
+${param ForIterator forer}
+${for(a : forer.beanList)}
+  ${for(a1 : forer.superBeanList)}
+    ${for(a2 : forer.extendBeanList)}
+      ${for(a3 : forer.superFaceList)}
+        ${for(a4 : forer.extendFaceList)}
+        ${for}
+      ${for}
+    ${for}
+  ${for}
+${for}

@@ -1,0 +1,30 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+
+public class W$IncludeSimpleTest$002_txt extends wrime.WrimeWriter {
+  private java.lang.String b;
+
+  public W$IncludeSimpleTest$002_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    this.b=null;
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+    this.b=(java.lang.String)model.get("b");
+  }
+
+  protected void renderContent() throws Exception {
+    for(char ch : b.toCharArray()) {
+      ModelMap $includeAt_2_40 = new ModelMap();
+      $includeAt_2_40.put("ch", ch);
+      $includeAt_2_40.put("ch2", ch);
+      this.include("000-include.txt", $includeAt_2_40);
+    }
+  }
+}

@@ -1,0 +1,35 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+import wrime.model.*;
+
+public class W$ForSimpleTest$001_txt extends wrime.WrimeWriter {
+  private ForIterator forer;
+
+  public W$ForSimpleTest$001_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    this.forer=null;
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+    this.forer=(ForIterator)model.get("forer");
+  }
+
+  protected void renderContent() throws Exception {
+    for(wrime.model.Bean2 a : forer.getBeanList()) {
+      for(java.lang.Object a1 : forer.getSuperBeanList()) {
+        for(wrime.model.Bean2 a2 : forer.getExtendBeanList()) {
+          for(java.lang.Object a3 : forer.getSuperFaceList()) {
+            for(wrime.model.Face1 a4 : forer.getExtendFaceList()) {
+            }
+          }
+        }
+      }
+    }
+  }
+}

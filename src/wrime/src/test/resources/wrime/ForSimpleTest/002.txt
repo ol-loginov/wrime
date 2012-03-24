@@ -1,0 +1,10 @@
+${import wrime.model.*}
+${param ForIterator2 forer}
+${for(a : forer.iterable)}
+  ${a.string}
+  ${continue}
+${for}
+${for(a : forer.iterable)}
+  ${a.string}
+  ${break}
+${for}

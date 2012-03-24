@@ -1,0 +1,26 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+import wrime.model.*;
+
+public class W$SimpleCompilerTest$009_txt extends wrime.WrimeWriter {
+  private Bean1 bean;
+
+  public W$SimpleCompilerTest$009_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    this.bean=null;
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+    this.bean=(Bean1)model.get("bean");
+  }
+
+  protected void renderContent() throws Exception {
+    write(bean.getBean().getHello());
+  }
+}

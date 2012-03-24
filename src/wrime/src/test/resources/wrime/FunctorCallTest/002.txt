@@ -1,0 +1,3 @@
+${i18n:translate("Call me the greatest!")}
+${i18n:translate("Call me the greatest!", "бугагашеньки")}
+${i18n:translate("\\b")}

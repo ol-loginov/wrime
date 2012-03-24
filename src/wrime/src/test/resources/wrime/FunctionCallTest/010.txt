@@ -1,0 +1,2 @@
+${param wrime.model.Bean0 bean}
+${bean.arg2(bean.hello, bean.hello)}

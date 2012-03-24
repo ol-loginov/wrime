@@ -1,0 +1,3 @@
+${import wrime.model.*}
+${param Bean1 bean}
+${bean.bean.hello}

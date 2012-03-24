@@ -1,0 +1,4 @@
+${i18n:translate("call me")}
+${i18n:translate("with ' inside")}
+${i18n:translate('with " inside')}
+${i18n:translate("slash \")}

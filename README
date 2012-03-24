@@ -1,0 +1,52 @@
+To directly view examples of markup - go to test resources: src/wrime/src/test/resources/wrime
+
+==============================
+Terms:
+==============================
+
+<call> - one invocation point (single function call, or chain of calls). For example:
+  a.foo().bubba.getToken()
+    it means "take var a, call a method 'foo' on it, then call method 'bubba' or getter 'getBubba' on result, then call 'getToken' method on it
+  i18n:concat("a", a, "b")
+    if you add token with ':' to the beginning of expression, then this means we use functor (class), registered in an engine
+
+==============================
+1-statements
+==============================
+
+${<call>} produces write to output or just call (if expression result is void)
+
+==============================
+Loop-statements:
+==============================
+
+${loop(a : <call>)} - start the for-each iteration. Type of a is deducted according to result for <call> (java.lang.Object in common)
+${loop} - finish last opened for-each.
+
+You may nest any reasonable number of loops
+
+-------------------------
+
+${break} - works like Java's "break"
+
+-------------------------
+
+${continue} - works like Java's "continue"
+
+==============================
+Parameter declaration
+==============================
+
+${param java.lang.String aaa} - this introduces parameter. It will be assigned from ModelMap input.
+
+-------------------------
+
+${param java.lang.String aaa transient} - this marks transient parameter. It will be automatically passed to underline calls to other child templates
+
+==============================
+Include other templates
+==============================
+
+${include "./asdasdasd.html"} - includes other template named "asdasdasd.html" in the same folder as current template
+${include "../asdasdasd.html"} - includes other template named "asdasdasd.html" from parent folder
+${include :concat("asdasd", someName, ".html")} - includes other template based on runtime info
