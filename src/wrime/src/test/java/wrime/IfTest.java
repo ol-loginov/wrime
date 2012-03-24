@@ -1,6 +1,5 @@
 package wrime;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class IfTest {
@@ -18,7 +17,6 @@ public class IfTest {
     }
 
     @Test
-    @Ignore
     public void justOne() throws WrimeException {
         check("000");
     }

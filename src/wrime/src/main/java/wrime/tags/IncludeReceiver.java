@@ -54,7 +54,7 @@ public class IncludeReceiver extends PathReceiver {
     }
 
     private void waitForPath() {
-        path.push(new CallReceiver(createPathCloser()));
+        path.push(new CallReceiver().setCloser(createPathCloser()));
     }
 
     private CompleteCallback createPathCloser() {

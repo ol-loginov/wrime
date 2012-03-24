@@ -15,20 +15,17 @@ public class CallReceiver extends PathReceiver {
         INVOKER
     }
 
-    private final CompleteCallback closer;
+    private CompleteCallback closer;
     private Operand operand;
     private Expect expect = Expect.NONE;
 
-    public CallReceiver() {
-        this(null);
-    }
-
-    public CallReceiver(CompleteCallback closer) {
-        this.closer = closer;
-    }
-
     public Operand getOperand() {
         return operand;
+    }
+
+    public CallReceiver setCloser(CompleteCallback closer) {
+        this.closer = closer;
+        return this;
     }
 
     @Override
@@ -44,7 +41,7 @@ public class CallReceiver extends PathReceiver {
     @Override
     public void beginList(ExpressionContextKeeper scope) throws WrimeException {
         if (operand instanceof Invoker) {
-            path.push(new CallReceiver(createCloser()));
+            path.push(new CallReceiver().setCloser(createCloser()));
         } else {
             error("expected at function point only");
         }
@@ -57,7 +54,7 @@ public class CallReceiver extends PathReceiver {
                 path.remove(child);
                 addOperand(((CallReceiver) child).getOperand());
                 if (!last) {
-                    path.push(new CallReceiver(this));
+                    path.push(new CallReceiver().setCloser(this));
                 } else {
                     resolveInvoker(scope);
                 }
