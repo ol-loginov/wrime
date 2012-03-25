@@ -4,7 +4,9 @@ import wrime.ExpressionContextKeeper;
 import wrime.WrimeException;
 import wrime.ops.Raw;
 
-public class ForBreakFactory implements TagFactory {
+public class BreakFactory implements TagFactory {
+    public static final String SCOPE_ATTRIBUTE = "breakable";
+
     @Override
     public boolean supports(String name) {
         return "break".equals(name);
@@ -15,8 +17,8 @@ public class ForBreakFactory implements TagFactory {
         return new PathReceiver() {
             @Override
             public void complete(ExpressionContextKeeper scope) throws WrimeException {
-                if (!scope.current().hasAttribute(ForFactory.LOOP_SCOPE)) {
-                    error("You may use 'break' only inside");
+                if (!scope.current().hasAttribute(SCOPE_ATTRIBUTE)) {
+                    error("You may use 'break' only inside breakable scope");
                 }
                 path.render(new Raw("break;"));
             }

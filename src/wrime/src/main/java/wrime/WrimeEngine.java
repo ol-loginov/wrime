@@ -37,8 +37,8 @@ public class WrimeEngine {
             add(new IncludeFactory());
             add(new ImportFactory());
             add(new ForFactory());
-            add(new ForContinueFactory());
-            add(new ForBreakFactory());
+            add(new ContinueFactory());
+            add(new BreakFactory());
             add(new IfFactory());
         }};
     }

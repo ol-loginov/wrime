@@ -53,7 +53,8 @@ public class ForReceiver extends PathReceiver {
                 path.render(chain);
 
                 ExpressionContext context = scope.openScope();
-                context.addAttribute(ForFactory.LOOP_SCOPE);
+                context.addAttribute(ContinueFactory.SCOPE_ATTRIBUTE);
+                context.addAttribute(BreakFactory.SCOPE_ATTRIBUTE);
                 context.addVar(varName, new TypeName(iteratorType.getType()));
 
                 break;
