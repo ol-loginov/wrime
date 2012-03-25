@@ -14,39 +14,69 @@ Terms:
 1-statements
 ==============================
 
-${<call>} produces write to output or just call (if expression result is void)
+${<call>}
+  produces write to output or just call (if expression result is void)
 
 ==============================
 Loop-statements:
 ==============================
 
-${loop(a : <call>)} - start the for-each iteration. Type of a is deducted according to result for <call> (java.lang.Object in common)
-${loop} - finish last opened for-each.
+${loop(a : <call>)}
+  start the for-each iteration. Type of a is deducted according to result for <call> (java.lang.Object in common)
+${loop}
+  finish last opened for-each.
 
 You may nest any reasonable number of loops
 
 -------------------------
 
-${break} - works like Java's "break"
+${break}
+  works like Java's "break"
 
 -------------------------
 
-${continue} - works like Java's "continue"
+${continue}
+  works like Java's "continue"
 
 ==============================
 Parameter declaration
 ==============================
 
-${param java.lang.String aaa} - this introduces parameter. It will be assigned from ModelMap input.
+${param java.lang.String aaa}
+  this introduces parameter. It will be assigned from ModelMap input.
 
 -------------------------
 
-${param java.lang.String aaa transient} - this marks transient parameter. It will be automatically passed to underline calls to other child templates
+${param java.lang.String aaa transient}
+  this marks transient parameter. It will be automatically passed to underline calls to other child templates
 
 ==============================
 Include other templates
 ==============================
 
-${include "./asdasdasd.html"} - includes other template named "asdasdasd.html" in the same folder as current template
-${include "../asdasdasd.html"} - includes other template named "asdasdasd.html" from parent folder
-${include :concat("asdasd", someName, ".html")} - includes other template based on runtime info
+${include("./asdasdasd.html")}
+  includes other template named "asdasdasd.html" in the same folder as current template
+${include("../asdasdasd.html")}
+  includes other template named "asdasdasd.html" from parent folder
+${include(str:concat("asdasd", someName, ".html"), ch, ch2=ch)}
+  includes other template based on runtime info. Initialize ModelMap with two parameters (named ch and ch2)  while calling the template
+
+==============================
+If-elif-else
+==============================
+
+${if(<call>)}
+  start
+${elif(<call>)}
+  else-if branch
+${else}
+  else branch
+${if}
+  finish
+
+==============================
+TO-DO
+==============================
+
+${set a=<call>}
+  local variable setter. doesn't open the scope (like '{ }' in Java). If variable wasn't introduced before - the it will be done here
