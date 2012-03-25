@@ -51,7 +51,16 @@ public abstract class OperandRendererDefault implements OperandRenderer, Functor
     }
 
     private void render0(Literal operand, Writer writer) throws IOException {
-        writer.append('"').append(EscapeUtils.escapeJavaString(operand.getText())).append('"');
+        switch (operand.getValue()) {
+            case STRING:
+                writer.append('"').append(EscapeUtils.escapeJavaString(operand.getString())).append('"');
+                break;
+            case INTEGER:
+                writer.append(Integer.toString(operand.getInteger()));
+                break;
+            default:
+                throw new IOException("No method to render value of type " + operand.getValue());
+        }
     }
 
     private void render0(Raw operand, Writer writer) throws IOException {

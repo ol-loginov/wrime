@@ -23,6 +23,13 @@ public class RootReceiver extends PathReceiver {
         }
 
         CallReceiver receiver = new CallReceiver();
+        receiver.setCloser(new CompleteCallback() {
+            @Override
+            public void complete(PathReceiver child, ExpressionContextKeeper scope, boolean last) throws WrimeException {
+                path.render(((CallReceiver) child).getOperand());
+            }
+        });
+
         path.push(receiver, scope);
         receiver.pushToken(scope, name);
     }

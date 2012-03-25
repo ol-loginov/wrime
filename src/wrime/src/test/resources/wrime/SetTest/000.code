@@ -1,0 +1,29 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+
+public class W$SetTest$000_txt extends wrime.WrimeWriter {
+  private wrime.functor.StringFunctor $str;
+
+  public W$SetTest$000_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    this.$str=null;
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+    this.$str=(wrime.functor.StringFunctor)model.get("functor:str");
+  }
+
+  protected void renderContent() throws Exception {
+    java.lang.String s = "";
+    int n = 1;
+    java.lang.String s2 = this.$str.create("s2");
+    n = 2;
+    s = s2.substring(1);
+  }
+}

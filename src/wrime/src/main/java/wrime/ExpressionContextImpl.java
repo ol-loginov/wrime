@@ -109,7 +109,7 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
     @Override
     public TypeName getVarType(String name) {
         TypeName def = super.getVarType(name);
-        if (def == null) {
+        if (def != null) {
             return def;
         }
         ParameterName parameter = compiler.getModelParameter(name);

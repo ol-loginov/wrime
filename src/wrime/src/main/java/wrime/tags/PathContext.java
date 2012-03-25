@@ -74,9 +74,13 @@ public class PathContext {
 
     public void markComplete(ExpressionContextKeeper scope) throws WrimeException {
         while (!receiverStack.empty()) {
-            PathReceiver receiver = receiverStack.pop();
+            PathReceiver receiver = receiverStack.peek();
             receiver.complete(scope);
             receiver.setPath(null);
+
+            if (!receiverStack.isEmpty() && receiverStack.peek() == receiver) {
+                receiverStack.pop();
+            }
         }
     }
 

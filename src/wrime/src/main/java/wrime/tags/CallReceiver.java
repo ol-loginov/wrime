@@ -6,6 +6,8 @@ import wrime.TypeUtil;
 import wrime.WrimeException;
 import wrime.ops.*;
 
+import java.util.regex.Pattern;
+
 /**
  * Accepts and validate syntax like "field.method().foo"
  */
@@ -18,6 +20,7 @@ public class CallReceiver extends PathReceiver {
     private CompleteCallback closer;
     private Operand operand;
     private Expect expect = Expect.NONE;
+    private boolean showUnknownTagError = false;
 
     public Operand getOperand() {
         return operand;
@@ -28,6 +31,11 @@ public class CallReceiver extends PathReceiver {
         return this;
     }
 
+    public CallReceiver setShowUnknownTagError(boolean showUnknownTagError) {
+        this.showUnknownTagError = showUnknownTagError;
+        return this;
+    }
+
     @Override
     public String getHumanName() {
         return "Expression analyser";
@@ -35,7 +43,7 @@ public class CallReceiver extends PathReceiver {
 
     @Override
     public void complete(ExpressionContextKeeper scope) throws WrimeException {
-        path.render(operand);
+        closer.complete(this, scope, true);
     }
 
     @Override
@@ -139,11 +147,13 @@ public class CallReceiver extends PathReceiver {
                 functor.setName(name);
                 functor.setResult(scope.findFunctorType(name));
                 operand = functor;
+            } else if (toNumber(name) != null) {
+                operand = new Literal(toNumber(name));
             } else {
-                if (path.depth() > 2) {
-                    error("unknown variable or functor '" + name + "'");
-                } else {
+                if (showUnknownTagError) {
                     error("unknown tag, variable or functor '" + name + "'");
+                } else {
+                    error("unknown variable or functor '" + name + "'");
                 }
             }
         } else if (expect == Expect.INVOKER) {
@@ -159,5 +169,11 @@ public class CallReceiver extends PathReceiver {
         } else {
             error("unexpected token");
         }
+    }
+
+    private Integer toNumber(String value) {
+        if (Pattern.compile("^\\d+$").matcher(value).find())
+            return Integer.parseInt(value);
+        return null;
     }
 }

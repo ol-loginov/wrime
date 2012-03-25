@@ -1,9 +1,8 @@
 package wrime;
 
-import wrime.tags.*;
+import wrime.tags.TagFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -15,7 +14,7 @@ import java.util.*;
 public class WrimeEngine {
     private final Map<String, Class<? extends WrimeWriter>> urlToClassMappings = new HashMap<String, Class<? extends WrimeWriter>>();
     private final Map<String, Object> nameToFunctorMappings = new HashMap<String, Object>();
-    private final List<TagFactory> tagFactories;
+    private final List<TagFactory> tagFactories = new ArrayList<TagFactory>();
 
     private String rootPath;
     private ClassLoader rootLoader;
@@ -28,45 +27,25 @@ public class WrimeEngine {
     }
 
     public WrimeEngine() throws WrimeException {
-        createWorkingFolder();
-
-        setOption(Compiler.FUNCTOR_PREFIX, "functor:");
-
-        tagFactories = new ArrayList<TagFactory>() {{
-            add(new ParamFactory());
-            add(new IncludeFactory());
-            add(new ImportFactory());
-            add(new ForFactory());
-            add(new ContinueFactory());
-            add(new BreakFactory());
-            add(new IfFactory());
-        }};
+        this(new WrimeConfiguration());
     }
 
-    private void createWorkingFolder() throws WrimeException {
-        File tmpFolder;
-        try {
-            tmpFolder = File.createTempFile("wrime", "");
-        } catch (IOException e) {
-            throw new WrimeException("fail to create working folder", e);
-        }
+    public WrimeEngine(WrimeConfiguration configuration) throws WrimeException {
+        createWorkingFolder(configuration.getWorkingFolder());
+        configuration.setOptions(this);
+        configuration.setTagFactories(this);
+        configuration.setFunctors(this);
+    }
 
-        if (!tmpFolder.delete()) {
-            throw new WrimeException("fail to delete just created temporary file", null);
-        }
-        if (!tmpFolder.mkdir()) {
-            throw new WrimeException("fail to create directory from just created temporary file", null);
-        }
-        tmpFolder.deleteOnExit();
-
+    private void createWorkingFolder(File workingFolder) throws WrimeException {
         URL tmpFolderUrl;
         try {
-            tmpFolderUrl = tmpFolder.toURI().toURL();
+            tmpFolderUrl = workingFolder.toURI().toURL();
         } catch (MalformedURLException e) {
             throw new WrimeException("fail to create working folder URL", e);
         }
 
-        this.rootPath = tmpFolder.getAbsolutePath();
+        this.rootPath = workingFolder.getAbsolutePath();
         this.rootLoader = new URLClassLoader(new URL[]{tmpFolderUrl}, getClass().getClassLoader());
     }
 

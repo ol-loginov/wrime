@@ -1,0 +1,2 @@
+${set s="", n=1, s2=str:create("s2")}
+${set  n=2, s=s2.substring(1)}
