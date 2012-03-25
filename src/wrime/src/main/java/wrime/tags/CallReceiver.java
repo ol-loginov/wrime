@@ -153,7 +153,7 @@ public class CallReceiver extends PathReceiver {
             } else if (invoker instanceof Invoker) {
                 ((Invoker) invoker).setInvocable(operand);
             } else {
-                error("unknown invoker");
+                error("unknown function or getter for '" + name + "'");
             }
             operand = invoker;
         } else {

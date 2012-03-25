@@ -1,2 +1,9 @@
-${if(super:solt())}
+${param wrime.model.IfBean bean}
+${if(bean)}
+  ${if(bean.bool)}
+  ${if}
+  ${if(bean.boolean)}
+  ${if}
+  ${if(bean.reference)}
+  ${if}
 ${if}

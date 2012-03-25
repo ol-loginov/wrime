@@ -2,20 +2,31 @@ import java.io.Writer;
 import java.lang.*;
 import java.util.*;
 
-public class W$IncludeSimpleTest$000_txt extends wrime.WrimeWriter {
-  public W$IncludeSimpleTest$000_txt(Writer writer) {
+public class W$IfTest$000_txt extends wrime.WrimeWriter {
+  private wrime.model.IfBean bean;
+
+  public W$IfTest$000_txt(Writer writer) {
     super(writer);
   }
 
   protected void clear() {
+    this.bean=null;
     super.clear();
   }
 
   protected void assignFields(Map<String, Object> model) {
     super.assignFields(model);
+    this.bean=(wrime.model.IfBean)model.get("bean");
   }
 
   protected void renderContent() throws Exception {
-    this.include("000-include.txt", null);
+    if(ifNotNull(bean)) {
+      if(ifTrue(bean.getBool())) {
+      }
+      if(ifTrue(bean.getBoolean())) {
+      }
+      if(ifNotNull(bean.getReference())) {
+      }
+    }
   }
 }

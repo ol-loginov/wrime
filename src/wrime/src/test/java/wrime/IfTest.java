@@ -2,6 +2,9 @@ package wrime;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 public class IfTest {
     private TestResource resources = new TestResource(IfTest.class);
 
@@ -16,8 +19,31 @@ public class IfTest {
                 .parse(resource);
     }
 
+    private void checkError(String resource, String message) {
+        boolean caught = false;
+        try {
+            check(resource);
+        } catch (WrimeException e) {
+            caught = true;
+            assertEquals(message, e.getMessage());
+        }
+        if (!caught) {
+            fail("Exception expected");
+        }
+    }
+
     @Test
     public void justOne() throws WrimeException {
         check("000");
+    }
+
+    @Test
+    public void voidInIf() throws WrimeException {
+        checkError("001", "IfReceiver reports an error: call is not conditional statement (IfTest/001.txt:2, column 21)");
+    }
+
+    @Test
+    public void elses() throws WrimeException {
+        check("002");
     }
 }
