@@ -89,7 +89,7 @@ public class ForReceiver extends PathReceiver {
             case WAIT_VAR:
                 if (":".equals(delimiter)) {
                     status = Status.WAIT_ITERATOR;
-                    path.push(new CallReceiver().setCloser(createCloser()));
+                    path.push(new CallReceiver().setCloser(createCloser()), scope);
                     return;
                 }
             default:

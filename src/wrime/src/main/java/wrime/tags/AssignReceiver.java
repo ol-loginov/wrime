@@ -69,7 +69,7 @@ public class AssignReceiver extends PathReceiver {
             case WAIT_SPLITTER:
                 if (WrimeScanner.EQUAL_SYMBOL.equals(delimiter)) {
                     status = Status.WAIT_CALL;
-                    path.push(new CallReceiver().setCloser(createCloser()));
+                    path.push(new CallReceiver().setCloser(createCloser()), scope);
                 } else if (WrimeScanner.SPLIT_LIST_SYMBOL.equals(delimiter)) {
                     setSourceFromAlias(scope);
                     markComplete(scope, false);

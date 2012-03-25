@@ -15,8 +15,8 @@ public class PathContext {
     private int line;
     private int column;
 
-    public PathContext(OperandRenderer renderer, PathReceiver root) {
-        push(root);
+    public PathContext(OperandRenderer renderer, PathReceiver root) throws WrimeException {
+        push(root, null);
         push(renderer);
     }
 
@@ -42,10 +42,10 @@ public class PathContext {
         return receiverStack.size();
     }
 
-    public void push(PathReceiver receiver) {
+    public void push(PathReceiver receiver, ExpressionContextKeeper scope) throws WrimeException {
         receiver.setPath(this);
         receiverStack.push(receiver);
-        receiver.setup();
+        receiver.setup(scope);
     }
 
     public void remove(PathReceiver receiver) {

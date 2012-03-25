@@ -10,7 +10,7 @@ public abstract class PathReceiver {
         this.path = path;
     }
 
-    public void setup() {
+    public void setup(ExpressionContextKeeper scope) throws WrimeException {
     }
 
     public void errorUnexpected(String token) throws WrimeException {
@@ -18,7 +18,7 @@ public abstract class PathReceiver {
     }
 
     public String getHumanName() {
-        return getClass().getSimpleName();
+        return getClass().getName();
     }
 
     public void error(String text) throws WrimeException {

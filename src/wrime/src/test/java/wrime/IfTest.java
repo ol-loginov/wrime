@@ -39,11 +39,26 @@ public class IfTest {
 
     @Test
     public void voidInIf() throws WrimeException {
-        checkError("001", "IfReceiver reports an error: call is not conditional statement (IfTest/001.txt:2, column 21)");
+        checkError("001", "IF builder reports an error: call is not conditional statement (IfTest/001.txt:2, column 21)");
     }
 
     @Test
     public void elses() throws WrimeException {
         check("002");
+    }
+
+    @Test
+    public void elseWithoutIf() throws WrimeException {
+        checkError("003", "ELSE builder reports an error: current scope is not IF scope (IfTest/003.txt:2, column 7)");
+    }
+
+    @Test
+    public void elifWithoutIf() throws WrimeException {
+        checkError("004", "ELIF builder reports an error: current scope is not IF scope (IfTest/004.txt:2, column 3)");
+    }
+
+    @Test
+    public void elifEmpty() throws WrimeException {
+        checkError("005", "ELIF builder reports an error: no condition specified (IfTest/005.txt:3, column 7)");
     }
 }

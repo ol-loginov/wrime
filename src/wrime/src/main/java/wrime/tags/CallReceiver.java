@@ -41,7 +41,7 @@ public class CallReceiver extends PathReceiver {
     @Override
     public void beginList(ExpressionContextKeeper scope) throws WrimeException {
         if (operand instanceof Invoker) {
-            path.push(new CallReceiver().setCloser(createCloser()));
+            path.push(new CallReceiver().setCloser(createCloser()), scope);
         } else {
             error("expected at function point only");
         }
@@ -54,7 +54,7 @@ public class CallReceiver extends PathReceiver {
                 path.remove(child);
                 addOperand(((CallReceiver) child).getOperand());
                 if (!last) {
-                    path.push(new CallReceiver().setCloser(this));
+                    path.push(new CallReceiver().setCloser(this), scope);
                 } else {
                     resolveInvoker(scope);
                 }

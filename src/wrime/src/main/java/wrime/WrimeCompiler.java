@@ -144,7 +144,7 @@ public class WrimeCompiler {
         expressionPath = null;
     }
 
-    private void startExpression() {
+    private void startExpression() throws WrimeException {
         RootReceiver rootReceiver = new RootReceiver(tagFactories);
         expressionPath = new PathContext(new DirectCallRenderer(), rootReceiver);
     }

@@ -1,0 +1,4 @@
+${param wrime.model.IfBean bean}
+${if(bean.bool)}
+${elif}
+${if}

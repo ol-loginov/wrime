@@ -17,14 +17,13 @@ public class RootReceiver extends PathReceiver {
     public void pushToken(ExpressionContextKeeper scope, String name) throws WrimeException {
         for (TagFactory factory : tagFactories) {
             if (factory.supports(name)) {
-                PathReceiver receiver = factory.createReceiver(name);
-                path.push(receiver);
+                path.push(factory.createReceiver(name), scope);
                 return;
             }
         }
 
         CallReceiver receiver = new CallReceiver();
-        path.push(receiver);
+        path.push(receiver, scope);
         receiver.pushToken(scope, name);
     }
 

@@ -35,7 +35,7 @@ public class IncludeReceiver extends PathReceiver {
         switch (status) {
             case WAIT_START:
                 storeTransientParameters(scope);
-                waitForPath();
+                waitForPath(scope);
                 break;
             default:
                 errorUnexpected(WrimeScanner.OPEN_LIST_SYMBOL);
@@ -53,8 +53,8 @@ public class IncludeReceiver extends PathReceiver {
         }
     }
 
-    private void waitForPath() {
-        path.push(new CallReceiver().setCloser(createPathCloser()));
+    private void waitForPath(ExpressionContextKeeper scope) throws WrimeException {
+        path.push(new CallReceiver().setCloser(createPathCloser()), scope);
     }
 
     private CompleteCallback createPathCloser() {
@@ -65,14 +65,14 @@ public class IncludeReceiver extends PathReceiver {
                 status = last ? Status.COMPLETE : Status.WAIT_PARAMETER;
                 templatePath = ((CallReceiver) child).getOperand();
                 if (!last) {
-                    waitForParameter();
+                    waitForParameter(scope);
                 }
             }
         };
     }
 
-    private void waitForParameter() {
-        path.push(new AssignReceiver().setCompleteCallback(createParameterCloser()));
+    private void waitForParameter(ExpressionContextKeeper scope) throws WrimeException {
+        path.push(new AssignReceiver().setCompleteCallback(createParameterCloser()), scope);
     }
 
     private CompleteCallback createParameterCloser() {
@@ -88,7 +88,7 @@ public class IncludeReceiver extends PathReceiver {
                 templateModel.add(parameter);
 
                 if (!last) {
-                    waitForParameter();
+                    waitForParameter(scope);
                 } else {
                 }
             }

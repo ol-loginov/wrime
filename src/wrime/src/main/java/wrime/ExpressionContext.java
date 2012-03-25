@@ -1,9 +1,6 @@
 package wrime;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ExpressionContext {
     private final ClassLoader classLoader;
@@ -30,8 +27,16 @@ public class ExpressionContext {
         return attributes.contains(attribute);
     }
 
+    public Collection<String> getAttributes() {
+        return Collections.unmodifiableCollection(attributes);
+    }
+
     public void addAttribute(String attribute) {
         attributes.add(attribute);
+    }
+
+    public void addAttributeAll(Collection<String> attributeList) {
+        attributes.addAll(attributeList);
     }
 
     public void addVar(String name, TypeName classDef) throws WrimeException {
