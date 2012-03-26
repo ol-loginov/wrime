@@ -21,6 +21,6 @@ public class W$SimpleCompilerTest$009_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    write(bean.getBean().getHello());
+    this.$$e(bean.getBean().getHello());
   }
 }

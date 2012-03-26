@@ -16,6 +16,6 @@ public class W$SimpleCompilerTest$005_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    write("OGA!");
+    this.$$t("OGA!");
   }
 }

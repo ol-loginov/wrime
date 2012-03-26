@@ -11,6 +11,7 @@ public interface WrimeScanner {
     String CLOSE_LIST_SYMBOL = ")";
     String SPLIT_LIST_SYMBOL = ",";
     String EQUAL_SYMBOL = "=";
+    String RAW_SYMBOL = "#";
 
     void configure(Map<WrimeEngine.Scanner, String> options);
 

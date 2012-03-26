@@ -1,6 +1,5 @@
 package wrime;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import wrime.functor.I18Nizer;
 
@@ -32,8 +31,7 @@ public class FunctionCallTest extends TestClass {
     }
 
     @Test
-    @Ignore
     public void callOnVoidResult() throws WrimeException {
-        parseWithError("014", "Expression analyser reports an error: no invocable at the point (FunctionCallTest/014.txt:2, column 33)");
+        parseWithError("014", "Expression analyser reports an error: no invocable at the point (FunctionCallTest/014.txt:2, column 16)");
     }
 }

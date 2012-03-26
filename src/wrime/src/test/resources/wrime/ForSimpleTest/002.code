@@ -22,11 +22,11 @@ public class W$ForSimpleTest$002_txt extends wrime.output.WrimeWriter {
 
   protected void renderContent() throws Exception {
     for(wrime.model.Bean2 a : forer.getIterable()) {
-      writeValue(a.getString());
+      this.$$e(a.getString());
       continue;
     }
     for(wrime.model.Bean2 a : forer.getIterable()) {
-      writeValue(a.getString());
+      this.$$e(a.getString());
       break;
     }
   }

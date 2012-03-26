@@ -20,6 +20,6 @@ public class W$SimpleCompilerTest$007_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    write(hello);
+    this.$$e(hello);
   }
 }

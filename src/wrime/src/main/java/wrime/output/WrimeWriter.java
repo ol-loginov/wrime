@@ -38,14 +38,21 @@ public abstract class WrimeWriter {
         this.model = model;
     }
 
-    protected void writeText(String text) throws IOException {
+    protected void wt(String text) throws IOException {
         if (text == null || text.length() == 0) {
             return;
         }
         writer.write(text);
     }
 
-    protected void writeValue(Object value) throws IOException {
+    protected void we(Object value) throws IOException {
+        if (value == null) {
+            return;
+        }
+        writer.write(value.toString());
+    }
+
+    protected void wr(Object value) throws IOException {
         if (value == null) {
             return;
         }

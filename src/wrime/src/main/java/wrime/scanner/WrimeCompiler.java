@@ -3,6 +3,7 @@ package wrime.scanner;
 import wrime.ScriptResource;
 import wrime.WrimeEngine;
 import wrime.WrimeException;
+import wrime.ops.EscapedRenderer;
 import wrime.ops.Functor;
 import wrime.ops.Operand;
 import wrime.ops.OperandRendererDefault;
@@ -23,6 +24,10 @@ import java.util.regex.Pattern;
 public class WrimeCompiler {
     private static final String EOL = System.getProperty("line.separator");
     private static final String SCOPE_IDENT = "  ";
+
+    private static final String ESCAPED_WRITE_METHOD = "this.$$e";
+    private static final String RAW_WRITE_METHOD = "this.$$r";
+    private static final String TEXT_WRITE_METHOD = "this.$$t";
 
     private Body renderContentBody;
 
@@ -150,8 +155,9 @@ public class WrimeCompiler {
     }
 
     private void startExpression() throws WrimeException {
-        RootReceiver rootReceiver = new RootReceiver(tagFactories);
-        expressionPath = new PathContext(new DirectCallRenderer(), rootReceiver);
+        DirectCallRenderer callRenderer = new DirectCallRenderer();
+        RootReceiver rootReceiver = new RootReceiver(tagFactories, callRenderer);
+        expressionPath = new PathContext(callRenderer, rootReceiver);
     }
 
     public void addImport(String clazz) {
@@ -396,7 +402,7 @@ public class WrimeCompiler {
         public void text(String text) throws WrimeException {
             ensureNotReady();
             if (text != null && text.length() > 0) {
-                renderContentBody.l(String.format("writeText(\"%s\");", EscapeUtils.escapeJavaString(text)));
+                renderContentBody.l(String.format("%s(\"%s\");", TEXT_WRITE_METHOD, EscapeUtils.escapeJavaString(text)));
             }
         }
 
@@ -450,7 +456,14 @@ public class WrimeCompiler {
         }
     }
 
-    private class DirectCallRenderer extends OperandRendererDefault {
+    private class DirectCallRenderer extends OperandRendererDefault implements EscapedRenderer {
+        private boolean escapeBeforeWrite;
+
+        @Override
+        public void escapeBeforeWrite(boolean enable) {
+            this.escapeBeforeWrite = enable;
+        }
+
         @Override
         public void render(Operand operand) throws WrimeException {
             if (operand == null) {
@@ -468,11 +481,18 @@ public class WrimeCompiler {
             if (operand.isStatement()) {
                 closer = ";";
             }
+
+            String format;
             if (isWritable(operand.getResult())) {
-                renderContentBody.everyLine(String.format("writeValue(%s)%s", writer.toString(), closer));
+                if (escapeBeforeWrite) {
+                    format = ESCAPED_WRITE_METHOD + "(%s)%s";
+                } else {
+                    format = RAW_WRITE_METHOD + "(%s)%s";
+                }
             } else {
-                renderContentBody.everyLine(String.format("%s%s", writer.toString(), closer));
+                format = "%s%s";
             }
+            renderContentBody.everyLine(String.format(format, writer.toString(), closer));
         }
 
         @Override

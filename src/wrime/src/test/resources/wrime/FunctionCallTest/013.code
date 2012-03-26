@@ -23,8 +23,8 @@ public class W$FunctionCallTest$013_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    writeText("A");
+    this.$$t("A");
     bean.varg(bean.getInteger(),bean.getString(),bean.getString());
-    writeText("G");
+    this.$$t("G");
   }
 }

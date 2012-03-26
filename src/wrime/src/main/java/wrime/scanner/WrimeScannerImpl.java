@@ -176,6 +176,8 @@ public class WrimeScannerImpl implements WrimeScanner {
                         token.type = TokenType.EXPR_DELIMITER;
                     } else if (EQUAL_SYMBOL.equals(token.value)) {
                         token.type = TokenType.EXPR_DELIMITER;
+                    } else if (RAW_SYMBOL.equals(token.value)) {
+                        token.type = TokenType.EXPR_DELIMITER;
                     } else if (".".equals(token.value)) {
                         token.type = TokenType.EXPR_DELIMITER;
                     } else if ("*".equals(token.value)) {
@@ -197,7 +199,7 @@ public class WrimeScannerImpl implements WrimeScanner {
 
     private static enum Expectation {
         TOKEN_MARK("(?<!\\$)\\$\\{"),
-        EXPR_DELIMITER("=|\\*| |,|:|\\(|\\)|'|\\\"|\\.|}"),
+        EXPR_DELIMITER("#|=|\\*| |,|:|\\(|\\)|'|\\\"|\\.|}"),
         EXPR_QUOTE_BOUND("\\\'"),
         EXPR_DQUOTE_BOUND("\\\"");
 

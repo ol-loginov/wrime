@@ -24,6 +24,6 @@ public class W$FunctionCallTest$011_txt extends wrime.output.WrimeWriter {
 
   protected void renderContent() throws Exception {
     bean.call(bean.getInteger());
-    writeValue(bean.call(bean.getString()));
+    this.$$e(bean.call(bean.getString()));
   }
 }
