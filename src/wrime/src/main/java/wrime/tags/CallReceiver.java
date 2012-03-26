@@ -1,10 +1,10 @@
 package wrime.tags;
 
-import wrime.ExpressionContextKeeper;
-import wrime.TypeName;
-import wrime.TypeUtil;
 import wrime.WrimeException;
 import wrime.ops.*;
+import wrime.util.ExpressionContextKeeper;
+import wrime.util.TypeName;
+import wrime.util.TypeUtil;
 
 import java.util.regex.Pattern;
 

@@ -1,4 +1,6 @@
-package wrime;
+package wrime.output;
+
+import wrime.WrimeException;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -36,14 +38,14 @@ public abstract class WrimeWriter {
         this.model = model;
     }
 
-    protected void write(String text) throws IOException {
+    protected void writeText(String text) throws IOException {
         if (text == null || text.length() == 0) {
             return;
         }
         writer.write(text);
     }
 
-    protected void write(Object value) throws IOException {
+    protected void writeValue(Object value) throws IOException {
         if (value == null) {
             return;
         }

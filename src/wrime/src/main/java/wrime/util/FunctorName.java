@@ -1,4 +1,4 @@
-package wrime;
+package wrime.util;
 
 public class FunctorName {
     private final String name;

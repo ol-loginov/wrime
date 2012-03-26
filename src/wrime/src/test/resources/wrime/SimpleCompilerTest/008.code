@@ -2,7 +2,7 @@ import java.io.Writer;
 import java.lang.*;
 import java.util.*;
 
-public class W$SimpleCompilerTest$008_txt extends wrime.WrimeWriter {
+public class W$SimpleCompilerTest$008_txt extends wrime.output.WrimeWriter {
   private String hello;
 
   public W$SimpleCompilerTest$008_txt(Writer writer) {

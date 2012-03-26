@@ -2,7 +2,7 @@ import java.io.Writer;
 import java.lang.*;
 import java.util.*;
 
-public class W$IfTest$002_txt extends wrime.WrimeWriter {
+public class W$IfTest$002_txt extends wrime.output.WrimeWriter {
   private wrime.model.IfBean bean;
 
   public W$IfTest$002_txt(Writer writer) {

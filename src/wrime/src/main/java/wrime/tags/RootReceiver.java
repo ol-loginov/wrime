@@ -1,7 +1,7 @@
 package wrime.tags;
 
-import wrime.ExpressionContextKeeper;
 import wrime.WrimeException;
+import wrime.util.ExpressionContextKeeper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +23,7 @@ public class RootReceiver extends PathReceiver {
         }
 
         CallReceiver receiver = new CallReceiver();
+        receiver.setShowUnknownTagError(true);
         receiver.setCloser(new CompleteCallback() {
             @Override
             public void complete(PathReceiver child, ExpressionContextKeeper scope, boolean last) throws WrimeException {

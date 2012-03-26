@@ -1,6 +1,6 @@
 package wrime.ops;
 
-import wrime.TypeName;
+import wrime.util.TypeName;
 
 public abstract class Operand {
     private TypeName result;

@@ -3,7 +3,7 @@ import java.lang.*;
 import java.util.*;
 import wrime.model.*;
 
-public class W$SimpleCompilerTest$009_txt extends wrime.WrimeWriter {
+public class W$SimpleCompilerTest$009_txt extends wrime.output.WrimeWriter {
   private Bean1 bean;
 
   public W$SimpleCompilerTest$009_txt(Writer writer) {

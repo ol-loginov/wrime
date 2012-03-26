@@ -1,5 +1,10 @@
 package wrime;
 
+import wrime.config.WrimeConfiguration;
+import wrime.output.WrimeWriter;
+import wrime.scanner.WrimeCompiler;
+import wrime.scanner.WrimeScanner;
+import wrime.scanner.WrimeScannerImpl;
 import wrime.tags.TagFactory;
 
 import java.io.File;
@@ -49,7 +54,7 @@ public class WrimeEngine {
         this.rootLoader = new URLClassLoader(new URL[]{tmpFolderUrl}, getClass().getClassLoader());
     }
 
-    public WrimeWriter newWriter(ScriptResource resource, Writer writer) throws Exception {
+    public WrimeWriter getWriter(ScriptResource resource, Writer writer) throws Exception {
         String path = resource.getPath();
         Class<? extends WrimeWriter> writerClass = urlToClassMappings.get(path);
         if (writerClass == null) {

@@ -1,7 +1,7 @@
 package wrime.ops;
 
-import wrime.EscapeUtils;
 import wrime.WrimeException;
+import wrime.util.EscapeUtils;
 
 import java.io.IOException;
 import java.io.StringWriter;

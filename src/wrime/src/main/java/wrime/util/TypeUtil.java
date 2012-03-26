@@ -1,4 +1,4 @@
-package wrime;
+package wrime.util;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;

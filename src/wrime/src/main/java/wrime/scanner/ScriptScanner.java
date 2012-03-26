@@ -1,4 +1,6 @@
-package wrime;
+package wrime.scanner;
+
+import wrime.WrimeException;
 
 import java.io.IOException;
 import java.io.Reader;

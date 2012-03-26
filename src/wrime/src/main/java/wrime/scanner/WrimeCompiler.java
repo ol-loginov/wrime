@@ -1,11 +1,16 @@
-package wrime;
+package wrime.scanner;
 
+import wrime.ScriptResource;
+import wrime.WrimeEngine;
+import wrime.WrimeException;
 import wrime.ops.Functor;
 import wrime.ops.Operand;
 import wrime.ops.OperandRendererDefault;
+import wrime.output.WrimeWriter;
 import wrime.tags.PathContext;
 import wrime.tags.RootReceiver;
 import wrime.tags.TagFactory;
+import wrime.util.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -391,7 +396,7 @@ public class WrimeCompiler {
         public void text(String text) throws WrimeException {
             ensureNotReady();
             if (text != null && text.length() > 0) {
-                renderContentBody.l(String.format("write(\"%s\");", EscapeUtils.escapeJavaString(text)));
+                renderContentBody.l(String.format("writeText(\"%s\");", EscapeUtils.escapeJavaString(text)));
             }
         }
 
@@ -464,7 +469,7 @@ public class WrimeCompiler {
                 closer = ";";
             }
             if (isWritable(operand.getResult())) {
-                renderContentBody.everyLine(String.format("write(%s)%s", writer.toString(), closer));
+                renderContentBody.everyLine(String.format("writeValue(%s)%s", writer.toString(), closer));
             } else {
                 renderContentBody.everyLine(String.format("%s%s", writer.toString(), closer));
             }

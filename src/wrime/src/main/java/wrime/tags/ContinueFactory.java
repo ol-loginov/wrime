@@ -1,8 +1,8 @@
 package wrime.tags;
 
-import wrime.ExpressionContextKeeper;
 import wrime.WrimeException;
 import wrime.ops.Raw;
+import wrime.util.ExpressionContextKeeper;
 
 public class ContinueFactory implements TagFactory {
     public static final String SCOPE_ATTRIBUTE = "continuable";

@@ -1,4 +1,8 @@
-package wrime;
+package wrime.scanner;
+
+import wrime.ScriptResource;
+import wrime.WrimeEngine;
+import wrime.WrimeException;
 
 import java.util.Map;
 

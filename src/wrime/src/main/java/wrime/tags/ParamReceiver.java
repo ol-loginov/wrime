@@ -1,7 +1,7 @@
 package wrime.tags;
 
-import wrime.ExpressionContextKeeper;
 import wrime.WrimeException;
+import wrime.util.ExpressionContextKeeper;
 
 public class ParamReceiver extends PathReceiver {
     public static enum Status {
@@ -28,7 +28,6 @@ public class ParamReceiver extends PathReceiver {
                 break;
             case EXPECT_OPTION:
                 scope.addModelParameter(paramType, paramName, scope.findClass(paramType), paramOption);
-                path.markComplete(scope);
                 break;
             default:
                 error("incomplete statement");

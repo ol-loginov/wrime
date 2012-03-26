@@ -1,5 +1,9 @@
-package wrime;
+package wrime.config;
 
+import wrime.WrimeEngine;
+import wrime.WrimeException;
+import wrime.functor.LogicFunctor;
+import wrime.functor.MathFunctor;
 import wrime.functor.StringFunctor;
 import wrime.tags.*;
 
@@ -44,5 +48,7 @@ public class WrimeConfiguration {
 
     public void setFunctors(WrimeEngine engine) {
         engine.addFunctor("str", new StringFunctor());
+        engine.addFunctor("logic", new LogicFunctor());
+        engine.addFunctor("math", new MathFunctor());
     }
 }

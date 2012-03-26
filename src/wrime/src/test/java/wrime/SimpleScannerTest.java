@@ -1,11 +1,12 @@
 package wrime;
 
 import org.junit.Test;
+import wrime.scanner.WrimeScannerDumper;
 
 import java.io.StringWriter;
 
 public class SimpleScannerTest {
-    private final TestResource resources = new TestResource(SimpleScannerTest.class);
+    protected TestResource resources = new TestResource(SimpleScannerTest.class);
 
     private String parse(ScriptResource resource) throws WrimeException {
         StringWriter result = new StringWriter();

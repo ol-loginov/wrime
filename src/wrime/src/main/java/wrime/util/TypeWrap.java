@@ -1,4 +1,6 @@
-package wrime;
+package wrime.util;
+
+import wrime.WrimeException;
 
 import java.lang.reflect.*;
 

@@ -1,10 +1,10 @@
 package wrime.tags;
 
-import wrime.ExpressionContextKeeper;
 import wrime.WrimeException;
-import wrime.WrimeScanner;
 import wrime.ops.Operand;
 import wrime.ops.Variable;
+import wrime.scanner.WrimeScanner;
+import wrime.util.ExpressionContextKeeper;
 
 /**
  * Accepts and validate syntax like "var_name : field.method().foo"

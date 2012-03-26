@@ -1,9 +1,13 @@
 package wrime.tags;
 
-import wrime.*;
+import wrime.WrimeException;
 import wrime.ops.Chain;
 import wrime.ops.Operand;
 import wrime.ops.Raw;
+import wrime.scanner.WrimeScanner;
+import wrime.util.ExpressionContext;
+import wrime.util.ExpressionContextKeeper;
+import wrime.util.TypeWrap;
 
 public class IfReceiver extends PathReceiver {
     public static final String SCOPE_ATTRIBUTE = "ifable";

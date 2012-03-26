@@ -1,4 +1,4 @@
-package wrime;
+package wrime.util;
 
 public class ParameterName {
     private final TypeName type;

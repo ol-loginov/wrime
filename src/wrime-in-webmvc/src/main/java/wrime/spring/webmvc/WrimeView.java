@@ -55,7 +55,7 @@ public class WrimeView extends AbstractTemplateView {
 
         PrintWriter writer = new PrintWriter(response.getOutputStream());
         wrimeEngine
-                .newWriter(script, writer)
+                .getWriter(script, writer)
                 .render(map);
     }
 }

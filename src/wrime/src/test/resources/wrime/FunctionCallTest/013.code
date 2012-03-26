@@ -2,7 +2,7 @@ import java.io.Writer;
 import java.lang.*;
 import java.util.*;
 
-public class W$FunctionCallTest$013_txt extends wrime.WrimeWriter {
+public class W$FunctionCallTest$013_txt extends wrime.output.WrimeWriter {
   private wrime.model.Bean2 bean;
   private wrime.functor.I18Nizer $i18n;
 
@@ -23,8 +23,8 @@ public class W$FunctionCallTest$013_txt extends wrime.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    write("A");
+    writeText("A");
     bean.varg(bean.getInteger(),bean.getString(),bean.getString());
-    write("G");
+    writeText("G");
   }
 }

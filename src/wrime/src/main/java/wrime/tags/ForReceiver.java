@@ -1,9 +1,14 @@
 package wrime.tags;
 
-import wrime.*;
+import wrime.WrimeException;
 import wrime.ops.Chain;
 import wrime.ops.Operand;
 import wrime.ops.Raw;
+import wrime.scanner.WrimeScanner;
+import wrime.util.ExpressionContext;
+import wrime.util.ExpressionContextKeeper;
+import wrime.util.TypeName;
+import wrime.util.TypeWrap;
 
 public class ForReceiver extends PathReceiver {
     private enum Status {

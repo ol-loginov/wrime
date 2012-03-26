@@ -1,4 +1,4 @@
-package wrime;
+package wrime.util;
 
 import java.lang.reflect.Type;
 

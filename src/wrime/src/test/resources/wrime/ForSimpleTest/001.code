@@ -3,7 +3,7 @@ import java.lang.*;
 import java.util.*;
 import wrime.model.*;
 
-public class W$ForSimpleTest$001_txt extends wrime.WrimeWriter {
+public class W$ForSimpleTest$001_txt extends wrime.output.WrimeWriter {
   private ForIterator forer;
 
   public W$ForSimpleTest$001_txt(Writer writer) {

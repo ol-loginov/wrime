@@ -3,7 +3,7 @@ import java.lang.*;
 import java.util.*;
 import wrime.model.*;
 
-public class W$ForSimpleTest$002_txt extends wrime.WrimeWriter {
+public class W$ForSimpleTest$002_txt extends wrime.output.WrimeWriter {
   private ForIterator2 forer;
 
   public W$ForSimpleTest$002_txt(Writer writer) {
@@ -22,11 +22,11 @@ public class W$ForSimpleTest$002_txt extends wrime.WrimeWriter {
 
   protected void renderContent() throws Exception {
     for(wrime.model.Bean2 a : forer.getIterable()) {
-      write(a.getString());
+      writeValue(a.getString());
       continue;
     }
     for(wrime.model.Bean2 a : forer.getIterable()) {
-      write(a.getString());
+      writeValue(a.getString());
       break;
     }
   }

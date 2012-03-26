@@ -1,7 +1,9 @@
-package wrime;
+package wrime.util;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import wrime.WrimeException;
+import wrime.scanner.WrimeCompiler;
 
 import java.util.Collection;
 import java.util.Stack;

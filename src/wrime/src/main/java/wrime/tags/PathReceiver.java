@@ -1,7 +1,7 @@
 package wrime.tags;
 
-import wrime.ExpressionContextKeeper;
 import wrime.WrimeException;
+import wrime.util.ExpressionContextKeeper;
 
 public abstract class PathReceiver {
     protected PathContext path;
