@@ -1,5 +1,7 @@
 package wrime;
 
+import wrime.bytecode.SourceCompiler;
+import wrime.bytecode.SourceResult;
 import wrime.config.WrimeConfiguration;
 import wrime.output.WrimeWriter;
 import wrime.scanner.WrimeCompiler;
@@ -8,6 +10,7 @@ import wrime.scanner.WrimeScannerImpl;
 import wrime.tags.TagFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -26,10 +29,6 @@ public class WrimeEngine {
 
     private Map<Scanner, String> scannerOptions = new TreeMap<Scanner, String>();
     private Map<Compiler, String> compilerOptions = new TreeMap<Compiler, String>();
-
-    public String getRootPath() {
-        return rootPath;
-    }
 
     public WrimeEngine() throws WrimeException {
         this(new WrimeConfiguration());
@@ -54,7 +53,7 @@ public class WrimeEngine {
         this.rootLoader = new URLClassLoader(new URL[]{tmpFolderUrl}, getClass().getClassLoader());
     }
 
-    public WrimeWriter getWriter(ScriptResource resource, Writer writer) throws Exception {
+    public WrimeWriter getWriter(ScriptResource resource, Writer out) throws WrimeException {
         String path = resource.getPath();
         Class<? extends WrimeWriter> writerClass = urlToClassMappings.get(path);
         if (writerClass == null) {
@@ -70,7 +69,7 @@ public class WrimeEngine {
         }
 
         try {
-            return writerConstructor.newInstance(writer);
+            return writerConstructor.newInstance(out);
         } catch (InstantiationException e) {
             throw new IllegalStateException("Wrime instance is na", e);
         } catch (IllegalAccessException e) {
@@ -93,8 +92,24 @@ public class WrimeEngine {
         return compiler;
     }
 
-    private Class<WrimeWriter> compile(WrimeCompiler parse) {
-        return null;
+    private Class<WrimeWriter> compile(WrimeCompiler code) throws WrimeException {
+        SourceCompiler compiler = new SourceCompiler(new File(rootPath));
+        SourceResult errors = new SourceResult();
+        try {
+            compiler.compile(code.getClassName(), code.getClassCode(), errors);
+        } catch (IOException e) {
+            throw new WrimeException("writer code is not available", e);
+        }
+
+        if (!errors.isSuccess()) {
+            throw new WrimeException("writer code is invalid", null);
+        }
+
+        try {
+            return (Class<WrimeWriter>) getRootLoader().loadClass(code.getClassName());
+        } catch (ClassNotFoundException e) {
+            throw new WrimeException("writer class is not available", e);
+        }
     }
 
     public WrimeEngine setOption(Scanner option, boolean enable) {

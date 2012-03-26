@@ -103,6 +103,10 @@ public class WrimeCompiler {
         return "W" + toFieldIdentifier(name);
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     public String getClassCode() {
         Body body = new Body();
         for (String name : importNames) {

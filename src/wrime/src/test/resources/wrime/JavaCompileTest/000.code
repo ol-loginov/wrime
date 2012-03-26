@@ -1,0 +1,55 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+import wrime.model.*;
+
+public class W$JavaCompileTest$000_txt extends wrime.output.WrimeWriter {
+  private String a;
+  private Bean2 b2;
+  private ForIterator fir;
+  private IfBean bif;
+  private wrime.functor.StringFunctor $str;
+  private wrime.functor.LogicFunctor $l;
+
+  public W$JavaCompileTest$000_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    this.a=null;
+    this.b2=null;
+    this.fir=null;
+    this.bif=null;
+    this.$str=null;
+    this.$l=null;
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+    this.a=(String)model.get("a");
+    this.b2=(Bean2)model.get("b2");
+    this.fir=(ForIterator)model.get("fir");
+    this.bif=(IfBean)model.get("bif");
+    this.$str=(wrime.functor.StringFunctor)model.get("functor:str");
+    this.$l=(wrime.functor.LogicFunctor)model.get("functor:l");
+  }
+
+  protected void renderContent() throws Exception {
+    this.$$e(a.length());
+    this.$$r(a.length());
+    this.$$e(this.$str.concat(a,a,a));
+    java.lang.String b = "";
+    for(char ch : a.toCharArray()) {
+      if(ifTrue(this.$l.eq(ch,"@"))) {
+        continue;
+      }
+      if(ifTrue(this.$l.eq(ch,"#"))) {
+        break;
+      }
+      this.$$e(ch);
+      b = this.$str.repeat(ch,10);
+      this.$$r(b);
+    }
+  }
+}

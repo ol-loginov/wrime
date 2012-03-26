@@ -75,8 +75,15 @@ ${if}
   finish
 
 ==============================
-TO-DO
+Variables
 ==============================
 
 ${set a=<call>}
   local variable setter. doesn't open the scope (like '{ }' in Java). If variable wasn't introduced before - the it will be done here
+
+==============================
+Un-escaped output
+==============================
+
+${#...}
+  with hash (#) symbol right after opening you'll skip HTML escaping of output

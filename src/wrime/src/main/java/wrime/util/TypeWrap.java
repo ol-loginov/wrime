@@ -103,7 +103,9 @@ public abstract class TypeWrap {
 
         @Override
         public boolean isAssignableFrom(Type other) {
-            if (isClass(other)) {
+            if (Object.class.equals(type)) {
+                return true;
+            } else if (isClass(other)) {
                 return type.isAssignableFrom((Class) other);
             } else if (isParameterizedType(other)) {
                 return isAssignableFrom(((ParameterizedType) other).getRawType());

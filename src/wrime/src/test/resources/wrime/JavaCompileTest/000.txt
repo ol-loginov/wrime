@@ -1,0 +1,20 @@
+${import wrime.model.*}
+${param String a}
+${param Bean2 b2}
+${param IfBean bif}
+${param ForIterator fir}
+
+${a.length()}
+${#a.length()}
+
+${str:concat(a,a,a)}
+
+${set b=""}
+${for(ch : a.toCharArray())}
+ ${if(l:eq(ch,"@"))}${continue}${if}
+ ${if(l:eq(ch,"#"))}${break}${if}
+ ${ch}
+
+ ${set b=str:repeat(ch, 10)}
+ ${#b}
+${for}

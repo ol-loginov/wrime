@@ -20,4 +20,6 @@ public interface ExpressionContextKeeper {
     ExpressionContext closeScope();
 
     TypeName findFunctorType(String name);
+
+    boolean inheritAttribute(String attribute);
 }

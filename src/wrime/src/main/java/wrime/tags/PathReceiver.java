@@ -34,11 +34,11 @@ public abstract class PathReceiver {
     }
 
     public void pushToken(ExpressionContextKeeper scope, String name) throws WrimeException {
-        error("unexpected token");
+        error("unexpected token '" + name + "'");
     }
 
     public void pushLiteral(ExpressionContextKeeper scope, String literal) throws WrimeException {
-        error("unexpected literal");
+        error("unexpected literal '" + literal + "'");
     }
 
     public void nextListItem(ExpressionContextKeeper scope) throws WrimeException {

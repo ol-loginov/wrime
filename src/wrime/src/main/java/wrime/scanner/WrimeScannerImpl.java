@@ -105,6 +105,8 @@ public class WrimeScannerImpl implements WrimeScanner {
         private ScriptScanner scanner;
         private Expectation expectation;
 
+        private String latestContent = "";
+
         private ScannerWrapper(Reader reader) {
             scanner = new ScriptScanner(reader);
             expect(Expectation.TOKEN_MARK);
@@ -118,6 +120,7 @@ public class WrimeScannerImpl implements WrimeScanner {
             token.clear();
             while (token.type == TokenType.INCOMPLETE) {
                 expect(consume(token));
+                latestContent = token.value;
             }
             return token.type != TokenType.INCOMPLETE;
         }
@@ -133,6 +136,10 @@ public class WrimeScannerImpl implements WrimeScanner {
 
             switch (expectation) {
                 case TOKEN_MARK:
+                    if (latestContent != null && latestContent.endsWith("$")) {
+                        token.type = TokenType.TEXT;
+                        return Expectation.TOKEN_MARK;
+                    }
                     if (scanner.lookingAt()) {
                         token.type = TokenType.EXPR_START;
                         return Expectation.EXPR_DELIMITER;
@@ -198,7 +205,7 @@ public class WrimeScannerImpl implements WrimeScanner {
     }
 
     private static enum Expectation {
-        TOKEN_MARK("(?<!\\$)\\$\\{"),
+        TOKEN_MARK("\\$\\{"),
         EXPR_DELIMITER("#|=|\\*| |,|:|\\(|\\)|'|\\\"|\\.|}"),
         EXPR_QUOTE_BOUND("\\\'"),
         EXPR_DQUOTE_BOUND("\\\"");
@@ -231,7 +238,6 @@ public class WrimeScannerImpl implements WrimeScanner {
     private static class Token {
         private TokenType type;
         private String value;
-        private String lastValue;
 
         private int line;
         private int column;
@@ -243,7 +249,6 @@ public class WrimeScannerImpl implements WrimeScanner {
         public void clear() {
             type = TokenType.INCOMPLETE;
             value = "";
-            lastValue = "";
             line = 0;
             column = 0;
         }

@@ -38,24 +38,36 @@ public abstract class WrimeWriter {
         this.model = model;
     }
 
-    protected void wt(String text) throws IOException {
+    protected void $$t(String text) throws IOException {
         if (text == null || text.length() == 0) {
             return;
         }
         writer.write(text);
     }
 
-    protected void we(Object value) throws IOException {
+    protected void $$e(Object value) throws IOException {
         if (value == null) {
             return;
         }
         writer.write(value.toString());
     }
 
-    protected void wr(Object value) throws IOException {
+    protected void $$r(Object value) throws IOException {
         if (value == null) {
             return;
         }
         writer.write(value.toString());
+    }
+
+    protected boolean ifTrue(boolean bool) {
+        return bool;
+    }
+
+    protected boolean ifTrue(Boolean bool) {
+        return Boolean.TRUE.equals(bool);
+    }
+
+    protected boolean ifTrue(Object bool) {
+        return bool != null;
     }
 }

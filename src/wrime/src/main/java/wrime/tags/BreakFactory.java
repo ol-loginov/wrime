@@ -17,7 +17,7 @@ public class BreakFactory implements TagFactory {
         return new PathReceiver() {
             @Override
             public void complete(ExpressionContextKeeper scope) throws WrimeException {
-                if (!scope.current().hasAttribute(SCOPE_ATTRIBUTE)) {
+                if (!scope.inheritAttribute(SCOPE_ATTRIBUTE)) {
                     error("You may use 'break' only inside breakable scope");
                 }
                 path.render(new Raw("break;"));

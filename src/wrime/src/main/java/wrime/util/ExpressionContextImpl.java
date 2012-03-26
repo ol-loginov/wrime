@@ -5,8 +5,7 @@ import org.springframework.util.StringUtils;
 import wrime.WrimeException;
 import wrime.scanner.WrimeCompiler;
 
-import java.util.Collection;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,5 +123,17 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
     @Override
     public TypeName findFunctorType(String name) {
         return compiler.findFunctorType(name);
+    }
+
+    @Override
+    public boolean inheritAttribute(String attribute) {
+        List<ExpressionContext> list = new ArrayList<ExpressionContext>(contextStack);
+        Collections.reverse(list);
+        for (ExpressionContext ctx : list) {
+            if (ctx.hasAttribute(attribute)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
