@@ -21,9 +21,9 @@ ${<call>}
 Loop-statements:
 ==============================
 
-${loop(a : <call>)}
+${for(a : <call>)}
   start the for-each iteration. Type of a is deducted according to result for <call> (java.lang.Object in common)
-${loop}
+${for}
   finish last opened for-each.
 
 You may nest any reasonable number of loops
