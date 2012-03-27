@@ -113,7 +113,7 @@ public class IncludeReceiver extends PathReceiver {
                 String model;
                 if (templateModel.size() > 0) {
                     model = String.format("$includeAt_%d_%d", path.getLine(), path.getColumn());
-                    chain.getOperands().add(new Raw(String.format("ModelMap %s = new ModelMap();\n", model)));
+                    chain.getOperands().add(new Raw(String.format("Map<String,Object> %s = new TreeMap<String,Object>();\n", model)));
                     for (TemplateParameter parameter : templateModel) {
                         chain.getOperands().add(new Raw(String.format("%s.put(\"%s\", ", model, EscapeUtils.escapeJavaString(parameter.name))));
                         chain.getOperands().add(parameter.getter);

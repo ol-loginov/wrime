@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -27,9 +28,14 @@ public class TestResource {
         }
     }
 
-    public ScriptResource load(String url) {
-        final String resourceBase = getResourceBasePath();
-        final ClassPathResource resource = new ClassPathResource(relative(url), testClass);
+    public ScriptResource load(String name) {
+        String resource = relative(name);
+        String resourceBase = getResourceBasePath();
+        return loadResource(resource, resourceBase);
+    }
+
+    public ScriptResource loadResource(String url, final String resourceBase) {
+        final ClassPathResource resource = new ClassPathResource(url, testClass);
         return new ScriptResource() {
             @Override
             public InputStream getInputStream() throws WrimeException {
@@ -47,6 +53,13 @@ public class TestResource {
                     return path.substring(resourceBase.length());
                 }
                 return path;
+            }
+
+            @Override
+            public ScriptResource getResource(String path) {
+                File self = new File(resource.getPath());
+                File next = new File(self.getParentFile(), path);
+                return loadResource(next.getAbsolutePath(), resourceBase);
             }
         };
     }

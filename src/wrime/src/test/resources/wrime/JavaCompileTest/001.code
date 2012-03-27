@@ -1,0 +1,36 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+
+public class W$JavaCompileTest$001_txt extends wrime.output.WrimeWriter {
+  private String a;
+  private wrime.functor.StringFunctor $str;
+  private wrime.functor.LogicFunctor $l;
+
+  public W$JavaCompileTest$001_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    this.a=null;
+    this.$str=null;
+    this.$l=null;
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+    this.a=(String)model.get("a");
+    this.$str=(wrime.functor.StringFunctor)model.get("functor:str");
+    this.$l=(wrime.functor.LogicFunctor)model.get("functor:l");
+  }
+
+  protected void renderContent() throws Exception {
+    for(char ch : a.toCharArray()) {
+      Map<String,Object> $includeAt_2_35 = new TreeMap<String,Object>();
+      $includeAt_2_35.put("value", ch);
+      this.include("001-char.txt", $includeAt_2_35);
+      this.$$t("|");
+    }
+  }
+}

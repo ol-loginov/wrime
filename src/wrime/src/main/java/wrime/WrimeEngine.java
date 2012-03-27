@@ -3,6 +3,7 @@ package wrime;
 import wrime.bytecode.SourceCompiler;
 import wrime.bytecode.SourceResult;
 import wrime.config.WrimeConfiguration;
+import wrime.output.IncludeWriterListener;
 import wrime.output.WrimeWriter;
 import wrime.scanner.WrimeCompiler;
 import wrime.scanner.WrimeScanner;
@@ -92,6 +93,7 @@ public class WrimeEngine {
         } catch (InvocationTargetException e) {
             throw new IllegalStateException("Wrime instance is na", e);
         }
+        writer.setIncludeWriterListener(new IncludeWriterListenerImpl(resource));
         return writer;
     }
 
@@ -169,5 +171,18 @@ public class WrimeEngine {
 
     public enum Compiler {
         FUNCTOR_PREFIX
+    }
+
+    private class IncludeWriterListenerImpl implements IncludeWriterListener {
+        private final ScriptResource parentResource;
+
+        private IncludeWriterListenerImpl(ScriptResource parentResource) {
+            this.parentResource = parentResource;
+        }
+
+        @Override
+        public void include(WrimeWriter caller, String resource, Map<String, Object> model, Writer out) {
+            WrimeEngine.this.render(parentResource.getResource(resource), out, model);
+        }
     }
 }

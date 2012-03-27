@@ -1,0 +1,4 @@
+${param String a}
+${for(ch : a.toCharArray())}
+${include('001-char.txt', value=ch)}|
+${for}

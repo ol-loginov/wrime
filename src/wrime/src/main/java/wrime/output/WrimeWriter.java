@@ -8,11 +8,16 @@ import java.util.Map;
 
 public abstract class WrimeWriter {
     private final Writer writer;
+    private IncludeWriterListener $$includeWriterListener;
 
     private Map<String, Object> model;
 
     protected WrimeWriter(Writer writer) {
         this.writer = writer;
+    }
+
+    public void setIncludeWriterListener(IncludeWriterListener listener) {
+        this.$$includeWriterListener = listener;
     }
 
     public void render(Map<String, Object> model) throws WrimeException {
@@ -69,5 +74,12 @@ public abstract class WrimeWriter {
 
     protected boolean ifTrue(Object bool) {
         return bool != null;
+    }
+
+    protected void include(String resource, Map<String, Object> model) {
+        if (this.$$includeWriterListener == null) {
+            throw new WrimeException("cannot handle include statement", null);
+        }
+        this.$$includeWriterListener.include(this, resource, model, writer);
     }
 }

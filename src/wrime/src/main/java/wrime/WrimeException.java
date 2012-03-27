@@ -1,6 +1,6 @@
 package wrime;
 
-public class WrimeException extends Exception {
+public class WrimeException extends RuntimeException {
     private String path;
     private int line;
     private int column;
