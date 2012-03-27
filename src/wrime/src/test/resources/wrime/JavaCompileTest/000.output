@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>8</head>
+<title>8</title>
+<body>
+<h1>строка Астрока Астрока А</h1>
+<ul>
+<li>
+<a>с</a>
+<span>сссссссссс</span>
+ </li>
+<li>
+<a>т</a>
+<span>тттттттттт</span>
+ </li>
+<li>
+<a>р</a>
+<span>рррррррррр</span>
+ </li>
+<li>
+<a>о</a>
+<span>оооооооооо</span>
+ </li>
+<li>
+<a>к</a>
+<span>кккккккккк</span>
+ </li>
+<li>
+<a>а</a>
+<span>аааааааааа</span>
+ </li>
+<li>
+<a> </a>
+<span>          </span>
+ </li>
+<li>
+<a>А</a>
+<span>АААААААААА</span>
+ </li>
+<ul>
+</body>
+</html>

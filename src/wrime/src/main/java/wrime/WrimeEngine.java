@@ -53,7 +53,21 @@ public class WrimeEngine {
         this.rootLoader = new URLClassLoader(new URL[]{tmpFolderUrl}, getClass().getClassLoader());
     }
 
-    public WrimeWriter getWriter(ScriptResource resource, Writer out) throws WrimeException {
+    public void render(ScriptResource resource, Writer out, Map<String, Object> map) throws WrimeException {
+        // put all functors
+        String prefix = compilerOptions.get(Compiler.FUNCTOR_PREFIX);
+        if (prefix == null) {
+            prefix = "";
+        }
+        for (Map.Entry<String, Object> functor : this.getFunctors()) {
+            map.put(prefix + functor.getKey(), functor.getValue());
+        }
+
+        // magic call
+        getRendererClass(resource, out).render(map);
+    }
+
+    private WrimeWriter getRendererClass(ScriptResource resource, Writer out) throws WrimeException {
         String path = resource.getPath();
         Class<? extends WrimeWriter> writerClass = urlToClassMappings.get(path);
         if (writerClass == null) {
@@ -68,8 +82,9 @@ public class WrimeEngine {
             throw new IllegalStateException("Wrime constructor is na", e);
         }
 
+        WrimeWriter writer;
         try {
-            return writerConstructor.newInstance(out);
+            writer = writerConstructor.newInstance(out);
         } catch (InstantiationException e) {
             throw new IllegalStateException("Wrime instance is na", e);
         } catch (IllegalAccessException e) {
@@ -77,6 +92,7 @@ public class WrimeEngine {
         } catch (InvocationTargetException e) {
             throw new IllegalStateException("Wrime instance is na", e);
         }
+        return writer;
     }
 
     protected void scan(ScriptResource resource, WrimeScanner.Receiver receiver) throws WrimeException {

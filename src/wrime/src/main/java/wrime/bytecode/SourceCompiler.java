@@ -1,6 +1,9 @@
 package wrime.bytecode;
 
-import javax.tools.*;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -24,16 +27,19 @@ public class SourceCompiler {
 
     public void compile(String name, String code, SourceResult result) throws IOException {
         StringWriter stderr = new StringWriter();
-        DiagnosticCollector diagnostic = new DiagnosticCollector();
+        DiagnosticCollector<JavaFileObject> diagnostic = new DiagnosticCollector<JavaFileObject>();
 
         File sourceFile = writeSourceFile(name, code);
-        JavaFileManager fileManager = compiler.getStandardFileManager(diagnostic, null, utf8);
-        JavaFileObject sourceObject = fileManager.getJavaFileForInput(StandardLocation.locationFor(sourceFile.getParent()), name, JavaFileObject.Kind.SOURCE);
-        JavaCompiler.CompilationTask task = compiler.getTask(stderr, fileManager, diagnostic, null, null, Arrays.asList(sourceObject));
+        StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostic, null, utf8);
+        Iterable<? extends JavaFileObject> sourceObjects = fileManager.getJavaFileObjectsFromFiles(Arrays.asList(sourceFile));
+        JavaCompiler.CompilationTask task = compiler.getTask(
+                stderr, fileManager, diagnostic,
+                Arrays.asList("-g", "-source", "1.6", "-target", "1.6"),
+                null,
+                sourceObjects);
         result.setSuccess(task.call());
         result.setStderr(stderr.toString());
         result.setDiagnostic(diagnostic.getDiagnostics());
-        fileManager.close();
     }
 
     private File writeSourceFile(String name, String code) throws IOException {

@@ -7,12 +7,9 @@ import wrime.WrimeException;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WrimeScannerImpl implements WrimeScanner {
-    private static final Pattern EAT_SPACE = Pattern.compile("^\\s*(.*)\\s*$");
-
     private Map<WrimeEngine.Scanner, String> options = new HashMap<WrimeEngine.Scanner, String>();
 
     public void configure(Map<WrimeEngine.Scanner, String> options) {
@@ -90,13 +87,12 @@ public class WrimeScannerImpl implements WrimeScanner {
         }
     }
 
-    private String eatSpace(String value) {
-        if (!options.containsKey(WrimeEngine.Scanner.EAT_SPACE)) {
-            return value;
-        }
-        Matcher matcher = EAT_SPACE.matcher(value);
-        if (matcher.find()) {
-            return matcher.group(1);
+    protected String eatSpace(String value) {
+        if (value != null) {
+            if (!options.containsKey(WrimeEngine.Scanner.EAT_SPACE)) {
+                return value;
+            }
+            value = value.replaceAll("\\s+$", "");
         }
         return value;
     }

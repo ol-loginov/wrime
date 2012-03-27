@@ -1,20 +1,25 @@
+<!DOCTYPE html>
 ${import wrime.model.*}
 ${param String a}
 ${param Bean2 b2}
 ${param IfBean bif}
 ${param ForIterator fir}
-
-${a.length()}
-${#a.length()}
-
-${str:concat(a,a,a)}
-
+<html>
+<head>${a.length()}</head>
+<title>${#a.length()}</title>
+<body>
+<h1>${str:concat(a,a,a)}</h1>
 ${set b=""}
+<ul>
 ${for(ch : a.toCharArray())}
+ ${set b=str:repeat(ch, 10)}
  ${if(l:eq(ch,"@"))}${continue}${if}
  ${if(l:eq(ch,"#"))}${break}${if}
- ${ch}
-
- ${set b=str:repeat(ch, 10)}
- ${#b}
+<li>
+<a>${ch}</a>
+<span>${#b}</span>
+ </li>
 ${for}
+<ul>
+</body>
+</html>

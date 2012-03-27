@@ -36,20 +36,30 @@ public class W$JavaCompileTest$000_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
+    this.$$t("<!DOCTYPE html>");
+    this.$$t("\n<html>\n<head>");
     this.$$e(a.length());
+    this.$$t("</head>\n<title>");
     this.$$r(a.length());
+    this.$$t("</title>\n<body>\n<h1>");
     this.$$e(this.$str.concat(a,a,a));
+    this.$$t("</h1>");
     java.lang.String b = "";
+    this.$$t("\n<ul>");
     for(char ch : a.toCharArray()) {
+      b = this.$str.repeat(ch,10);
       if(ifTrue(this.$l.eq(ch,"@"))) {
         continue;
       }
       if(ifTrue(this.$l.eq(ch,"#"))) {
         break;
       }
+      this.$$t("\n<li>\n<a>");
       this.$$e(ch);
-      b = this.$str.repeat(ch,10);
+      this.$$t("</a>\n<span>");
       this.$$r(b);
+      this.$$t("</span>\n </li>");
     }
+    this.$$t("\n<ul>\n</body>\n</html>");
   }
 }
