@@ -1,13 +1,11 @@
-package wrime.scanner;
+package wrime;
 
-import wrime.ScriptResource;
-import wrime.WrimeEngine;
-import wrime.WrimeException;
 import wrime.ops.EscapedRenderer;
 import wrime.ops.Functor;
 import wrime.ops.Operand;
 import wrime.ops.OperandRendererDefault;
 import wrime.output.WrimeWriter;
+import wrime.scanner.WrimeScanner;
 import wrime.tags.PathContext;
 import wrime.tags.RootReceiver;
 import wrime.tags.TagFactory;
@@ -21,7 +19,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class WrimeCompiler {
+class WrimeCompiler implements ExpressionRuntime {
     private static final String EOL = System.getProperty("line.separator");
     private static final String SCOPE_IDENT = "  ";
 
@@ -49,7 +47,7 @@ public class WrimeCompiler {
         renderContentBody = new Body();
         expressionContext = new ExpressionContextImpl(this, engine.getRootLoader());
 
-        for (Map.Entry<String, Object> kv : engine.getFunctors()) {
+        for (Map.Entry<String, Object> kv : engine.getFunctors().entrySet()) {
             functorNames.put(kv.getKey(), new FunctorName(kv.getKey(), kv.getValue().getClass(), toFieldIdentifier(kv.getKey())));
         }
 
@@ -164,10 +162,12 @@ public class WrimeCompiler {
         expressionPath = new PathContext(callRenderer, rootReceiver);
     }
 
+    @Override
     public void addImport(String clazz) {
         importNames.add(clazz);
     }
 
+    @Override
     public Collection<String> getImports() {
         return importNames;
     }
@@ -176,10 +176,12 @@ public class WrimeCompiler {
         return new ScannerReceiver();
     }
 
+    @Override
     public Collection<ParameterName> getModelParameters() {
         return parameterNames.values();
     }
 
+    @Override
     public void addModelParameter(String parameterName, String parameterTypeDef, Class parameterClass, String option) throws WrimeException {
         if (!isIdentifier(parameterName)) {
             error("not a Java identifier " + parameterName);
@@ -194,18 +196,22 @@ public class WrimeCompiler {
         parameterNames.put(parameterName, new ParameterName(parameterName, def, option));
     }
 
+    @Override
     public ParameterName getModelParameter(String name) {
         return parameterNames.get(name);
     }
 
+    @Override
     public void scopeAdded() {
         renderContentBody = renderContentBody.scope();
     }
 
+    @Override
     public void scopeRemoved() {
         renderContentBody = renderContentBody.leave();
     }
 
+    @Override
     public TypeName findFunctorType(String name) {
         FunctorName functor = functorNames.get(name);
         return functor != null ? new TypeName(functor.getType()) : null;

@@ -5,7 +5,6 @@ import wrime.bytecode.SourceResult;
 import wrime.config.WrimeConfiguration;
 import wrime.output.IncludeWriterListener;
 import wrime.output.WrimeWriter;
-import wrime.scanner.WrimeCompiler;
 import wrime.scanner.WrimeScanner;
 import wrime.scanner.WrimeScannerImpl;
 import wrime.tags.TagFactory;
@@ -21,9 +20,11 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 public class WrimeEngine {
+    private final Object COMPILER_LOCK = new Object();
+
     private final Map<String, WriterRecord> urlToClassMappings = new HashMap<String, WriterRecord>();
-    private final Map<String, Object> nameToFunctorMappings = new HashMap<String, Object>();
-    private final List<TagFactory> tagFactories = new ArrayList<TagFactory>();
+    private Map<String, Object> functors = new HashMap<String, Object>();
+    private List<TagFactory> tags = new ArrayList<TagFactory>();
 
     private File rootPath;
     private URLClassLoader rootLoader;
@@ -58,7 +59,7 @@ public class WrimeEngine {
     }
 
     public void render(ScriptResource resource, Writer out, Map<String, Object> map) throws WrimeException {
-        render0(resource, out, map, null);
+        render0(resource, out, map, map);
     }
 
     public void render(ScriptResource resource, Writer out, Map<String, Object> map, Map<String, Object> previousMap) throws WrimeException {
@@ -73,14 +74,14 @@ public class WrimeEngine {
         return prefix;
     }
 
-    public WrimeEngine setFunctorToModel(Map<String, Object> map, String key, Object value) {
+    public WrimeEngine addFunctorToModel(Map<String, Object> map, String key, Object value) {
         map.put(getFunctorPrefix() + key, value);
         return this;
     }
 
     private Map<String, Object> expandFunctorMap(Map<String, Object> copyFrom) {
         TreeMap<String, Object> result = new TreeMap<String, Object>();
-        for (Map.Entry<String, Object> functor : this.getFunctors()) {
+        for (Map.Entry<String, Object> functor : getFunctors().entrySet()) {
             String key = getFunctorPrefix() + functor.getKey();
             if (copyFrom != null && copyFrom.containsKey(key)) {
                 result.put(key, copyFrom.get(key));
@@ -98,25 +99,29 @@ public class WrimeEngine {
 
     private WrimeWriter getRendererClass(ScriptResource resource, Writer out) throws WrimeException {
         String path = resource.getPath();
-        WriterRecord record = urlToClassMappings.get(path);
+        WriterRecord record;
 
-        // check for expire
-        if (record != null && record.lastModified < resource.getLastModified()) {
-            resetRootLoader();
-            if (!record.sourceFile.delete()) {
-                throw new WrimeException("unable to delete obsolete source file " + record.sourceFile.getAbsolutePath(), null);
-            }
-            if (!record.classFile.delete()) {
-                throw new WrimeException("unable to delete obsolete class file " + record.classFile.getAbsolutePath(), null);
-            }
-            record = null;
-        }
+        synchronized (COMPILER_LOCK) {
+            record = urlToClassMappings.get(path);
 
-        if (record == null) {
-            record = new WriterRecord();
-            record.lastModified = resource.getLastModified();
-            record.writerClass = compile(record, parse(resource));
-            urlToClassMappings.put(path, record);
+            // check for expire
+            if (record != null && record.lastModified < resource.getLastModified()) {
+                resetRootLoader();
+                if (!record.sourceFile.delete()) {
+                    throw new WrimeException("unable to delete obsolete source file " + record.sourceFile.getAbsolutePath(), null);
+                }
+                if (!record.classFile.delete()) {
+                    throw new WrimeException("unable to delete obsolete class file " + record.classFile.getAbsolutePath(), null);
+                }
+                record = null;
+            }
+
+            if (record == null) {
+                record = new WriterRecord();
+                record.lastModified = resource.getLastModified();
+                record.writerClass = compile(record, parse(resource));
+                urlToClassMappings.put(path, record);
+            }
         }
 
         Constructor<? extends WrimeWriter> writerConstructor;
@@ -154,7 +159,7 @@ public class WrimeEngine {
     }
 
     private Class<WrimeWriter> compile(WriterRecord record, WrimeCompiler code) throws WrimeException {
-        SourceCompiler compiler = new SourceCompiler(rootPath);
+        SourceCompiler compiler = new SourceCompiler(getRootPath(), getRootLoader());
         SourceResult errors = new SourceResult();
         try {
             record.className = code.getClassName();
@@ -164,7 +169,7 @@ public class WrimeEngine {
         }
 
         if (!errors.isSuccess()) {
-            throw new WrimeException("writer code is invalid", null);
+            throw new WrimeException("writer code is invalid: \n" + errors.getErrorList(), null);
         }
 
         record.classFile = errors.getClassFile();
@@ -195,24 +200,29 @@ public class WrimeEngine {
         }
     }
 
-    public ClassLoader getRootLoader() {
+    protected ClassLoader getRootLoader() {
         return rootLoader;
     }
 
-    public File getRootPath() {
+    protected File getRootPath() {
         return rootPath;
     }
 
-    public Collection<TagFactory> getTags() {
-        return tagFactories;
+    public List<TagFactory> getTags() {
+        return Collections.unmodifiableList(tags);
     }
 
-    public Iterable<Map.Entry<String, Object>> getFunctors() {
-        return nameToFunctorMappings.entrySet();
+    public WrimeEngine setTags(List<TagFactory> tags) {
+        this.tags.addAll(tags);
+        return this;
     }
 
-    public WrimeEngine addFunctor(String name, Object functor) {
-        nameToFunctorMappings.put(name, functor);
+    protected Map<String, Object> getFunctors() {
+        return Collections.unmodifiableMap(functors);
+    }
+
+    public WrimeEngine setFunctors(Map<String, Object> functors) {
+        this.functors.putAll(functors);
         return this;
     }
 

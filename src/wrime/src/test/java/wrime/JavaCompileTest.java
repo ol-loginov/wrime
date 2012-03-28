@@ -13,9 +13,12 @@ import java.util.TreeMap;
 public class JavaCompileTest extends TestClass {
     @Override
     protected WrimeEngine getEngine() throws WrimeException {
-        return super.getEngine()
-                .addFunctor("str", new StringFunctor())
-                .addFunctor("l", new LogicFunctor());
+        return super
+                .getEngine()
+                .setFunctors(new TreeMap<String, Object>() {{
+                    put("str", new StringFunctor());
+                    put("l", new LogicFunctor());
+                }});
     }
 
     @Test

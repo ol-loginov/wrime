@@ -1,7 +1,6 @@
 package wrime;
 
 import wrime.config.WrimeConfiguration;
-import wrime.scanner.WrimeCompiler;
 
 import java.io.StringWriter;
 import java.util.Map;

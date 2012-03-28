@@ -15,38 +15,46 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class WrimeView extends AbstractTemplateView {
     private final static String SERVLET_FUNCTOR = "servlet";
 
-    private WrimeEngine wrimeEngine;
+    private static WrimeEngine wrimeEngine;
     private ResourceLoader resourceLoader;
 
-    protected void registerDefaultFunctors(WrimeEngine engine) {
-        engine.addFunctor(SERVLET_FUNCTOR, new ServletFunctor());
+    protected void registerDefaultFunctors() {
+        getWrimeEngine().setFunctors(new TreeMap<String, Object>() {{
+            put(SERVLET_FUNCTOR, new ServletFunctor());
+        }});
     }
 
-    protected void addDefaultFunctors(WrimeEngine engine, ModelMap map, HttpServletRequest request, HttpServletResponse response) {
-        engine.setFunctorToModel(map, SERVLET_FUNCTOR, new ServletFunctor(new ServletWebRequest(request, response)));
+    protected void addDefaultFunctors(ModelMap map, HttpServletRequest request, HttpServletResponse response) {
+        getWrimeEngine().addFunctorToModel(map, SERVLET_FUNCTOR, new ServletFunctor(new ServletWebRequest(request, response)));
+    }
+
+    protected WrimeEngine getWrimeEngine() {
+        if (wrimeEngine == null) {
+            wrimeEngine = new WrimeEngine();
+        }
+        return wrimeEngine;
     }
 
     @Override
     protected void initApplicationContext(ApplicationContext context) {
         super.initApplicationContext(context);
         resourceLoader = context;
-        wrimeEngine = context.getBean("wrimeViewEngine", WrimeEngine.class);
-        registerDefaultFunctors(wrimeEngine);
+        registerDefaultFunctors();
     }
 
     @Override
     protected void renderMergedTemplateModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
         ModelMap map = new ModelMap();
         map.addAllAttributes(model);
-        addDefaultFunctors(wrimeEngine, map, request, response);
+        addDefaultFunctors(map, request, response);
 
         Resource resource = resourceLoader.getResource(getUrl());
         ScriptResource script = new AbstractScriptSource((AbstractResource) resource);
-
         wrimeEngine.render(script, new PrintWriter(response.getOutputStream()), map);
     }
 }

@@ -3,11 +3,16 @@ package wrime;
 import org.junit.Test;
 import wrime.functor.StringFunctor;
 
+import java.util.TreeMap;
+
 public class SetTest extends TestClass {
     @Override
     protected WrimeEngine getEngine() throws WrimeException {
-        return super.getEngine()
-                .addFunctor("str", new StringFunctor());
+        return super
+                .getEngine()
+                .setFunctors(new TreeMap<String, Object>() {{
+                    put("str", new StringFunctor());
+                }});
     }
 
     @Test

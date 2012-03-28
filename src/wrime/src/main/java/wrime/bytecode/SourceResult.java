@@ -1,29 +1,23 @@
 package wrime.bytecode;
 
+import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 import java.io.File;
 import java.util.List;
 
 public class SourceResult {
     private String stderr;
-    private List diagnostic;
+    private List<Diagnostic<? extends JavaFileObject>> diagnostic;
     private boolean success;
 
     private File sourceFile;
     private File classFile;
 
-    public String getStderr() {
-        return stderr;
-    }
-
     public void setStderr(String stderr) {
         this.stderr = stderr;
     }
 
-    public List getDiagnostic() {
-        return diagnostic;
-    }
-
-    public void setDiagnostic(List diagnostic) {
+    public void setDiagnostic(List<Diagnostic<? extends JavaFileObject>> diagnostic) {
         this.diagnostic = diagnostic;
     }
 
@@ -49,5 +43,18 @@ public class SourceResult {
 
     public void setSourceFile(File sourceFile) {
         this.sourceFile = sourceFile;
+    }
+
+    public String getErrorList() {
+        StringBuilder builder = new StringBuilder();
+        if (diagnostic != null && diagnostic.size() > 0) {
+            for (Diagnostic<? extends JavaFileObject> d : diagnostic) {
+                builder.append(d.toString()).append("\n");
+            }
+        }
+        if (stderr != null) {
+            builder.append(stderr).append("\n");
+        }
+        return builder.toString();
     }
 }

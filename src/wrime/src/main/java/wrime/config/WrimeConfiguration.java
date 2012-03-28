@@ -10,6 +10,7 @@ import wrime.tags.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.TreeMap;
 
 public class WrimeConfiguration {
     public File getWorkingFolder() throws WrimeException {
@@ -34,7 +35,7 @@ public class WrimeConfiguration {
     }
 
     public void setTagFactories(WrimeEngine engine) {
-        engine.getTags().addAll(Arrays.asList(
+        engine.setTags(Arrays.asList(
                 new ParamFactory(),
                 new IncludeFactory(),
                 new ImportFactory(),
@@ -47,8 +48,10 @@ public class WrimeConfiguration {
     }
 
     public void setFunctors(WrimeEngine engine) {
-        engine.addFunctor("str", new StringFunctor());
-        engine.addFunctor("logic", new LogicFunctor());
-        engine.addFunctor("math", new MathFunctor());
+        engine.setFunctors(new TreeMap<String, Object>() {{
+            put("str", new StringFunctor());
+            put("logic", new LogicFunctor());
+            put("math", new MathFunctor());
+        }});
     }
 }

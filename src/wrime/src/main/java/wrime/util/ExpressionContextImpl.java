@@ -3,7 +3,6 @@ package wrime.util;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import wrime.WrimeException;
-import wrime.scanner.WrimeCompiler;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -11,11 +10,11 @@ import java.util.regex.Pattern;
 
 public class ExpressionContextImpl extends ExpressionContext implements ExpressionContextKeeper {
     private final Stack<ExpressionContext> contextStack;
-    private final WrimeCompiler compiler;
+    private final ExpressionRuntime runtime;
 
-    public ExpressionContextImpl(WrimeCompiler compiler, ClassLoader classLoader) {
+    public ExpressionContextImpl(ExpressionRuntime runtime, ClassLoader classLoader) {
         super(classLoader);
-        this.compiler = compiler;
+        this.runtime = runtime;
         this.contextStack = new Stack<ExpressionContext>() {{
             push(ExpressionContextImpl.this);
         }};
@@ -23,7 +22,7 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
 
     @Override
     public ExpressionContext openScope() {
-        compiler.scopeAdded();
+        runtime.scopeAdded();
         ExpressionContext child = new ExpressionContext(current(), getClassLoader());
         contextStack.push(child);
         return child;
@@ -31,7 +30,7 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
 
     @Override
     public ExpressionContext closeScope() {
-        compiler.scopeRemoved();
+        runtime.scopeRemoved();
         return contextStack.pop();
     }
 
@@ -47,7 +46,7 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
             return instance;
         }
         String classSelfName = getPublicClassName(className);
-        for (String imports : compiler.getImports()) {
+        for (String imports : runtime.getImports()) {
             if (imports.endsWith("." + classSelfName)) {
                 return tryClass(imports);
             }
@@ -90,21 +89,21 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
     }
 
     public void addImport(Class<?> className) {
-        compiler.addImport(className.getName());
+        runtime.addImport(className.getName());
     }
 
     public void addImport(String className) {
-        compiler.addImport(className);
+        runtime.addImport(className);
     }
 
     @Override
     public void addModelParameter(String parameterTypeDef, String parameterName, Class parameterClass, String option) throws WrimeException {
-        compiler.addModelParameter(parameterName, parameterTypeDef, parameterClass, option);
+        runtime.addModelParameter(parameterName, parameterTypeDef, parameterClass, option);
     }
 
     @Override
     public Collection<ParameterName> getModelParameters() {
-        return compiler.getModelParameters();
+        return runtime.getModelParameters();
     }
 
     @Override
@@ -113,7 +112,7 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
         if (def != null) {
             return def;
         }
-        ParameterName parameter = compiler.getModelParameter(name);
+        ParameterName parameter = runtime.getModelParameter(name);
         if (parameter != null) {
             return parameter.getType();
         }
@@ -122,7 +121,7 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
 
     @Override
     public TypeName findFunctorType(String name) {
-        return compiler.findFunctorType(name);
+        return runtime.findFunctorType(name);
     }
 
     @Override
