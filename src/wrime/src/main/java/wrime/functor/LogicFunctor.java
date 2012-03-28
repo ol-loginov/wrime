@@ -5,6 +5,22 @@ public class LogicFunctor {
         return lhs.equals(rhs);
     }
 
+    public boolean gt(int a, int b) {
+        return a > b;
+    }
+
+    public boolean lt(int a, int b) {
+        return a < b;
+    }
+
+    public boolean lte(int a, int b) {
+        return a <= b;
+    }
+
+    public boolean gte(int a, int b) {
+        return a >= b;
+    }
+
     public boolean and(boolean lhs, boolean rhs) {
         return rhs && lhs;
     }

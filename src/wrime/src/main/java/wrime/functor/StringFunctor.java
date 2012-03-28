@@ -26,4 +26,12 @@ public class StringFunctor {
         }
         return result.toString();
     }
+
+    public boolean ne(String text) {
+        return !e(text);
+    }
+
+    public boolean e(String text) {
+        return text == null || text.length() == 0;
+    }
 }
