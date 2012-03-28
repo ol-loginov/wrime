@@ -21,12 +21,12 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 public class WrimeEngine {
-    private final Map<String, Class<? extends WrimeWriter>> urlToClassMappings = new HashMap<String, Class<? extends WrimeWriter>>();
+    private final Map<String, WriterRecord> urlToClassMappings = new HashMap<String, WriterRecord>();
     private final Map<String, Object> nameToFunctorMappings = new HashMap<String, Object>();
     private final List<TagFactory> tagFactories = new ArrayList<TagFactory>();
 
-    private String rootPath;
-    private ClassLoader rootLoader;
+    private File rootPath;
+    private URLClassLoader rootLoader;
 
     private Map<Scanner, String> scannerOptions = new TreeMap<Scanner, String>();
     private Map<Compiler, String> compilerOptions = new TreeMap<Compiler, String>();
@@ -43,14 +43,17 @@ public class WrimeEngine {
     }
 
     private void createWorkingFolder(File workingFolder) throws WrimeException {
+        this.rootPath = workingFolder;
+        resetRootLoader();
+    }
+
+    private void resetRootLoader() {
         URL tmpFolderUrl;
         try {
-            tmpFolderUrl = workingFolder.toURI().toURL();
+            tmpFolderUrl = this.rootPath.toURI().toURL();
         } catch (MalformedURLException e) {
-            throw new WrimeException("fail to create working folder URL", e);
+            throw new WrimeException("fail to initialize working folder URL", e);
         }
-
-        this.rootPath = workingFolder.getAbsolutePath();
         this.rootLoader = new URLClassLoader(new URL[]{tmpFolderUrl}, getClass().getClassLoader());
     }
 
@@ -70,15 +73,26 @@ public class WrimeEngine {
 
     private WrimeWriter getRendererClass(ScriptResource resource, Writer out) throws WrimeException {
         String path = resource.getPath();
-        Class<? extends WrimeWriter> writerClass = urlToClassMappings.get(path);
-        if (writerClass == null) {
-            writerClass = compile(parse(resource));
-            urlToClassMappings.put(path, writerClass);
+        WriterRecord record = urlToClassMappings.get(path);
+
+        // check for expire
+        if (record != null && record.lastModified < resource.getLastModified()) {
+            resetRootLoader();
+            record.sourceFile.delete();
+            record.classFile.delete();
+            record = null;
+        }
+
+        if (record == null) {
+            record = new WriterRecord();
+            record.lastModified = resource.getLastModified();
+            record.writerClass = compile(record, parse(resource));
+            urlToClassMappings.put(path, record);
         }
 
         Constructor<? extends WrimeWriter> writerConstructor;
         try {
-            writerConstructor = writerClass.getConstructor(Writer.class);
+            writerConstructor = record.writerClass.getConstructor(Writer.class);
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException("Wrime constructor is na", e);
         }
@@ -110,10 +124,11 @@ public class WrimeEngine {
         return compiler;
     }
 
-    private Class<WrimeWriter> compile(WrimeCompiler code) throws WrimeException {
-        SourceCompiler compiler = new SourceCompiler(new File(rootPath));
+    private Class<WrimeWriter> compile(WriterRecord record, WrimeCompiler code) throws WrimeException {
+        SourceCompiler compiler = new SourceCompiler(rootPath);
         SourceResult errors = new SourceResult();
         try {
+            record.className = code.getClassName();
             compiler.compile(code.getClassName(), code.getClassCode(), errors);
         } catch (IOException e) {
             throw new WrimeException("writer code is not available", e);
@@ -122,6 +137,9 @@ public class WrimeEngine {
         if (!errors.isSuccess()) {
             throw new WrimeException("writer code is invalid", null);
         }
+
+        record.classFile = errors.getClassFile();
+        record.sourceFile = errors.getSourceFile();
 
         try {
             return (Class<WrimeWriter>) getRootLoader().loadClass(code.getClassName());
@@ -184,5 +202,13 @@ public class WrimeEngine {
         public void include(WrimeWriter caller, String resource, Map<String, Object> model, Writer out) {
             WrimeEngine.this.render(parentResource.getResource(resource), out, model);
         }
+    }
+
+    static class WriterRecord {
+        Class<? extends WrimeWriter> writerClass;
+        long lastModified;
+        String className;
+        File classFile;
+        File sourceFile;
     }
 }

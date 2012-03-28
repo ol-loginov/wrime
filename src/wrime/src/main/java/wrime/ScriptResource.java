@@ -7,5 +7,7 @@ public interface ScriptResource {
 
     String getPath();
 
-    ScriptResource getResource(String path);
+    ScriptResource getResource(String path) throws WrimeException;
+
+    long getLastModified() throws WrimeException;
 }

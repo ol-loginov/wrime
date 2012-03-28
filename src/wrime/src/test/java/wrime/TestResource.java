@@ -58,8 +58,17 @@ public class TestResource {
             }
 
             @Override
-            public ScriptResource getResource(String path) {
+            public ScriptResource getResource(String path) throws WrimeException {
                 return loadResource0((ClassPathResource) resource.createRelative(path), resourceBase);
+            }
+
+            @Override
+            public long getLastModified() throws WrimeException {
+                try {
+                    return resource.lastModified();
+                } catch (IOException e) {
+                    throw new WrimeException("fail to get last modified time", e);
+                }
             }
         };
     }

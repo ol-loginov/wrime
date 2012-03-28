@@ -29,9 +29,11 @@ public class SourceCompiler {
         StringWriter stderr = new StringWriter();
         DiagnosticCollector<JavaFileObject> diagnostic = new DiagnosticCollector<JavaFileObject>();
 
-        File sourceFile = writeSourceFile(name, code);
+        result.setSourceFile(writeSourceFile(name, code));
+        result.setClassFile(new File(result.getSourceFile().getParentFile(), name + ".class"));
+
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostic, null, utf8);
-        Iterable<? extends JavaFileObject> sourceObjects = fileManager.getJavaFileObjectsFromFiles(Arrays.asList(sourceFile));
+        Iterable<? extends JavaFileObject> sourceObjects = fileManager.getJavaFileObjectsFromFiles(Arrays.asList(result.getSourceFile()));
         JavaCompiler.CompilationTask task = compiler.getTask(
                 stderr, fileManager, diagnostic,
                 Arrays.asList("-g", "-source", "1.6", "-target", "1.6"),
