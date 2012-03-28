@@ -4,6 +4,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceAware;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -22,20 +24,30 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class WrimeView extends AbstractTemplateView {
+public class WrimeView extends AbstractTemplateView implements MessageSourceAware {
     private final static String SERVLET_FUNCTOR = "servlet";
+    private final static String MESSAGE_FUNCTOR = "l18n";
 
     private ResourceLoader resourceLoader;
     private WrimeEngine wrimeEngine;
+    private MessageSource messageSource;
 
     protected void registerWebRequestFunctors() {
         getWrimeEngine().setFunctors(new TreeMap<String, Object>() {{
             put(SERVLET_FUNCTOR, new ServletFunctor());
+            put(MESSAGE_FUNCTOR, new L18nFunctor());
         }});
     }
 
     protected void addWebRequestFunctors(ModelMap map, HttpServletRequest request, HttpServletResponse response) {
         getWrimeEngine().addFunctorToModel(map, SERVLET_FUNCTOR, new ServletFunctor(new ServletWebRequest(request, response)));
+        getWrimeEngine().addFunctorToModel(map, MESSAGE_FUNCTOR, new L18nFunctor(messageSource, request.getLocale()));
+    }
+
+    @Override
+    public void setMessageSource(MessageSource messageSource) {
+        this.messageSource = messageSource;
+
     }
 
     protected WrimeEngine getWrimeEngine() {
@@ -73,12 +85,12 @@ public class WrimeView extends AbstractTemplateView {
         names.addAll(Arrays.asList(BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getApplicationContext(), WrimeEngineFactory.class, true, false)));
         if (names.size() > 0) {
             if (names.contains("wrimeViewEngine")) {
-                return getApplicationContext().getBean("wrimeViewEngine", WrimeEngine.class);
+                return getApplicationContext().getBean("wrimeViewEngine", WrimeEngineFactory.class).create();
             } else {
-                return getApplicationContext().getBean(names.get(0), WrimeEngine.class);
+                return getApplicationContext().getBean(names.get(0), WrimeEngineFactory.class).create();
             }
         }
-        throw new ApplicationContextException("Must define a single WrimeEngineFactory bean in this web application context (may be inherited): WrimeEngineFactory is the usual implementation. This bean may be given any name.");
+        throw new ApplicationContextException("Must define a WrimeEngineFactory or WrimeEngineFactoryAdapter bean in this web application context. Use default name 'wrimeViewEngine' if necessary");
     }
 
     @Override

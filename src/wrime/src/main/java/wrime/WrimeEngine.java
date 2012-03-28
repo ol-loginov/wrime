@@ -7,6 +7,7 @@ import wrime.output.WrimeWriter;
 import wrime.scanner.WrimeScanner;
 import wrime.scanner.WrimeScannerImpl;
 import wrime.tags.TagFactory;
+import wrime.util.EscapeUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -93,6 +94,7 @@ public class WrimeEngine {
     }
 
     private void render0(ScriptResource resource, Writer out, Map<String, Object> map, Map<String, Object> previousMap) throws WrimeException {
+        map = EscapeUtils.defaultIfNull(map, new TreeMap<String, Object>());
         map.putAll(expandFunctorMap(previousMap));
         getRendererClass(resource, out).render(map);
     }
