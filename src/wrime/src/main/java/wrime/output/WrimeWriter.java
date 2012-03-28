@@ -4,12 +4,12 @@ import wrime.WrimeException;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class WrimeWriter {
     private final Writer writer;
     private IncludeWriterListener $$includeWriterListener;
-
     private Map<String, Object> model;
 
     protected WrimeWriter(Writer writer) {
@@ -84,6 +84,8 @@ public abstract class WrimeWriter {
         if (this.$$includeWriterListener == null) {
             throw new WrimeException("cannot handle include statement", null);
         }
-        this.$$includeWriterListener.include(this, resource, model, writer);
+        Map<String, Object> next = new HashMap<String, Object>(this.model);
+        next.putAll(model);
+        this.$$includeWriterListener.include(this, resource, next, writer);
     }
 }

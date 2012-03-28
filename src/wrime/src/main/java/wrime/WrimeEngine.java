@@ -59,14 +59,6 @@ public class WrimeEngine {
         this.rootLoader = new URLClassLoader(new URL[]{tmpFolderUrl}, getClass().getClassLoader());
     }
 
-    public void render(ScriptResource resource, Writer out, Map<String, Object> map) throws WrimeException {
-        render0(resource, out, map, map);
-    }
-
-    public void render(ScriptResource resource, Writer out, Map<String, Object> map, Map<String, Object> previousMap) throws WrimeException {
-        render0(resource, out, map, previousMap);
-    }
-
     private String getFunctorPrefix() {
         String prefix = compilerOptions.get(Compiler.FUNCTOR_PREFIX);
         if (prefix == null || prefix.length() == 0) {
@@ -80,22 +72,21 @@ public class WrimeEngine {
         return this;
     }
 
-    private Map<String, Object> expandFunctorMap(Map<String, Object> copyFrom) {
-        TreeMap<String, Object> result = new TreeMap<String, Object>();
+    private Map<String, Object> createFunctorMap() {
+        Map<String, Object> result = new HashMap<String, Object>();
         for (Map.Entry<String, Object> functor : getFunctors().entrySet()) {
-            String key = getFunctorPrefix() + functor.getKey();
-            if (copyFrom != null && copyFrom.containsKey(key)) {
-                result.put(key, copyFrom.get(key));
-            } else {
-                result.put(key, functor.getValue());
-            }
+            result.put(getFunctorPrefix() + functor.getKey(), functor.getValue());
         }
         return result;
     }
 
-    private void render0(ScriptResource resource, Writer out, Map<String, Object> map, Map<String, Object> previousMap) throws WrimeException {
-        map = EscapeUtils.defaultIfNull(map, new TreeMap<String, Object>());
-        map.putAll(expandFunctorMap(previousMap));
+    public void render(ScriptResource resource, Writer out, Map<String, Object> map) throws WrimeException {
+        Map<String, Object> renderMap = createFunctorMap();
+        renderMap.putAll(EscapeUtils.defaultIfNull(map, new TreeMap<String, Object>()));
+        render0(resource, out, renderMap);
+    }
+
+    private void render0(ScriptResource resource, Writer out, Map<String, Object> map) throws WrimeException {
         getRendererClass(resource, out).render(map);
     }
 
@@ -245,7 +236,7 @@ public class WrimeEngine {
 
         @Override
         public void include(WrimeWriter caller, String resource, Map<String, Object> model, Writer out) {
-            WrimeEngine.this.render0(parentResource.getResource(resource), out, model, caller.getCurrentModel());
+            WrimeEngine.this.render0(parentResource.getResource(resource), out, model);
         }
     }
 
