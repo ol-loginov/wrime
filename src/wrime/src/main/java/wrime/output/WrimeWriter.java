@@ -16,6 +16,10 @@ public abstract class WrimeWriter {
         this.writer = writer;
     }
 
+    public Map<String, Object> getCurrentModel() {
+        return model;
+    }
+
     public void setIncludeWriterListener(IncludeWriterListener listener) {
         this.$$includeWriterListener = listener;
     }

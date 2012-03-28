@@ -58,16 +58,41 @@ public class WrimeEngine {
     }
 
     public void render(ScriptResource resource, Writer out, Map<String, Object> map) throws WrimeException {
-        // put all functors
-        String prefix = compilerOptions.get(Compiler.FUNCTOR_PREFIX);
-        if (prefix == null) {
-            prefix = "";
-        }
-        for (Map.Entry<String, Object> functor : this.getFunctors()) {
-            map.put(prefix + functor.getKey(), functor.getValue());
-        }
+        render0(resource, out, map, null);
+    }
 
-        // magic call
+    public void render(ScriptResource resource, Writer out, Map<String, Object> map, Map<String, Object> previousMap) throws WrimeException {
+        render0(resource, out, map, previousMap);
+    }
+
+    private String getFunctorPrefix() {
+        String prefix = compilerOptions.get(Compiler.FUNCTOR_PREFIX);
+        if (prefix == null || prefix.length() == 0) {
+            throw new WrimeException("lack of functor prefix option", null);
+        }
+        return prefix;
+    }
+
+    public WrimeEngine setFunctorToModel(Map<String, Object> map, String key, Object value) {
+        map.put(getFunctorPrefix() + key, value);
+        return this;
+    }
+
+    private Map<String, Object> expandFunctorMap(Map<String, Object> copyFrom) {
+        TreeMap<String, Object> result = new TreeMap<String, Object>();
+        for (Map.Entry<String, Object> functor : this.getFunctors()) {
+            String key = getFunctorPrefix() + functor.getKey();
+            if (copyFrom != null && copyFrom.containsKey(key)) {
+                result.put(key, copyFrom.get(key));
+            } else {
+                result.put(key, functor.getValue());
+            }
+        }
+        return result;
+    }
+
+    private void render0(ScriptResource resource, Writer out, Map<String, Object> map, Map<String, Object> previousMap) throws WrimeException {
+        map.putAll(expandFunctorMap(previousMap));
         getRendererClass(resource, out).render(map);
     }
 
@@ -78,8 +103,12 @@ public class WrimeEngine {
         // check for expire
         if (record != null && record.lastModified < resource.getLastModified()) {
             resetRootLoader();
-            record.sourceFile.delete();
-            record.classFile.delete();
+            if (!record.sourceFile.delete()) {
+                throw new WrimeException("unable to delete obsolete source file " + record.sourceFile.getAbsolutePath(), null);
+            }
+            if (!record.classFile.delete()) {
+                throw new WrimeException("unable to delete obsolete class file " + record.classFile.getAbsolutePath(), null);
+            }
             record = null;
         }
 
@@ -170,6 +199,10 @@ public class WrimeEngine {
         return rootLoader;
     }
 
+    public File getRootPath() {
+        return rootPath;
+    }
+
     public Collection<TagFactory> getTags() {
         return tagFactories;
     }
@@ -200,7 +233,7 @@ public class WrimeEngine {
 
         @Override
         public void include(WrimeWriter caller, String resource, Map<String, Object> model, Writer out) {
-            WrimeEngine.this.render(parentResource.getResource(resource), out, model);
+            WrimeEngine.this.render0(parentResource.getResource(resource), out, model, caller.getCurrentModel());
         }
     }
 
