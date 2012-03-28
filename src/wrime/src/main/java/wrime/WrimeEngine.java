@@ -2,7 +2,6 @@ package wrime;
 
 import wrime.bytecode.SourceCompiler;
 import wrime.bytecode.SourceResult;
-import wrime.config.WrimeConfiguration;
 import wrime.output.IncludeWriterListener;
 import wrime.output.WrimeWriter;
 import wrime.scanner.WrimeScanner;
@@ -17,33 +16,34 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.Charset;
 import java.util.*;
 
 public class WrimeEngine {
-    private final Object COMPILER_LOCK = new Object();
+    public static final Charset UTF_8 = Charset.forName("utf-8");
 
-    private final Map<String, WriterRecord> urlToClassMappings = new HashMap<String, WriterRecord>();
-    private Map<String, Object> functors = new HashMap<String, Object>();
-    private List<TagFactory> tags = new ArrayList<TagFactory>();
+    private final Object COMPILER_LOCK;
+
+    private final Map<String, WriterRecord> urlToClassMappings;
+    private Map<String, Object> functors;
+    private List<TagFactory> tags;
 
     private File rootPath;
     private URLClassLoader rootLoader;
 
-    private Map<Scanner, String> scannerOptions = new TreeMap<Scanner, String>();
-    private Map<Compiler, String> compilerOptions = new TreeMap<Compiler, String>();
+    private Map<Scanner, String> scannerOptions;
+    private Map<Compiler, String> compilerOptions;
 
-    public WrimeEngine() throws WrimeException {
-        this(new WrimeConfiguration());
+    WrimeEngine() {
+        COMPILER_LOCK = new Object();
+        urlToClassMappings = new HashMap<String, WriterRecord>();
+        functors = new HashMap<String, Object>();
+        tags = new ArrayList<TagFactory>();
+        scannerOptions = new TreeMap<Scanner, String>();
+        compilerOptions = new TreeMap<Compiler, String>();
     }
 
-    public WrimeEngine(WrimeConfiguration configuration) throws WrimeException {
-        createWorkingFolder(configuration.getWorkingFolder());
-        configuration.setOptions(this);
-        configuration.setTagFactories(this);
-        configuration.setFunctors(this);
-    }
-
-    private void createWorkingFolder(File workingFolder) throws WrimeException {
+    void setWorkingFolder(File workingFolder) throws WrimeException {
         this.rootPath = workingFolder;
         resetRootLoader();
     }

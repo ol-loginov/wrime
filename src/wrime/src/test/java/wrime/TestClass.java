@@ -1,7 +1,5 @@
 package wrime;
 
-import wrime.config.WrimeConfiguration;
-
 import java.io.StringWriter;
 import java.util.Map;
 
@@ -25,12 +23,13 @@ public class TestClass {
     }
 
     protected WrimeEngine getEngine() throws WrimeException {
-        WrimeConfiguration config = new WrimeConfiguration() {
+        WrimeEngineFactory factory = new WrimeEngineFactory() {
             @Override
-            public void setFunctors(WrimeEngine engine) {
+            public void initializeFunctors(WrimeEngine engine) {
             }
         };
-        return new WrimeEngine(config)
+        return factory
+                .create()
                 .setOption(WrimeEngine.Scanner.EAT_SPACE, true);
     }
 

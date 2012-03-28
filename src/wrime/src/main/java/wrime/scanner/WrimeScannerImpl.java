@@ -4,7 +4,10 @@ import wrime.ScriptResource;
 import wrime.WrimeEngine;
 import wrime.WrimeException;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -23,9 +26,7 @@ public class WrimeScannerImpl implements WrimeScanner {
         InputStream in = null;
         try {
             in = resource.getInputStream();
-            parse(receiver, new InputStreamReader(in, "utf-8"), resource.getPath());
-        } catch (UnsupportedEncodingException e) {
-            throw new WrimeException("UTF-8 is N/A", e);
+            parse(receiver, new InputStreamReader(in, WrimeEngine.UTF_8), resource.getPath());
         } finally {
             if (in != null) {
                 try {

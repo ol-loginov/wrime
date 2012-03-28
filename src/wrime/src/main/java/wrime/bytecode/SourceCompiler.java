@@ -2,6 +2,7 @@ package wrime.bytecode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import wrime.WrimeEngine;
 import wrime.util.EscapeUtils;
 
 import javax.tools.DiagnosticCollector;
@@ -9,15 +10,11 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.*;
 
 public class SourceCompiler {
     private static final Logger logger = LoggerFactory.getLogger(SourceCompiler.class);
-    private static final Charset utf8 = Charset.forName("utf-8");
     private static final JavaCompiler compiler;
 
     static {
@@ -33,7 +30,7 @@ public class SourceCompiler {
 
     public SourceCompiler(File workingFolder, ClassLoader workingLoader) {
         this.workingFolder = workingFolder;
-        this.fileManager = compiler.getStandardFileManager(null, null, utf8);
+        this.fileManager = compiler.getStandardFileManager(null, null, WrimeEngine.UTF_8);
         this.workingLoader = workingLoader;
     }
 
@@ -110,7 +107,7 @@ public class SourceCompiler {
         final File javaFile = new File(workingFolder, name + ".java");
         OutputStreamWriter fileWriter = null;
         try {
-            fileWriter = new OutputStreamWriter(new FileOutputStream(javaFile), utf8);
+            fileWriter = new OutputStreamWriter(new FileOutputStream(javaFile), WrimeEngine.UTF_8);
             fileWriter.write(code);
         } finally {
             if (fileWriter != null) {
@@ -118,13 +115,5 @@ public class SourceCompiler {
             }
         }
         return javaFile;
-    }
-
-    private static URI toURI(String name) {
-        try {
-            return new URI(name);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

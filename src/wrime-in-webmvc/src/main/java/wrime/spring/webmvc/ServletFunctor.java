@@ -12,4 +12,8 @@ public class ServletFunctor {
     public ServletFunctor(ServletWebRequest request) {
         this.request = request;
     }
+
+    public void setContentType(String contentType) {
+        request.getResponse().setContentType(contentType);
+    }
 }

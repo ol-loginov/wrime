@@ -76,7 +76,7 @@ public class TestResource {
     public void verify(String expectedResourceName, String content) {
         StringWriter writer = new StringWriter();
         try {
-            IOUtils.copy(load(expectedResourceName).getInputStream(), writer, "UTF-8");
+            IOUtils.copy(load(expectedResourceName).getInputStream(), writer, WrimeEngine.UTF_8.name());
         } catch (IOException e) {
             Assert.fail(e.getMessage());
         } catch (WrimeException e) {
