@@ -1,1 +1,1 @@
-${param String value}${#value}
+${param Character value}${#value}

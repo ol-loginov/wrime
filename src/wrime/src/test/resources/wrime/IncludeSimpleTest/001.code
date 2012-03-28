@@ -23,7 +23,7 @@ public class W$IncludeSimpleTest$001_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    ModelMap $includeAt_2_28 = new ModelMap();
+    Map<String,Object> $includeAt_2_28 = new TreeMap<String,Object>();
     $includeAt_2_28.put("a", this.a);
     this.include("000-include.txt", $includeAt_2_28);
   }
