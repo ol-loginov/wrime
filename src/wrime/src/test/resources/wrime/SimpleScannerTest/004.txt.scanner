@@ -1,1 +1,1 @@
-[enter resource SimpleScannerTest/004.txt][expr][$loop][.][$apply][list][$e][/list][/expr][leave resource]
+[enter SimpleScannerTest/004.txt][command loop.apply(e)][leave]

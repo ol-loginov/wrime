@@ -393,6 +393,14 @@ class WrimeCompiler implements ExpressionRuntime {
         }
 
         @Override
+        public void exprPart(String part) throws WrimeException {
+        }
+
+        @Override
+        public void command(String command) throws WrimeException {
+        }
+
+        @Override
         public void startResource(ScriptResource resource) throws WrimeException {
             ensureNotReady();
             expressionContext.addImport(java.io.Writer.class);

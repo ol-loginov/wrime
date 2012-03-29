@@ -1,6 +1,7 @@
 package wrime.scanner;
 
 import wrime.ScriptResource;
+import wrime.WrimeException;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -25,13 +26,23 @@ public class WrimeScannerDumper implements WrimeScanner.Receiver {
     }
 
     @Override
+    public void command(String command) throws WrimeException {
+        appendQuietly("[command " + command + "]");
+    }
+
+    @Override
+    public void exprPart(String part) throws WrimeException {
+        appendQuietly("[part " + part + "]");
+    }
+
+    @Override
     public void startResource(ScriptResource resource) {
-        appendQuietly("[enter resource " + resource.getPath() + "]");
+        appendQuietly("[enter " + resource.getPath() + "]");
     }
 
     @Override
     public void finishResource() {
-        appendQuietly("[leave resource]");
+        appendQuietly("[leave]");
     }
 
     @Override

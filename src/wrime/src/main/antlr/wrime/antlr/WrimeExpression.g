@@ -19,6 +19,9 @@ package wrime.antlr;
 package wrime.antlr;
 }
 
+@members{
+}
+
 command
 	:	expression
 	|	tagIf

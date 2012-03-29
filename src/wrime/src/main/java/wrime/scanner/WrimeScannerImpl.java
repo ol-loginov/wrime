@@ -68,20 +68,8 @@ public class WrimeScannerImpl implements WrimeScanner {
             case EXPR_END:
                 receiver.exprFinish();
                 break;
-            case EXPR_LIST_OPEN:
-                receiver.exprListOpen();
-                break;
-            case EXPR_LIST_CLOSE:
-                receiver.exprListClose();
-                break;
-            case EXPR_NAME:
-                receiver.exprName(token.value);
-                break;
-            case EXPR_LITERAL:
-                receiver.exprLiteral(token.value);
-                break;
-            case EXPR_DELIMITER:
-                receiver.exprDelimiter(token.value);
+            case EXPR_PART:
+                receiver.exprPart(token.value);
                 break;
             default:
                 throw new IllegalStateException("this situation is not supported");
@@ -133,10 +121,6 @@ public class WrimeScannerImpl implements WrimeScanner {
 
             switch (expectation) {
                 case TOKEN_MARK:
-                    if (latestContent != null && latestContent.endsWith("$")) {
-                        token.type = TokenType.TEXT;
-                        return Expectation.TOKEN_MARK;
-                    }
                     if (scanner.lookingAt()) {
                         token.type = TokenType.EXPR_START;
                         return Expectation.EXPR_DELIMITER;
@@ -145,65 +129,51 @@ public class WrimeScannerImpl implements WrimeScanner {
                         return Expectation.TOKEN_MARK;
                     }
                 case EXPR_QUOTE_BOUND:
-                    token.type = TokenType.EXPR_LITERAL;
-                    if (scanner.lookingAt()) {
-                        token.value = "";
-                    } else {
+                    token.type = TokenType.EXPR_PART;
+                    if (scanner.lookingAt() && latestContentBackCount("\\") % 2 == 1) {
                         scanner.skip(expectation.pattern());
                     }
                     return Expectation.EXPR_DELIMITER;
                 case EXPR_DQUOTE_BOUND:
-                    token.type = TokenType.EXPR_LITERAL;
-                    if (scanner.lookingAt()) {
-                        token.value = "";
-                    } else {
+                    token.type = TokenType.EXPR_PART;
+                    if (scanner.lookingAt() && latestContentBackCount("\\") % 2 == 1) {
                         scanner.skip(expectation.pattern());
                     }
                     return Expectation.EXPR_DELIMITER;
                 case EXPR_DELIMITER:
+                    token.type = TokenType.EXPR_PART;
                     if ("'".equals(token.value)) {
-                        token.type = TokenType.INCOMPLETE;
                         return Expectation.EXPR_QUOTE_BOUND;
                     } else if ("\"".equals(token.value)) {
-                        token.type = TokenType.INCOMPLETE;
                         return Expectation.EXPR_DQUOTE_BOUND;
                     } else if ("}".equals(token.value)) {
                         token.type = TokenType.EXPR_END;
                         return Expectation.TOKEN_MARK;
-                    }
-
-                    if (OPEN_LIST_SYMBOL.equals(token.value)) {
-                        token.type = TokenType.EXPR_LIST_OPEN;
-                    } else if (CLOSE_LIST_SYMBOL.equals(token.value)) {
-                        token.type = TokenType.EXPR_LIST_CLOSE;
-                    } else if (SPLIT_LIST_SYMBOL.equals(token.value)) {
-                        token.type = TokenType.EXPR_DELIMITER;
-                    } else if (EQUAL_SYMBOL.equals(token.value)) {
-                        token.type = TokenType.EXPR_DELIMITER;
-                    } else if (RAW_SYMBOL.equals(token.value)) {
-                        token.type = TokenType.EXPR_DELIMITER;
-                    } else if (".".equals(token.value)) {
-                        token.type = TokenType.EXPR_DELIMITER;
-                    } else if ("*".equals(token.value)) {
-                        token.type = TokenType.EXPR_DELIMITER;
-                    } else if (":".equals(token.value)) {
-                        token.type = TokenType.EXPR_DELIMITER;
-                    } else if (" ".equals(token.value)) {
-                        token.type = TokenType.INCOMPLETE;
                     } else {
-                        token.type = TokenType.EXPR_NAME;
+                        return Expectation.EXPR_DELIMITER;
                     }
-                    return Expectation.EXPR_DELIMITER;
-
                 default:
                     throw new IllegalStateException("this situation is not supported");
             }
+        }
+
+        private int latestContentBackCount(String s) {
+            if (latestContent == null) {
+                return 0;
+            }
+            String end = latestContent;
+            int count = 0;
+            while (end.endsWith(s)) {
+                count++;
+                end = latestContent.substring(0, latestContent.length() - s.length());
+            }
+            return count;
         }
     }
 
     private static enum Expectation {
         TOKEN_MARK("\\$\\{"),
-        EXPR_DELIMITER("#|=|\\*| |,|:|\\(|\\)|'|\\\"|\\.|}"),
+        EXPR_DELIMITER("'|\\\"|}"),
         EXPR_QUOTE_BOUND("\\\'"),
         EXPR_DQUOTE_BOUND("\\\"");
 
@@ -225,11 +195,7 @@ public class WrimeScannerImpl implements WrimeScanner {
         TEXT,
         EXPR_START,
         EXPR_END,
-        EXPR_NAME,
-        EXPR_LIST_OPEN,
-        EXPR_LIST_CLOSE,
-        EXPR_LITERAL,
-        EXPR_DELIMITER
+        EXPR_PART
     }
 
     private static class Token {

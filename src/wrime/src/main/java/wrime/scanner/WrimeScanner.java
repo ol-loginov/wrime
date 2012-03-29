@@ -24,6 +24,8 @@ public interface WrimeScanner {
 
         void text(String text) throws WrimeException;
 
+        void command(String command) throws WrimeException;
+
         void exprStart() throws WrimeException;
 
         void exprFinish() throws WrimeException;
@@ -39,5 +41,7 @@ public interface WrimeScanner {
         void exprDelimiter(String value) throws WrimeException;
 
         void setLocation(String path, int line, int column);
+
+        void exprPart(String part) throws WrimeException;
     }
 }
