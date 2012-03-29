@@ -31,11 +31,6 @@ public class WrimeScannerDumper implements WrimeScanner.Receiver {
     }
 
     @Override
-    public void exprPart(String part) throws WrimeException {
-        appendQuietly("[part " + part + "]");
-    }
-
-    @Override
     public void startResource(ScriptResource resource) {
         appendQuietly("[enter " + resource.getPath() + "]");
     }
@@ -48,40 +43,5 @@ public class WrimeScannerDumper implements WrimeScanner.Receiver {
     @Override
     public void text(String text) {
         appendQuietly("[write] " + text);
-    }
-
-    @Override
-    public void exprStart() {
-        appendQuietly("[expr]");
-    }
-
-    @Override
-    public void exprFinish() {
-        appendQuietly("[/expr]");
-    }
-
-    @Override
-    public void exprListOpen() {
-        appendQuietly("[list]");
-    }
-
-    @Override
-    public void exprListClose() {
-        appendQuietly("[/list]");
-    }
-
-    @Override
-    public void exprName(String name) {
-        appendQuietly("[$" + name + "]");
-    }
-
-    @Override
-    public void exprLiteral(String literal) {
-        appendQuietly("['" + literal + "']");
-    }
-
-    @Override
-    public void exprDelimiter(String value) {
-        appendQuietly("[" + value + "]");
     }
 }

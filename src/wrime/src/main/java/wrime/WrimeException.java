@@ -34,4 +34,8 @@ public class WrimeException extends RuntimeException {
         }
         return String.format(" (%s:%d, column %d)", path, line, column);
     }
+
+    public boolean hasLocation() {
+        return path != null && line > 0 && column > 0;
+    }
 }

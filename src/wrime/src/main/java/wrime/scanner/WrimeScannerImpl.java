@@ -15,18 +15,20 @@ import java.util.regex.Pattern;
 public class WrimeScannerImpl implements WrimeScanner {
     private Map<WrimeEngine.Scanner, String> options = new HashMap<WrimeEngine.Scanner, String>();
 
+    @Override
     public void configure(Map<WrimeEngine.Scanner, String> options) {
         this.options.clear();
         this.options.putAll(options);
     }
 
-    public void parse(ScriptResource resource, Receiver receiver) throws WrimeException {
+    @Override
+    public void scan(ScriptResource resource, Receiver receiver) throws WrimeException {
         receiver.startResource(resource);
 
         InputStream in = null;
         try {
             in = resource.getInputStream();
-            parse(receiver, new InputStreamReader(in, WrimeEngine.UTF_8), resource.getPath());
+            scan0(receiver, new InputStreamReader(in, WrimeEngine.UTF_8), resource.getPath());
         } finally {
             if (in != null) {
                 try {
@@ -38,38 +40,47 @@ public class WrimeScannerImpl implements WrimeScanner {
         }
     }
 
-    private void parse(Receiver receiver, Reader reader, String path) throws WrimeException {
+    private void scan0(Receiver receiver, Reader reader, String path) throws WrimeException {
         ScannerWrapper scanner = new ScannerWrapper(reader);
-        Token token = new Token();
-        while (scanner.next(token)) {
+        ScanContext context = new ScanContext();
+        while (scanner.next(context.token)) {
             try {
-                receiver.setLocation(path, token.line, token.column);
-                accept(receiver, token);
-                if (token.type == TokenType.EOF) {
+                receiver.setLocation(path, context.token.line, context.token.column);
+                accept(receiver, context);
+                if (context.token.type == TokenType.EOF) {
                     return;
                 }
             } catch (WrimeException e) {
-                throw new WrimeException(e.getMessage(), e, path, token.line + 1, token.column + 1);
+                if (e.hasLocation()) {
+                    throw e;
+                }
+                throw new WrimeException(e.getMessage(), e, path, context.token.line + 1, context.token.column + 1);
             }
         }
     }
 
-    private void accept(Receiver receiver, Token token) throws WrimeException {
-        switch (token.type) {
+    private void accept(Receiver receiver, ScanContext state) throws WrimeException {
+        switch (state.token.type) {
             case EOF:
+                if (state.expressionShouldEnds) {
+                    throw new WrimeException("Unexpected EOF, expression end needed", null);
+                }
                 receiver.finishResource();
                 return;
             case TEXT:
-                receiver.text(eatSpace(token.value));
+                receiver.text(eatSpace(state.token.value));
                 break;
             case EXPR_START:
-                receiver.exprStart();
+                state.expression.setLength(0);
+                state.expressionShouldEnds = true;
                 break;
             case EXPR_END:
-                receiver.exprFinish();
+                receiver.command(state.expression.toString());
+                state.expression.setLength(0);
+                state.expressionShouldEnds = false;
                 break;
             case EXPR_PART:
-                receiver.exprPart(token.value);
+                state.expression.append(state.token.value);
                 break;
             default:
                 throw new IllegalStateException("this situation is not supported");
@@ -111,6 +122,8 @@ public class WrimeScannerImpl implements WrimeScanner {
         }
 
         private Expectation consume(Token token) throws WrimeException {
+            Expectation same = expectation;
+
             token.line = scanner.line();
             token.column = scanner.column();
             token.value = scanner.waitDelimiter(expectation.pattern());
@@ -130,16 +143,18 @@ public class WrimeScannerImpl implements WrimeScanner {
                     }
                 case EXPR_QUOTE_BOUND:
                     token.type = TokenType.EXPR_PART;
-                    if (scanner.lookingAt() && latestContentBackCount("\\") % 2 == 1) {
-                        scanner.skip(expectation.pattern());
+                    if (scanner.lookingAt() && latestContentAtEndCount("\\") % 2 == 0) {
+                        return Expectation.EXPR_DELIMITER;
+                    } else {
+                        return same;
                     }
-                    return Expectation.EXPR_DELIMITER;
                 case EXPR_DQUOTE_BOUND:
                     token.type = TokenType.EXPR_PART;
-                    if (scanner.lookingAt() && latestContentBackCount("\\") % 2 == 1) {
-                        scanner.skip(expectation.pattern());
+                    if (scanner.lookingAt() && latestContentAtEndCount("\\") % 2 == 0) {
+                        return Expectation.EXPR_DELIMITER;
+                    } else {
+                        return same;
                     }
-                    return Expectation.EXPR_DELIMITER;
                 case EXPR_DELIMITER:
                     token.type = TokenType.EXPR_PART;
                     if ("'".equals(token.value)) {
@@ -157,7 +172,7 @@ public class WrimeScannerImpl implements WrimeScanner {
             }
         }
 
-        private int latestContentBackCount(String s) {
+        private int latestContentAtEndCount(String s) {
             if (latestContent == null) {
                 return 0;
             }
@@ -165,7 +180,7 @@ public class WrimeScannerImpl implements WrimeScanner {
             int count = 0;
             while (end.endsWith(s)) {
                 count++;
-                end = latestContent.substring(0, latestContent.length() - s.length());
+                end = end.substring(0, end.length() - s.length());
             }
             return count;
         }
@@ -215,5 +230,11 @@ public class WrimeScannerImpl implements WrimeScanner {
             line = 0;
             column = 0;
         }
+    }
+
+    private static class ScanContext {
+        Token token = new Token();
+        StringBuilder expression = new StringBuilder();
+        boolean expressionShouldEnds = false;
     }
 }

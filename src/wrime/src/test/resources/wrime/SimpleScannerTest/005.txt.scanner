@@ -1,4 +1,4 @@
-[enter SimpleScannerTest/005.txt][command i18n:translate("call me")][write]
-[command i18n:translate("with ' inside")][write]
-[command i18n:translate('with " inside')][write]
-[command i18n:translate("slash \")][leave]
+[enter SimpleScannerTest/005.txt][command i18n:translate("call me")][write] 
+[command i18n:translate("with ' inside")][write] 
+[command i18n:translate('with " inside')][write] 
+[command i18n:translate("slash \\")][leave]

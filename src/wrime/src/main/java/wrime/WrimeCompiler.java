@@ -1,5 +1,10 @@
 package wrime;
 
+import org.antlr.runtime.ANTLRStringStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
+import wrime.antlr.WrimeExpressionLexer;
+import wrime.antlr.WrimeExpressionParser;
 import wrime.ops.EscapedRenderer;
 import wrime.ops.Functor;
 import wrime.ops.Operand;
@@ -29,7 +34,6 @@ class WrimeCompiler implements ExpressionRuntime {
 
     private Body renderContentBody;
 
-    private PathContext expressionPath;
     private ExpressionContextImpl expressionContext;
 
     private boolean classDone;
@@ -143,23 +147,6 @@ class WrimeCompiler implements ExpressionRuntime {
         if (classDone) {
             error("class is ready");
         }
-    }
-
-    private void ensureInsideExpression(boolean shouldHaveExpression) throws WrimeException {
-        if (expressionPath != null ^ shouldHaveExpression) {
-            error("unexpected expression statement");
-        }
-    }
-
-    private void completeExpression() throws WrimeException {
-        expressionPath.markComplete(expressionContext);
-        expressionPath = null;
-    }
-
-    private void startExpression() throws WrimeException {
-        DirectCallRenderer callRenderer = new DirectCallRenderer();
-        RootReceiver rootReceiver = new RootReceiver(tagFactories, callRenderer);
-        expressionPath = new PathContext(callRenderer, rootReceiver);
     }
 
     @Override
@@ -384,20 +371,55 @@ class WrimeCompiler implements ExpressionRuntime {
     }
 
     private class ScannerReceiver implements WrimeScanner.Receiver {
-        @Override
-        public void setLocation(String path, int line, int column) {
-            if (expressionPath == null) {
-                return;
-            }
-            expressionPath.setPosition(path, line, column);
-        }
+        private String path;
+        private int line;
+        private int column;
 
         @Override
-        public void exprPart(String part) throws WrimeException {
+        public void setLocation(String path, int line, int column) {
+            this.path = path;
+            this.line = line;
+            this.column = column;
         }
 
         @Override
         public void command(String command) throws WrimeException {
+            boolean rawRender = false;
+            if (command.startsWith("#")) {
+                command = command.substring(1);
+                rawRender = true;
+            }
+
+            WrimeExpressionParser.RecognitionErrorListener recognitionErrorListener = new WrimeExpressionParser.RecognitionErrorListener() {
+                @Override
+                public void report(RecognitionException e, String message) {
+                    String innerMessage = "";
+                    if (message == null || message.length() == 0) {
+                        innerMessage = " (" + message + ")";
+                    }
+                    throw new WrimeException("lexical error in command" + innerMessage, e, path, line + e.line, column + e.charPositionInLine);
+                }
+            };
+
+            WrimeExpressionLexer lexer = new WrimeExpressionLexer(new ANTLRStringStream(command));
+            WrimeExpressionParser parser = new WrimeExpressionParser(new CommonTokenStream(lexer));
+            parser.recognitionErrorListener = recognitionErrorListener;
+
+            WrimeExpressionParser.command_return cmd;
+            try {
+                cmd = parser.command();
+            } catch (RecognitionException e) {
+                recognitionErrorListener.report(e, "");
+                cmd = null;
+            }
+
+            if (cmd == null) {
+                throw new WrimeException("empty expression", null, path, line, column);
+            }
+
+            DirectCallRenderer callRenderer = new DirectCallRenderer();
+            RootReceiver rootReceiver = new RootReceiver(tagFactories, callRenderer);
+            PathContext expressionPath = new PathContext(callRenderer, rootReceiver);
         }
 
         @Override
@@ -412,7 +434,6 @@ class WrimeCompiler implements ExpressionRuntime {
         @Override
         public void finishResource() throws WrimeException {
             ensureNotReady();
-            ensureInsideExpression(false);
             classDone = true;
         }
 
@@ -422,55 +443,6 @@ class WrimeCompiler implements ExpressionRuntime {
             if (text != null && text.length() > 0) {
                 renderContentBody.l(String.format("%s(\"%s\");", TEXT_WRITE_METHOD, EscapeUtils.escapeJavaString(text)));
             }
-        }
-
-        @Override
-        public void exprStart() throws WrimeException {
-            ensureNotReady();
-            ensureInsideExpression(false);
-            startExpression();
-        }
-
-        @Override
-        public void exprFinish() throws WrimeException {
-            ensureNotReady();
-            ensureInsideExpression(true);
-            completeExpression();
-        }
-
-        @Override
-        public void exprListOpen() throws WrimeException {
-            ensureNotReady();
-            ensureInsideExpression(true);
-            expressionPath.current().beginList(expressionContext);
-        }
-
-        @Override
-        public void exprListClose() throws WrimeException {
-            ensureNotReady();
-            ensureInsideExpression(true);
-            expressionPath.current().closeList(expressionContext);
-        }
-
-        @Override
-        public void exprName(String name) throws WrimeException {
-            ensureNotReady();
-            ensureInsideExpression(true);
-            expressionPath.current().pushToken(expressionContext, name);
-        }
-
-        @Override
-        public void exprLiteral(String literal) throws WrimeException {
-            ensureNotReady();
-            ensureInsideExpression(true);
-            expressionPath.current().pushLiteral(expressionContext, literal);
-        }
-
-        @Override
-        public void exprDelimiter(String value) throws WrimeException {
-            ensureNotReady();
-            ensureInsideExpression(true);
-            expressionPath.current().pushDelimiter(expressionContext, value);
         }
     }
 
