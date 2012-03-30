@@ -403,7 +403,7 @@ class WrimeCompiler implements ExpressionRuntime {
 
             WrimeExpressionLexer lexer = new WrimeExpressionLexer(new ANTLRStringStream(command));
             WrimeExpressionParser parser = new WrimeExpressionParser(new CommonTokenStream(lexer));
-            parser.recognitionErrorListener = recognitionErrorListener;
+            parser.setRecognitionErrorListener(recognitionErrorListener);
 
             WrimeExpressionParser.command_return cmd;
             try {

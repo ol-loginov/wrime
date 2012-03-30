@@ -9,6 +9,10 @@ public class WrimeException extends RuntimeException {
         super(message, e);
     }
 
+    public WrimeException(String message, Throwable e, Location location) {
+        this(message, e, location.getPath(), location.getLine(), location.getColumn());
+    }
+
     public WrimeException(String message, Throwable e, String path, int line, int column) {
         super(message + createLocationInfo(path, line, column), e);
         this.path = path;

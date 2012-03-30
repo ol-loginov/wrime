@@ -7,7 +7,7 @@ grammar WrimeExpression;
 options
 {
 	output=AST;
-	backtrack=true;
+//	backtrack=true;
 	memoize=true;
 }
 
@@ -38,6 +38,10 @@ tokens {
     TRUE='true';
     FALSE='false';
     NULL='null';
+    PLUS='+';
+    MINUS='-';
+    DIV='/';
+    MOD='%';
 }
 
 @header {
@@ -52,19 +56,26 @@ package wrime.antlr;
 public static interface RecognitionErrorListener {
     void report(RecognitionException e, String message);
 }
-public static interface NodeFactory {
-    Operand createLogical(Token act, Operand lhs, Operand rhs);
+
+public static interface EmitterFactory {
+    Emitter getNumber(Token o);
+    Emitter getBool(boolean value);
+    Emitter getNull();
+    Emitter getString(String text);
+
+	Gate makeGate(Emitter l, Token o, Emitter r);
+	Comparison makeComparison(Emitter l, Token o, Emitter r);
 }
 
-public RecognitionErrorListener recognitionErrorListener;
-private NodeFactory nf;
+private RecognitionErrorListener recognitionErrorListener;
+private EmitterFactory ef;
 
-public void setNodeFactory(NodeFactory nf) {
-    this.nf = nf;
+public void setEmitterFactory(EmitterFactory ef) {
+    this.ef = ef;
 }
 
-public NodeFactory getNodeFactory() {
-    return this.nf;
+public void setRecognitionErrorListener(RecognitionErrorListener recognitionErrorListener) {
+	this.recognitionErrorListener=recognitionErrorListener;
 }
 
 @Override
@@ -76,10 +87,14 @@ public void displayRecognitionError(String[] tokenNames, RecognitionException e)
 }
 }
 
-command
-	:	expression  EOF
-	|   anyTag EOF
+command returns [Emitter expression]
+	:	o=expression EOF                                {$expression=o.e;}
+	|   t=anyTag EOF									{}
 	;
+
+/*************************************************************************
+TAGS
+*************************************************************************/
 
 anyTag
 	:	tagIf
@@ -89,7 +104,7 @@ anyTag
 	|	tagInclude
 	|	tagParam
 	|	tagSet
-	|  tagImport
+	|	tagImport
 	;
 	
 tagImport
@@ -148,45 +163,79 @@ assignOrIdentifierExpr
 	:	Identifier (EQUAL expression)?
 	;
 	
-expression returns [Operand op]
-	:	r1=logicExpr act=(AND | OR | XOR) r2=logicExpr {$op=nf.createLogical(act,r1.op,r2.op);}
-	|	r1=logicExpr act=(AND | OR | XOR) r3=expression {$op=nf.createLogical(act,r1.op,r3.op);}
+/*************************************************************************
+EXPRESSION
+*************************************************************************/
+
+/*----------------- Logical --------------------*/
+
+expression returns [Emitter e]
+	:	l= boolyExpr							{$e=l.e;}
+	;
+
+boolyExpr returns [Emitter e]
+@init {Emitter res;}
+@after {$e = res;}
+	:	l= logicExpr							{res=l.e;}
+		(
+			o= (AND|OR|XOR) 
+			r= logicExpr						{res=ef.makeGate(res,o,l.e);}
+		)*						
 	;
 		
-logicExpr returns [Operand op]
-	:	addExpr ((LT | GT | LTE | GTE | EQ | NEQ) addExpr)*
+logicExpr returns [Emitter e]
+	:	l= addExpr								{$e=l.e;} 
+		(
+			o= (LT|GT|LTE|GTE|EQ|NEQ) 
+			r= addExpr							{$e=ef.makeComparison($e,o,l.e);}
+		)*
 	|	NOT logicExpr
 	;
+
+/*----------------- Math --------------------*/
 			
-addExpr
-	:	multExpr (('+' | '-') multExpr)*
+addExpr returns [Emitter e]
+	:	l= multExpr							{$e=l.e;} 
+		(
+			o= (MINUS|PLUS) 
+			r= multExpr
+		)*
 	;
 	
-multExpr
-    :   atom (('*'|'/'|'%') atom)*
-    ; 
+multExpr returns [Emitter e]
+    :   l= atom 							{$e=l.e;}
+		(
+			o= (STAR|DIV|MOD) 
+			r= atom
+		)*
+    ;
 
-atom
-	:   literal
+/*----------------- Atoms --------------------*/
+
+atom returns [Emitter e]
+	:   l= literal							{$e=l.e;}
 	|	funcall
     |   '(' expression ')'
     ;   
+
+/*----------------- Literals --------------------*/
     
-literal
+literal returns [Emitter e]
 	:	TRUE
 	|	FALSE
 	|	NULL
-	|	NumericLiteral
+	|	l= NumericLiteral					{$e=ef.getNumber(l);}
     |   StringLiteral
     ;
     
+/*----------- Member Access or Func Call ---------------*/
+
 funcall
-	:	functorExpr memberExpr funcallArguments?
-	|	memberExpr funcallArguments?
+	:	functorExpr? memberExpr funcallArguments?
 	;
 
 functorExpr
-	:	Identifier ':' 
+	:	Identifier ':'
 	;	
 	
 memberExpr
@@ -194,8 +243,14 @@ memberExpr
 	;
 	    
 funcallArguments
-	: '(' (expression (',' expression)*)? ')'
+	: '(' (expression (',' expression)* )? ')'
 	;
+
+
+
+/*************************************************************************
+TOKENS
+*************************************************************************/
 
 NumericLiteral
 	: DecimalLiteral
