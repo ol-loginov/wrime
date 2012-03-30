@@ -1,0 +1,134 @@
+package wrime.ast;
+
+import wrime.WrimeException;
+import wrime.util.EscapeUtils;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
+
+public class EmitterWriter {
+    private final Writer writer;
+
+    public EmitterWriter(Writer writer) {
+        this.writer = writer;
+    }
+
+    public void write(Emitter emitter) throws IOException {
+        if (emitter == null) {
+            throw new IllegalArgumentException("emitter should not be null");
+        }
+
+        LineHolder line = new LineHolder(emitter);
+        while (!line.isEmpty()) {
+            Object item = line.take();
+            if (item == null) {
+                throw new IllegalStateException("One of emitters becomes null!");
+            }
+
+            if (item instanceof Emitter) {
+                line.put(toJavaWords((Emitter) item));
+            } else {
+                writer.append(item.toString());
+            }
+        }
+    }
+
+    private List<Object> toJavaWords(Emitter emitter) throws IOException {
+        if (emitter instanceof Gate) {
+            return toJavaWords0((Gate) emitter);
+        } else if (emitter instanceof NumberValue) {
+            return toJavaWords0((NumberValue) emitter);
+        } else if (emitter instanceof BoolValue) {
+            return toJavaWords0((BoolValue) emitter);
+        } else if (emitter instanceof NullValue) {
+            return toJavaWords0((NullValue) emitter);
+        } else if (emitter instanceof Group) {
+            return toJavaWords0((Group) emitter);
+        } else if (emitter instanceof Inverter) {
+            return toJavaWords0((Inverter) emitter);
+        } else if (emitter instanceof Comparison) {
+            return toJavaWords0((Comparison) emitter);
+        } else if (emitter instanceof Algebraic) {
+            return toJavaWords0((Algebraic) emitter);
+        } else if (emitter instanceof StringValue) {
+            return toJavaWords0((StringValue) emitter);
+        } else if (emitter instanceof Func) {
+            return toJavaWords0((Func) emitter);
+        } else {
+            throw new WrimeException("No way to write emitter of type " + emitter.getClass(), null);
+        }
+    }
+
+    private List<Object> toJavaWords0(Func func) {
+        return Arrays.<Object>asList("" + func.getFunctor() + ":");
+    }
+
+    private List<Object> toJavaWords0(StringValue emitter) {
+        return Arrays.<Object>asList('"' + EscapeUtils.escapeJavaString(emitter.getValue()) + '"');
+    }
+
+    private List<Object> toJavaWords0(NullValue emitter) {
+        return Arrays.<Object>asList("null");
+    }
+
+    private List<Object> toJavaWords0(BoolValue emitter) {
+        return Arrays.<Object>asList(emitter.getValue() ? "true" : "false");
+    }
+
+    private List<Object> toJavaWords0(Algebraic c) {
+        return Arrays.asList(c.getLeft(), " " + c.getRule().getJavaSymbol() + " ", c.getRight());
+    }
+
+    private List<Object> toJavaWords0(Comparison c) {
+        return Arrays.asList(c.getLeft(), " " + c.getRule().getJavaSymbol() + " ", c.getRight());
+    }
+
+    private List<Object> toJavaWords0(Inverter emitter) {
+        return Arrays.asList("!", emitter.getInner());
+    }
+
+    private List<Object> toJavaWords0(Group emitter) {
+        return Arrays.asList("(", emitter.getInner(), ")");
+    }
+
+    private List<Object> toJavaWords0(NumberValue emitter) throws IOException {
+        return Arrays.<Object>asList(emitter.getText());
+    }
+
+    private List<Object> toJavaWords0(Gate gate) throws IOException {
+        return Arrays.asList(gate.getLeft(), " " + gate.getRule().getJavaSymbol() + " ", gate.getRight());
+    }
+
+    static class LineHolder {
+        private Deque<Object> line = new LinkedList<Object>();
+
+        public LineHolder(Emitter emitter) {
+            line.add(emitter);
+        }
+
+        public boolean isEmpty() {
+            return line.isEmpty();
+        }
+
+        public Object take() {
+            return line.pollFirst();
+        }
+
+        public void put(Object... values) {
+            put(Arrays.asList(values));
+        }
+
+        /**
+         * danger! reverse input list
+         *
+         * @param list to be inserted
+         */
+        private void put(List<Object> list) {
+            Collections.reverse(list);
+            for (Object o : list) {
+                line.addFirst(o);
+            }
+        }
+    }
+}

@@ -46,6 +46,8 @@ tokens {
 
 @header {
 package wrime.antlr;
+
+import wrime.ast.*;
 }
 
 @lexer::header {
@@ -59,12 +61,17 @@ public static interface RecognitionErrorListener {
 
 public static interface EmitterFactory {
     Emitter getNumber(Token o);
-    Emitter getBool(boolean value);
-    Emitter getNull();
-    Emitter getString(String text);
+    Emitter getBool(Token o, boolean value);
+    Emitter getNull(Token o);
+    Emitter getString(Token o);
+    Name getName(Token o);
 
+    Group makeGroup(Token o, Emitter e);
 	Gate makeGate(Emitter l, Token o, Emitter r);
 	Comparison makeComparison(Emitter l, Token o, Emitter r);
+    Inverter makeInversion(Token o, Emitter e);
+    Algebraic makeMath(Emitter l, Token o, Emitter r);
+    Func makeFunc(String functor, List<Name> path, List<Emitter> arguments);
 }
 
 private RecognitionErrorListener recognitionErrorListener;
@@ -174,12 +181,10 @@ expression returns [Emitter e]
 	;
 
 boolyExpr returns [Emitter e]
-@init {Emitter res;}
-@after {$e = res;}
-	:	l= logicExpr							{res=l.e;}
+	:	l= logicExpr							{$e=l.e;}
 		(
 			o= (AND|OR|XOR) 
-			r= logicExpr						{res=ef.makeGate(res,o,l.e);}
+			r= logicExpr						{$e=ef.makeGate($e,o,r.e);}
 		)*						
 	;
 		
@@ -187,9 +192,9 @@ logicExpr returns [Emitter e]
 	:	l= addExpr								{$e=l.e;} 
 		(
 			o= (LT|GT|LTE|GTE|EQ|NEQ) 
-			r= addExpr							{$e=ef.makeComparison($e,o,l.e);}
+			r= addExpr							{$e=ef.makeComparison($e,o,r.e);}
 		)*
-	|	NOT logicExpr
+	|	t= NOT l2= logicExpr                    {$e=ef.makeInversion(t,l2.e);}
 	;
 
 /*----------------- Math --------------------*/
@@ -198,7 +203,7 @@ addExpr returns [Emitter e]
 	:	l= multExpr							{$e=l.e;} 
 		(
 			o= (MINUS|PLUS) 
-			r= multExpr
+			r= multExpr                     {$e=ef.makeMath($e,o,r.e);}
 		)*
 	;
 	
@@ -206,44 +211,56 @@ multExpr returns [Emitter e]
     :   l= atom 							{$e=l.e;}
 		(
 			o= (STAR|DIV|MOD) 
-			r= atom
+			r= atom                         {$e=ef.makeMath($e,o,r.e);}
 		)*
     ;
 
 /*----------------- Atoms --------------------*/
 
 atom returns [Emitter e]
-	:   l= literal							{$e=l.e;}
-	|	funcall
-    |   '(' expression ')'
+	:   l= literal							    {$e=l.e;}
+	|	f= funcall                              {$e=f.e;}
+    |   t='(' g= expression ')'                 {$e=ef.makeGroup(t,g.e);}
     ;   
 
 /*----------------- Literals --------------------*/
     
 literal returns [Emitter e]
-	:	TRUE
-	|	FALSE
-	|	NULL
-	|	l= NumericLiteral					{$e=ef.getNumber(l);}
-    |   StringLiteral
+	:	t= TRUE                             {$e=ef.getBool(t, true);}
+	|	t= FALSE                            {$e=ef.getBool(t, false);}
+	|	t= NULL                             {$e=ef.getNull(t);}
+	|	t= NumericLiteral					{$e=ef.getNumber(t);}
+    |   t= StringLiteral                    {$e=ef.getString(t);}
     ;
     
 /*----------- Member Access or Func Call ---------------*/
 
-funcall
-	:	functorExpr? memberExpr funcallArguments?
+funcall returns [Emitter e]
+	:	f= functorExpr? 
+        p= memberExpr 
+        a= funcallArguments?                {$e=ef.makeFunc(f.name,p.path,a.list);}
 	;
 
-functorExpr
-	:	Identifier ':'
+functorExpr returns [String name] 
+	:	t= Identifier ':'                   {$name=t.getText();}
 	;	
 	
-memberExpr
+memberExpr returns [List<Name> path]
+@init { $path = new ArrayList<Name>(); }
 	:	Identifier ('.' Identifier)*
 	;
 	    
-funcallArguments
-	: '(' (expression (',' expression)* )? ')'
+funcallArguments returns [List<Emitter> list]
+@init { $list = new ArrayList<Emitter>(); }
+	:   '(' 
+        (
+            e= expression                   {$list.add(e.e);}
+            (
+                ',' 
+                e= expression               {$list.add(e.e);}
+            )* 
+        )? 
+        ')'
 	;
 
 

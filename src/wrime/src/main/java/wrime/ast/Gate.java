@@ -1,11 +1,11 @@
-package wrime.antlr;
+package wrime.ast;
 
-public class Comparison extends Emitter {
+public class Gate extends Emitter {
     private final Emitter left;
     private final Emitter right;
-    private final ComparisonRule rule;
+    private final GateRule rule;
 
-    public Comparison(Emitter left, ComparisonRule rule, Emitter right) {
+    public Gate(Emitter left, GateRule rule, Emitter right) {
         this.rule = rule;
         this.left = left;
         this.right = right;
@@ -19,7 +19,7 @@ public class Comparison extends Emitter {
         return right;
     }
 
-    public ComparisonRule getRule() {
+    public GateRule getRule() {
         return rule;
     }
 }

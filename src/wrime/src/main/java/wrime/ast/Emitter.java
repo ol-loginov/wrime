@@ -1,4 +1,4 @@
-package wrime.antlr;
+package wrime.ast;
 
 import wrime.Location;
 
