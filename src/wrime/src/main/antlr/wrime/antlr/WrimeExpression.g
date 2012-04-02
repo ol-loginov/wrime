@@ -65,6 +65,8 @@ public static interface EmitterFactory {
     Emitter getNull(Token o);
     Emitter getString(Token o);
     Name getName(Token o);
+    LocatableString getLocatableString(Token n);
+    ClassName getClassName(List<LocatableString> packageName, LocatableString className);
 
     Group makeGroup(Token o, Emitter e);
 	Gate makeGate(Emitter l, Token o, Emitter r);
@@ -72,6 +74,19 @@ public static interface EmitterFactory {
     Inverter makeInversion(Token o, Emitter e);
     Algebraic makeMath(Emitter l, Token o, Emitter r);
     Func makeFunc(String functor, List<Name> path, List<Emitter> arguments);
+    Assignment makeAssignment(LocatableString varName);
+
+    TagImport makeTagImport(List<LocatableString> packagePath, LocatableString packageName);
+    TagSet makeTagSet(LocatableString var, Emitter e);
+    TagContinue makeTagContinue(Token t);
+    TagBreak makeTagBreak(Token t);
+    TagFor makeTagFor(Token t);
+    TagInclude makeTagInclude(Emitter e);
+    TagParam makeTagParam(ClassName className, LocatableString paramName);
+    TagIf makeTagIf(Token t, Emitter emitter);
+    TagIf makeTagIfElif(Token t, Emitter emitter);
+    TagIf makeTagIfElse(Token t);
+    TagIf makeTagIfClose(Token t);
 }
 
 private RecognitionErrorListener recognitionErrorListener;
@@ -94,80 +109,123 @@ public void displayRecognitionError(String[] tokenNames, RecognitionException e)
 }
 }
 
-command returns [Emitter expression]
-	:	o=expression EOF                                {$expression=o.e;}
-	|   t=anyTag EOF									{}
+command returns [Emitter expression, WrimeTag tag]
+	:	o= expression EOF                               {$expression=o.e;}
+	|   t= anyTag EOF									{$tag=t.tag;}
 	;
 
 /*************************************************************************
 TAGS
 *************************************************************************/
 
-anyTag
-	:	tagIf
-	|	tagFor
-	|	tagBreak
-	|	tagContinue
-	|	tagInclude
-	|	tagParam
-	|	tagSet
-	|	tagImport
+anyTag returns [WrimeTag tag]
+	:	t1= tagIf                    {$tag=t1.tag;}
+	|	t2= tagFor                   {$tag=t2.tag;}
+	|	t3= tagBreak                 {$tag=t3.tag;}
+	|	t4= tagContinue              {$tag=t4.tag;}
+	|	t5= tagInclude               {$tag=t5.tag;}   
+	|	t6= tagParam                 {$tag=t6.tag;}
+	|	t7= tagSet                   {$tag=t7.tag;}
+	|	t8= tagImport                {$tag=t8.tag;}
 	;
 	
-tagImport
-	:	IMPORT classNamePackage Identifier
-	|	IMPORT classNamePackage STAR
+tagImport returns [TagImport tag]
+	:	IMPORT 
+        t= packageName 
+        n= Identifier               {$tag=ef.makeTagImport(t.path,ef.getLocatableString(n));}
+	|	IMPORT 
+        t= packageName
+        STAR                        {$tag=ef.makeTagImport(t.path,null);}
 	;
 	
-tagSet
-	:	SET Identifier EQUAL expression
+tagSet returns [TagSet tag]
+	:	SET 
+        t= Identifier 
+        EQUAL
+        e= expression               {$tag=ef.makeTagSet(ef.getLocatableString(t),e.e);}
 	;
 
-tagParam
-	:	PARAM className Identifier tagParamOpts*
+tagParam returns [TagParam tag]
+	:	PARAM 
+        c= className
+        n= Identifier               {$tag=ef.makeTagParam(c.name,ef.getLocatableString(n));}
+        (
+            o= tagParamOpts         {$tag.setOption(o.value);}
+        )*            
 	;
 
-tagParamOpts
-	:	TRANSIENT
+tagParamOpts returns [LocatableString value]
+	:	t= TRANSIENT                {$value=ef.getLocatableString(t);}
 	;
 	
-className
-	:	classNamePackage Identifier classNameGeneric?
+className returns [ClassName name]
+	:	p= packageName? 
+        n= Identifier               {$name=ef.getClassName(p==null ? null : p.path, ef.getLocatableString(n));}
+        g= genericSpec?             {$name.setGenericTypes(g==null ? null : g.spec);}
 	;
 
-classNamePackage
-	:	(Identifier '.')*
+packageName returns [List<LocatableString> path]
+@init { $path=new ArrayList<LocatableString>(); }
+	:	(
+            n= Identifier           {$path.add(ef.getLocatableString(n));}
+            '.'
+        )+
 	;
 	
-classNameGeneric
-	:	'<' className (',' className)* '>'
+genericSpec returns [List<ClassName> spec]
+@init {$spec = new ArrayList<ClassName>();}
+	:	'<' 
+        c= className                {$spec.add(c.name);}
+        (
+            ',' 
+            c= className            {$spec.add(c.name);}
+        )* 
+        '>'
 	;
 	
-tagInclude
-	:	INCLUDE '(' funcall (',' assignOrIdentifierExpr)* ')'
+tagInclude returns [TagInclude tag]
+	:	INCLUDE 
+        '(' 
+        f= funcall                          {$tag=ef.makeTagInclude(f.e);}
+        (
+            ',' 
+            p= assignOrIdentifierExpr       {$tag.addAssignment(p.a);}
+        )* 
+        ')'
 	;
 	
-tagFor
-	:	FOR ('(' Identifier ':' funcall ')')?
+tagFor returns [TagFor tag]
+	:	t= FOR                                 {$tag=ef.makeTagFor(t);}
+        (
+            '(' 
+            v= Identifier                      {$tag.setVar(ef.getLocatableString(v));}
+            ':' 
+            a= funcall                         {$tag.setIterable(a.e);}
+            ')'
+        )?
 	;
 
-tagBreak
-	:	BREAK
+tagBreak returns [TagBreak tag]
+	:	t= BREAK                                {$tag=ef.makeTagBreak(t);}
 	;
 	
-tagContinue
-	:	CONTINUE
+tagContinue returns [TagContinue tag]
+	:	t= CONTINUE                             {$tag=ef.makeTagContinue(t);}
 	;
 			
-tagIf
-	:	IF
-	|	IF '(' expression ')'
-	|	ELIF ('(' expression ')')
-	|	ELSE
+tagIf returns [TagIf tag]
+	:	t= IF                                   {$tag=ef.makeTagIfClose(t);}
+	|	t= IF   '(' e= expression ')'           {$tag=ef.makeTagIf(t,e.e);}
+	|	t= ELIF '(' e= expression ')'           {$tag=ef.makeTagIfElif(t,e.e);}
+	|	t= ELSE                                 {$tag=ef.makeTagIfElse(t);}
 	;	
 
-assignOrIdentifierExpr
-	:	Identifier (EQUAL expression)?
+assignOrIdentifierExpr returns [Assignment a]
+	:	t= Identifier                      {$a=ef.makeAssignment(ef.getLocatableString(t));}
+        (
+            EQUAL
+            e= expression                  {$a.setEmitter(e.e);}
+        )?
 	;
 	
 /*************************************************************************

@@ -15,12 +15,12 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
         this.location = location;
     }
 
-    private <T extends Emitter> T locatable(T emitter, Location location) {
+    private <T extends Locatable> T locatable(T emitter, Location location) {
         emitter.setLocation(location);
         return emitter;
     }
 
-    private <T extends Emitter> T locatable(T emitter, Token token) {
+    private <T extends Locatable> T locatable(T emitter, Token token) {
         return locatable(emitter, location.move(token.getLine(), token.getCharPositionInLine()));
     }
 
@@ -47,6 +47,19 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     @Override
     public Name getName(Token token) {
         return locatable(new Name(token.getText()), token);
+    }
+
+    @Override
+    public LocatableString getLocatableString(Token n) {
+        return locatable(new LocatableString(n.getText()), n);
+    }
+
+    @Override
+    public ClassName getClassName(List<LocatableString> packageName, LocatableString className) {
+        ClassName result = new ClassName();
+        result.setClassName(className);
+        result.setPackageName(packageName);
+        return result;
     }
 
     @Override
@@ -117,5 +130,46 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     @Override
     public Func makeFunc(String functor, List<Name> memberPath, List<Emitter> arguments) {
         return new Func(functor, new NamePath(memberPath), arguments);
+    }
+
+    @Override
+    public Assignment makeAssignment(LocatableString varName) {
+        Assignment assignment = new Assignment();
+        assignment.setVar(varName);
+        return assignment;
+    }
+
+    @Override
+    public TagBreak makeTagBreak(Token t) {
+        return locatable(new TagBreak(), t);
+    }
+
+    @Override
+    public TagContinue makeTagContinue(Token t) {
+        return locatable(new TagContinue(), t);
+    }
+
+    @Override
+    public TagIf makeTagIfClose(Token t) {
+        return locatable(new TagIf(TagIf.Mode.CLOSE), t);
+    }
+
+    @Override
+    public TagIf makeTagIfElse(Token t) {
+        return locatable(new TagIf(TagIf.Mode.ELSE), t);
+    }
+
+    @Override
+    public TagIf makeTagIfElif(Token t, Emitter emitter) {
+        TagIf tag = new TagIf(TagIf.Mode.ELIF);
+        tag.setTest(emitter);
+        return locatable(tag, t);
+    }
+
+    @Override
+    public TagIf makeTagIf(Token t, Emitter emitter) {
+        TagIf tag = new TagIf(TagIf.Mode.OPEN);
+        tag.setTest(emitter);
+        return locatable(tag, t);
     }
 }
