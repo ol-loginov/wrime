@@ -41,7 +41,8 @@ public class EmitTest {
         checkExpression("true   and    false        or      null", "true && false || null");
         checkExpression("'true'   and    \"false\"        or      \"nu'll\"", "\"true\" && \"false\" || \"nu'll\"");
 
-        checkExpression("i18n:translate('asdasd', 100)", "");
+        checkExpression("i18n:translate('asdasd', 100)", "this.$$i18n.translate(\"asdasd\", 100)");
+        checkExpression("agone.bubba.value", "agone.bubba.value()");
     }
 }
 

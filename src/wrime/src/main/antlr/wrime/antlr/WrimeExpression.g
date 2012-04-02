@@ -238,7 +238,7 @@ literal returns [Emitter e]
 funcall returns [Emitter e]
 	:	f= functorExpr? 
         p= memberExpr 
-        a= funcallArguments?                {$e=ef.makeFunc(f.name,p.path,a.list);}
+        a= funcallArguments?                {$e=ef.makeFunc(f==null?null:f.name,p.path,a==null?null:a.list);}
 	;
 
 functorExpr returns [String name] 
@@ -247,7 +247,11 @@ functorExpr returns [String name]
 	
 memberExpr returns [List<Name> path]
 @init { $path = new ArrayList<Name>(); }
-	:	Identifier ('.' Identifier)*
+	:	t= Identifier                           {$path.add(ef.getName(t));}
+	    (
+	        '.'
+	        t= Identifier                       {$path.add(ef.getName(t));}
+        )*
 	;
 	    
 funcallArguments returns [List<Emitter> list]

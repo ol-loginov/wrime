@@ -34,6 +34,10 @@ public class EmitterWriter {
         }
     }
 
+    private List<Object> asList(Object... objects) {
+        return Arrays.asList(objects);
+    }
+
     private List<Object> toJavaWords(Emitter emitter) throws IOException {
         if (emitter instanceof Gate) {
             return toJavaWords0((Gate) emitter);
@@ -61,43 +65,73 @@ public class EmitterWriter {
     }
 
     private List<Object> toJavaWords0(Func func) {
-        return Arrays.<Object>asList("" + func.getFunctor() + ":");
+        List<Object> result = new ArrayList<Object>();
+        if (func.getFunctor() != null) {
+            result.add("this.$$" + func.getFunctor() + ".");
+        }
+        result.addAll(toJavaWords(func.getPath()));
+        result.add("(");
+        if (func.getArguments() != null) {
+            boolean first = true;
+            for (Emitter arg : func.getArguments()) {
+                if (!first) {
+                    result.add(", ");
+                }
+                result.add(arg);
+                first = false;
+            }
+        }
+        result.add(")");
+        return result;
+    }
+
+    private List<Object> toJavaWords(NamePath path) {
+        List<Object> result = new ArrayList<Object>();
+        boolean first = true;
+        for (Name item : path.getPath()) {
+            if (!first) {
+                result.add(".");
+            }
+            first = false;
+            result.add(item.getName());
+        }
+        return result;
     }
 
     private List<Object> toJavaWords0(StringValue emitter) {
-        return Arrays.<Object>asList('"' + EscapeUtils.escapeJavaString(emitter.getValue()) + '"');
+        return asList('"' + EscapeUtils.escapeJavaString(emitter.getValue()) + '"');
     }
 
     private List<Object> toJavaWords0(NullValue emitter) {
-        return Arrays.<Object>asList("null");
+        return asList("null");
     }
 
     private List<Object> toJavaWords0(BoolValue emitter) {
-        return Arrays.<Object>asList(emitter.getValue() ? "true" : "false");
+        return asList(emitter.getValue() ? "true" : "false");
     }
 
     private List<Object> toJavaWords0(Algebraic c) {
-        return Arrays.asList(c.getLeft(), " " + c.getRule().getJavaSymbol() + " ", c.getRight());
+        return asList(c.getLeft(), " " + c.getRule().getJavaSymbol() + " ", c.getRight());
     }
 
     private List<Object> toJavaWords0(Comparison c) {
-        return Arrays.asList(c.getLeft(), " " + c.getRule().getJavaSymbol() + " ", c.getRight());
+        return asList(c.getLeft(), " " + c.getRule().getJavaSymbol() + " ", c.getRight());
     }
 
     private List<Object> toJavaWords0(Inverter emitter) {
-        return Arrays.asList("!", emitter.getInner());
+        return asList("!", emitter.getInner());
     }
 
     private List<Object> toJavaWords0(Group emitter) {
-        return Arrays.asList("(", emitter.getInner(), ")");
+        return asList("(", emitter.getInner(), ")");
     }
 
     private List<Object> toJavaWords0(NumberValue emitter) throws IOException {
-        return Arrays.<Object>asList(emitter.getText());
+        return asList(emitter.getText());
     }
 
     private List<Object> toJavaWords0(Gate gate) throws IOException {
-        return Arrays.asList(gate.getLeft(), " " + gate.getRule().getJavaSymbol() + " ", gate.getRight());
+        return asList(gate.getLeft(), " " + gate.getRule().getJavaSymbol() + " ", gate.getRight());
     }
 
     static class LineHolder {
