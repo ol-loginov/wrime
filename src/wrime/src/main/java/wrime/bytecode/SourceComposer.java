@@ -1,10 +1,15 @@
-package wrime;
+package wrime.bytecode;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import wrime.ScriptResource;
+import wrime.WrimeEngine;
+import wrime.WrimeException;
 import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
+import wrime.ast.Emitter;
+import wrime.ast.WrimeTag;
 import wrime.ops.EscapedRenderer;
 import wrime.ops.Functor;
 import wrime.ops.Operand;
@@ -24,7 +29,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Pattern;
 
-class WrimeCompiler implements ExpressionRuntime {
+public class SourceComposer implements ExpressionRuntime {
     private static final String EOL = System.getProperty("line.separator");
     private static final String SCOPE_IDENT = "  ";
 
@@ -45,17 +50,17 @@ class WrimeCompiler implements ExpressionRuntime {
     private String functorPrefix;
     private Map<String, FunctorName> functorNames = new HashMap<String, FunctorName>();
 
-    private List<TagFactory> tagFactories = new ArrayList<TagFactory>();
+    private Map<String, TagFactory> tagFactories = new TreeMap<String, TagFactory>();
 
-    public WrimeCompiler(WrimeEngine engine) throws WrimeException {
+    public SourceComposer(ClassLoader classLoader, Map<String, Object> functors, Map<String, TagFactory> customTags) throws WrimeException {
         renderContentBody = new Body();
-        expressionContext = new ExpressionContextImpl(this, engine.getRootLoader());
+        expressionContext = new ExpressionContextImpl(this, classLoader);
 
-        for (Map.Entry<String, Object> kv : engine.getFunctors().entrySet()) {
+        for (Map.Entry<String, Object> kv : functors.entrySet()) {
             functorNames.put(kv.getKey(), new FunctorName(kv.getKey(), kv.getValue().getClass(), toFieldIdentifier(kv.getKey())));
         }
 
-        tagFactories.addAll(engine.getTags());
+        tagFactories.putAll(customTags);
     }
 
     public void configure(Map<WrimeEngine.Compiler, String> options) {
@@ -413,13 +418,29 @@ class WrimeCompiler implements ExpressionRuntime {
                 cmd = null;
             }
 
-            if (cmd == null) {
+            if (cmd == null || cmd.expression == null || cmd.tag == null) {
                 throw new WrimeException("empty expression", null, path, line, column);
             }
 
+            if (cmd.expression != null) {
+                commandExpression(cmd.expression, rawRender);
+            } else if (cmd.tag != null) {
+                commandTag(cmd.tag);
+            }
+        }
+
+        private void commandExpression(Emitter expression, boolean rawOutput) {
             DirectCallRenderer callRenderer = new DirectCallRenderer();
             RootReceiver rootReceiver = new RootReceiver(tagFactories, callRenderer);
             PathContext expressionPath = new PathContext(callRenderer, rootReceiver);
+        }
+
+        private void commandTag(WrimeTag tag) {
+            String processor = (tag.isCustomTag() ? "$" : "") + tag.getProcessor();
+            TagFactory factory = tagFactories.get(processor);
+            if (factory == null) {
+                throw new WrimeException("No tag factory for name '" + processor + "'", null, tag.getLocation());
+            }
         }
 
         @Override

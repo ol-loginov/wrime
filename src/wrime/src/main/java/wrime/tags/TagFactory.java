@@ -1,9 +1,8 @@
 package wrime.tags;
 
 import wrime.WrimeException;
+import wrime.ast.WrimeTag;
 
 public interface TagFactory {
-    boolean supports(String name);
-
-    PathReceiver createReceiver(String name) throws WrimeException;
+    TagProcessor createProcessor(WrimeTag tag) throws WrimeException;
 }

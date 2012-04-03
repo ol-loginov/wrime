@@ -7,6 +7,7 @@ public class TagCustom extends WrimeTag {
     private final List<Emitter> arguments;
 
     public TagCustom(LocatableString name, List<Emitter> arguments) {
+        super(true);
         this.name = name;
         this.arguments = arguments;
     }

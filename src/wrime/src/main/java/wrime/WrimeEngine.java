@@ -1,6 +1,7 @@
 package wrime;
 
 import wrime.bytecode.SourceCompiler;
+import wrime.bytecode.SourceComposer;
 import wrime.bytecode.SourceResult;
 import wrime.output.IncludeWriterListener;
 import wrime.output.WrimeWriter;
@@ -18,7 +19,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class WrimeEngine {
     public static final Charset UTF_8 = Charset.forName("utf-8");
@@ -27,7 +31,7 @@ public class WrimeEngine {
 
     private final Map<String, WriterRecord> urlToClassMappings;
     private Map<String, Object> functors;
-    private List<TagFactory> tags;
+    private Map<String, TagFactory> tags;
 
     private File rootPath;
     private URLClassLoader rootLoader;
@@ -39,7 +43,7 @@ public class WrimeEngine {
         COMPILER_LOCK = new Object();
         urlToClassMappings = new HashMap<String, WriterRecord>();
         functors = new HashMap<String, Object>();
-        tags = new ArrayList<TagFactory>();
+        tags = new TreeMap<String, TagFactory>();
         scannerOptions = new TreeMap<Scanner, String>();
         compilerOptions = new TreeMap<Compiler, String>();
     }
@@ -112,7 +116,7 @@ public class WrimeEngine {
             if (record == null) {
                 record = new WriterRecord();
                 record.lastModified = resource.getLastModified();
-                record.writerClass = compile(record, parse(resource));
+                record.writerClass = compile(record, compose(resource));
                 urlToClassMappings.put(path, record);
             }
         }
@@ -144,14 +148,14 @@ public class WrimeEngine {
         scanner.scan(resource, receiver);
     }
 
-    protected WrimeCompiler parse(ScriptResource resource) throws WrimeException {
-        WrimeCompiler compiler = new WrimeCompiler(this);
+    protected SourceComposer compose(ScriptResource resource) throws WrimeException {
+        SourceComposer compiler = new SourceComposer(getRootLoader(), getFunctors(), getTags());
         compiler.configure(compilerOptions);
         scan(resource, compiler.createReceiver());
         return compiler;
     }
 
-    private Class<WrimeWriter> compile(WriterRecord record, WrimeCompiler code) throws WrimeException {
+    private Class<WrimeWriter> compile(WriterRecord record, SourceComposer code) throws WrimeException {
         SourceCompiler compiler = new SourceCompiler(getRootPath(), getRootLoader());
         SourceResult errors = new SourceResult();
         try {
@@ -201,12 +205,12 @@ public class WrimeEngine {
         return rootPath;
     }
 
-    public List<TagFactory> getTags() {
-        return Collections.unmodifiableList(tags);
+    public Map<String, TagFactory> getTags() {
+        return Collections.unmodifiableMap(tags);
     }
 
-    public WrimeEngine setTags(List<TagFactory> tags) {
-        this.tags.addAll(tags);
+    public WrimeEngine setTags(Map<String, TagFactory> tags) {
+        this.tags.putAll(tags);
         return this;
     }
 

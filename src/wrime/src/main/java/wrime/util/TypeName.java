@@ -3,14 +3,18 @@ package wrime.util;
 import java.lang.reflect.Type;
 
 public class TypeName {
-    private Type type;
-    private String alias;
+    public static final TypeName NULL_TYPE = new TypeName(null);
 
-    public TypeName() {
-    }
+    private final Type type;
+    private final String alias;
 
     public TypeName(Type type) {
+        this(type, null);
+    }
+
+    public TypeName(Type type, String alias) {
         this.type = type;
+        this.alias = alias;
     }
 
     public boolean isVoid() {
@@ -21,15 +25,11 @@ public class TypeName {
         return type;
     }
 
-    public void setType(Type type) {
-        this.type = type;
-    }
-
     public String getAlias() {
         return alias;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public boolean isNullType() {
+        return this == NULL_TYPE;
     }
 }

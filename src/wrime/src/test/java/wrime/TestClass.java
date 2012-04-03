@@ -1,5 +1,7 @@
 package wrime;
 
+import wrime.bytecode.WrimeCompiler;
+
 import java.io.StringWriter;
 import java.util.Map;
 
