@@ -21,7 +21,12 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     }
 
     private <T extends Locatable> T locatable(T emitter, Token token) {
-        return locatable(emitter, location.move(token.getLine(), token.getCharPositionInLine()));
+        return locatable(emitter, getLocation(token));
+    }
+
+    @Override
+    public Location getLocation(Token token) {
+        return location.move(token.getLine(), token.getCharPositionInLine());
     }
 
     @Override
@@ -140,36 +145,62 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     }
 
     @Override
-    public TagBreak makeTagBreak(Token t) {
-        return locatable(new TagBreak(), t);
+    public TagBreak makeTagBreak(Location location) {
+        return locatable(new TagBreak(), location);
     }
 
     @Override
-    public TagContinue makeTagContinue(Token t) {
-        return locatable(new TagContinue(), t);
+    public TagContinue makeTagContinue(Location location) {
+        return locatable(new TagContinue(), location);
     }
 
     @Override
-    public TagIf makeTagIfClose(Token t) {
-        return locatable(new TagIf(TagIf.Mode.CLOSE), t);
+    public TagIf makeTagIfClose(Location location) {
+        return locatable(new TagIf(TagIf.Mode.CLOSE), location);
     }
 
     @Override
-    public TagIf makeTagIfElse(Token t) {
-        return locatable(new TagIf(TagIf.Mode.ELSE), t);
+    public TagIf makeTagIfElse(Location location) {
+        return locatable(new TagIf(TagIf.Mode.ELSE), location);
     }
 
     @Override
-    public TagIf makeTagIfElif(Token t, Emitter emitter) {
-        TagIf tag = new TagIf(TagIf.Mode.ELIF);
-        tag.setTest(emitter);
-        return locatable(tag, t);
+    public TagIf makeTagIfElif(Location location, Emitter emitter) {
+        return locatable(new TagIf(TagIf.Mode.ELIF, emitter), location);
     }
 
     @Override
-    public TagIf makeTagIf(Token t, Emitter emitter) {
-        TagIf tag = new TagIf(TagIf.Mode.OPEN);
-        tag.setTest(emitter);
-        return locatable(tag, t);
+    public TagIf makeTagIf(Location location, Emitter emitter) {
+        return locatable(new TagIf(TagIf.Mode.OPEN, emitter), location);
+    }
+
+    @Override
+    public TagFor makeTagFor(Location location) {
+        return locatable(new TagFor(), location);
+    }
+
+    @Override
+    public TagInclude makeTagInclude(Location location, Emitter source) {
+        return locatable(new TagInclude(source), location);
+    }
+
+    @Override
+    public TagImport makeTagImport(Location location, List<LocatableString> packagePath, LocatableString packageName) {
+        return locatable(new TagImport(packagePath, packageName), location);
+    }
+
+    @Override
+    public TagSet makeTagSet(Location location, LocatableString var, Emitter e) {
+        return locatable(new TagSet(var, e), location);
+    }
+
+    @Override
+    public TagParam makeTagParam(Location location, ClassName className, LocatableString paramName) {
+        return locatable(new TagParam(className, paramName), location);
+    }
+
+    @Override
+    public TagCustom makeCustomTag(Location location, LocatableString name, List<Emitter> arguments) {
+        return locatable(new TagCustom(name, arguments), location);
     }
 }

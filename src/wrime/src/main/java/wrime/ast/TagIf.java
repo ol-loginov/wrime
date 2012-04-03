@@ -7,7 +7,12 @@ public class TagIf extends WrimeTag {
     private Emitter test;
 
     public TagIf(Mode mode) {
+        this(mode, null);
+    }
+
+    public TagIf(Mode mode, Emitter test) {
         this.mode = mode;
+        this.test = test;
     }
 
     public Mode getMode() {
@@ -16,9 +21,5 @@ public class TagIf extends WrimeTag {
 
     public Emitter getTest() {
         return test;
-    }
-
-    public void setTest(Emitter test) {
-        this.test = test;
     }
 }

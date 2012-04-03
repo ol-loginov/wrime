@@ -42,12 +42,14 @@ tokens {
     MINUS='-';
     DIV='/';
     MOD='%';
+    DOLLAR='$';
 }
 
 @header {
 package wrime.antlr;
 
 import wrime.ast.*;
+import wrime.Location;
 }
 
 @lexer::header {
@@ -65,7 +67,8 @@ public static interface EmitterFactory {
     Emitter getNull(Token o);
     Emitter getString(Token o);
     Name getName(Token o);
-    LocatableString getLocatableString(Token n);
+    LocatableString getLocatableString(Token token);
+    Location getLocation(Token token);
     ClassName getClassName(List<LocatableString> packageName, LocatableString className);
 
     Group makeGroup(Token o, Emitter e);
@@ -76,17 +79,18 @@ public static interface EmitterFactory {
     Func makeFunc(String functor, List<Name> path, List<Emitter> arguments);
     Assignment makeAssignment(LocatableString varName);
 
-    TagImport makeTagImport(List<LocatableString> packagePath, LocatableString packageName);
-    TagSet makeTagSet(LocatableString var, Emitter e);
-    TagContinue makeTagContinue(Token t);
-    TagBreak makeTagBreak(Token t);
-    TagFor makeTagFor(Token t);
-    TagInclude makeTagInclude(Emitter e);
-    TagParam makeTagParam(ClassName className, LocatableString paramName);
-    TagIf makeTagIf(Token t, Emitter emitter);
-    TagIf makeTagIfElif(Token t, Emitter emitter);
-    TagIf makeTagIfElse(Token t);
-    TagIf makeTagIfClose(Token t);
+    TagImport makeTagImport(Location location,List<LocatableString> packagePath, LocatableString packageName);
+    TagSet makeTagSet(Location location, LocatableString var, Emitter e);
+    TagContinue makeTagContinue(Location location);
+    TagBreak makeTagBreak(Location location);
+    TagFor makeTagFor(Location location);
+    TagInclude makeTagInclude(Location location, Emitter e);
+    TagParam makeTagParam(Location location,ClassName className, LocatableString paramName);
+    TagIf makeTagIf(Location location, Emitter emitter);
+    TagIf makeTagIfElif(Location location, Emitter emitter);
+    TagIf makeTagIfElse(Location location);
+    TagIf makeTagIfClose(Location location);
+    TagCustom makeCustomTag(Location location, LocatableString name, List<Emitter> arguments);
 }
 
 private RecognitionErrorListener recognitionErrorListener;
@@ -112,11 +116,18 @@ public void displayRecognitionError(String[] tokenNames, RecognitionException e)
 command returns [Emitter expression, WrimeTag tag]
 	:	o= expression EOF                               {$expression=o.e;}
 	|   t= anyTag EOF									{$tag=t.tag;}
+	|   c= customTag EOF									{$tag=c.tag;}
 	;
 
 /*************************************************************************
 TAGS
 *************************************************************************/
+
+customTag returns [WrimeTag tag]
+    :   o= DOLLAR
+        n= Identifier
+        a= funcallArguments?                {$tag=ef.makeCustomTag(ef.getLocation(o), ef.getLocatableString(n),a==null?null:a.list);}
+    ;
 
 anyTag returns [WrimeTag tag]
 	:	t1= tagIf                    {$tag=t1.tag;}
@@ -130,25 +141,25 @@ anyTag returns [WrimeTag tag]
 	;
 	
 tagImport returns [TagImport tag]
-	:	IMPORT 
+	:	o= IMPORT
         t= packageName 
-        n= Identifier               {$tag=ef.makeTagImport(t.path,ef.getLocatableString(n));}
-	|	IMPORT 
+        n= Identifier               {$tag=ef.makeTagImport(ef.getLocation(o),t.path,ef.getLocatableString(n));}
+	|	o= IMPORT
         t= packageName
-        STAR                        {$tag=ef.makeTagImport(t.path,null);}
+        STAR                        {$tag=ef.makeTagImport(ef.getLocation(o),t.path,null);}
 	;
 	
 tagSet returns [TagSet tag]
-	:	SET 
+	:	o= SET
         t= Identifier 
         EQUAL
-        e= expression               {$tag=ef.makeTagSet(ef.getLocatableString(t),e.e);}
+        e= expression               {$tag=ef.makeTagSet(ef.getLocation(o),ef.getLocatableString(t),e.e);}
 	;
 
 tagParam returns [TagParam tag]
-	:	PARAM 
+	:	t= PARAM
         c= className
-        n= Identifier               {$tag=ef.makeTagParam(c.name,ef.getLocatableString(n));}
+        n= Identifier               {$tag=ef.makeTagParam(ef.getLocation(t),c.name,ef.getLocatableString(n));}
         (
             o= tagParamOpts         {$tag.setOption(o.value);}
         )*            
@@ -184,9 +195,9 @@ genericSpec returns [List<ClassName> spec]
 	;
 	
 tagInclude returns [TagInclude tag]
-	:	INCLUDE 
+	:	o= INCLUDE
         '(' 
-        f= funcall                          {$tag=ef.makeTagInclude(f.e);}
+        f= funcall                          {$tag=ef.makeTagInclude(ef.getLocation(o),f.e);}
         (
             ',' 
             p= assignOrIdentifierExpr       {$tag.addAssignment(p.a);}
@@ -195,7 +206,7 @@ tagInclude returns [TagInclude tag]
 	;
 	
 tagFor returns [TagFor tag]
-	:	t= FOR                                 {$tag=ef.makeTagFor(t);}
+	:	t= FOR                                 {$tag=ef.makeTagFor(ef.getLocation(t));}
         (
             '(' 
             v= Identifier                      {$tag.setVar(ef.getLocatableString(v));}
@@ -206,18 +217,18 @@ tagFor returns [TagFor tag]
 	;
 
 tagBreak returns [TagBreak tag]
-	:	t= BREAK                                {$tag=ef.makeTagBreak(t);}
+	:	t= BREAK                                {$tag=ef.makeTagBreak(ef.getLocation(t));}
 	;
 	
 tagContinue returns [TagContinue tag]
-	:	t= CONTINUE                             {$tag=ef.makeTagContinue(t);}
+	:	t= CONTINUE                             {$tag=ef.makeTagContinue(ef.getLocation(t));}
 	;
 			
 tagIf returns [TagIf tag]
-	:	t= IF                                   {$tag=ef.makeTagIfClose(t);}
-	|	t= IF   '(' e= expression ')'           {$tag=ef.makeTagIf(t,e.e);}
-	|	t= ELIF '(' e= expression ')'           {$tag=ef.makeTagIfElif(t,e.e);}
-	|	t= ELSE                                 {$tag=ef.makeTagIfElse(t);}
+	:	t= IF                                   {$tag=ef.makeTagIfClose(ef.getLocation(t));}
+	|	t= IF   '(' e= expression ')'           {$tag=ef.makeTagIf(ef.getLocation(t),e.e);}
+	|	t= ELIF '(' e= expression ')'           {$tag=ef.makeTagIfElif(ef.getLocation(t),e.e);}
+	|	t= ELSE                                 {$tag=ef.makeTagIfElse(ef.getLocation(t));}
 	;	
 
 assignOrIdentifierExpr returns [Assignment a]
