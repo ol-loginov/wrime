@@ -10,7 +10,7 @@ import wrime.util.TypeWrap;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SetReceiver extends PathReceiver {
+public class SetTagProcessor extends PathReceiver implements TagProcessor {
     enum Status {
         WAIT_ASSIGNMENT,
         COMPLETE

@@ -12,7 +12,7 @@ import wrime.util.ParameterName;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IncludeReceiver extends PathReceiver {
+public class IncludeTagProcessor extends PathReceiver implements TagProcessor {
     enum Status {
         WAIT_START,
         WAIT_PATH,

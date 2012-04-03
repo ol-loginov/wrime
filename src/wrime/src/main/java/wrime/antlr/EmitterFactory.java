@@ -31,7 +31,11 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
 
     @Override
     public NumberValue getNumber(Token token) {
-        return locatable(new NumberValue(token.getText()), token);
+        try {
+            return locatable(new NumberValue(token.getText()), token);
+        } catch (WrimeException we) {
+            throw new WrimeException(we.getMessage(), null, getLocation(token));
+        }
     }
 
     @Override
@@ -201,6 +205,6 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
 
     @Override
     public TagCustom makeCustomTag(Location location, LocatableString name, List<Emitter> arguments) {
-        return locatable(new TagCustom(name, arguments), location);
+        return locatable(new TagCustom(name.getText(), arguments), location);
     }
 }

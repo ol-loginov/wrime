@@ -10,6 +10,10 @@ public class TagFor extends WrimeTag {
     private LocatableString variable;
     private Mode mode = Mode.CLOSE;
 
+    public TagFor() {
+        super("for");
+    }
+
     public void setIterable(Emitter iterable) {
         this.iterable = iterable;
         if (this.iterable != null) {

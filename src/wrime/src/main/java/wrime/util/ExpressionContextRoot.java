@@ -8,34 +8,34 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ExpressionContextImpl extends ExpressionContext implements ExpressionContextKeeper {
-    private final Stack<ExpressionContext> contextStack;
+public class ExpressionContextRoot extends ExpressionContextChild implements ExpressionContextKeeper {
+    private final Stack<ExpressionContextChild> contextStack;
     private final ExpressionRuntime runtime;
 
-    public ExpressionContextImpl(ExpressionRuntime runtime, ClassLoader classLoader) {
+    public ExpressionContextRoot(ExpressionRuntime runtime, ClassLoader classLoader) {
         super(classLoader);
         this.runtime = runtime;
-        this.contextStack = new Stack<ExpressionContext>() {{
-            push(ExpressionContextImpl.this);
+        this.contextStack = new Stack<ExpressionContextChild>() {{
+            push(ExpressionContextRoot.this);
         }};
     }
 
     @Override
-    public ExpressionContext openScope() {
+    public ExpressionContextChild openScope() {
         runtime.scopeAdded();
-        ExpressionContext child = new ExpressionContext(current(), getClassLoader());
+        ExpressionContextChild child = new ExpressionContextChild(current(), getClassLoader());
         contextStack.push(child);
         return child;
     }
 
     @Override
-    public ExpressionContext closeScope() {
+    public ExpressionContextChild closeScope() {
         runtime.scopeRemoved();
         return contextStack.pop();
     }
 
     @Override
-    public ExpressionContext current() {
+    public ExpressionContextChild current() {
         return contextStack.peek();
     }
 
@@ -126,9 +126,9 @@ public class ExpressionContextImpl extends ExpressionContext implements Expressi
 
     @Override
     public boolean inheritAttribute(String attribute) {
-        List<ExpressionContext> list = new ArrayList<ExpressionContext>(contextStack);
+        List<ExpressionContextChild> list = new ArrayList<ExpressionContextChild>(contextStack);
         Collections.reverse(list);
-        for (ExpressionContext ctx : list) {
+        for (ExpressionContextChild ctx : list) {
             if (ctx.hasAttribute(attribute)) {
                 return true;
             }

@@ -1,16 +1,14 @@
 package wrime.tags;
 
 import wrime.WrimeException;
-import wrime.ops.Chain;
-import wrime.ops.Raw;
-import wrime.util.ExpressionContextKeeper;
+import wrime.ast.WrimeTag;
 
-public class IfFactory implements TagFactory {
+public class IfTagFactory implements TagFactory {
     @Override
-    public boolean supports(String name) {
-        return "if".equals(name) || "elif".equals(name) || "else".equals(name);
+    public IfTagProcessor createProcessor(WrimeTag tag) throws WrimeException {
+        return new IfTagProcessor();
     }
-
+    /*
     @Override
     public PathReceiver createReceiver(String name) throws WrimeException {
         if ("if".equals(name)) {
@@ -67,5 +65,5 @@ public class IfFactory implements TagFactory {
             };
         }
         throw new WrimeException("Tag '" + name + "' is not supported", null);
-    }
+    }  */
 }

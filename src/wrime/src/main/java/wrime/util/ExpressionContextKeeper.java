@@ -5,7 +5,7 @@ import wrime.WrimeException;
 import java.util.Collection;
 
 public interface ExpressionContextKeeper {
-    ExpressionContext current();
+    ExpressionContextChild current();
 
     Class findClass(String className);
 
@@ -15,9 +15,9 @@ public interface ExpressionContextKeeper {
 
     Collection<ParameterName> getModelParameters();
 
-    ExpressionContext openScope();
+    ExpressionContextChild openScope();
 
-    ExpressionContext closeScope();
+    ExpressionContextChild closeScope();
 
     TypeName findFunctorType(String name);
 

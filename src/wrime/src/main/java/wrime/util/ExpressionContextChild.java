@@ -4,21 +4,21 @@ import wrime.WrimeException;
 
 import java.util.*;
 
-public class ExpressionContext {
+public class ExpressionContextChild implements ExpressionScope {
     private final ClassLoader classLoader;
-    private final ExpressionContext parentContext;
+    private final ExpressionScope parentScope;
 
     private Map<String, TypeName> localVariables = new HashMap<String, TypeName>();
     private Set<String> attributes = new HashSet<String>();
 
-    public ExpressionContext(ClassLoader classLoader) {
+    public ExpressionContextChild(ClassLoader classLoader) {
         this.classLoader = classLoader;
-        this.parentContext = null;
+        this.parentScope = null;
     }
 
-    public ExpressionContext(ExpressionContext parentContext, ClassLoader classLoader) {
+    public ExpressionContextChild(ExpressionScope parentScope, ClassLoader classLoader) {
         this.classLoader = classLoader;
-        this.parentContext = parentContext;
+        this.parentScope = parentScope;
     }
 
     public ClassLoader getClassLoader() {
@@ -53,10 +53,10 @@ public class ExpressionContext {
         if (classDef != null) {
             return classDef;
         }
-        return parentContext != null ? parentContext.getVarType(name) : null;
+        return parentScope != null ? parentScope.getVarType(name) : null;
     }
 
     public boolean hasVar(String name) {
-        return localVariables.get(name) != null || (parentContext != null && parentContext.hasVar(name));
+        return localVariables.get(name) != null || (parentScope != null && parentScope.hasVar(name));
     }
 }

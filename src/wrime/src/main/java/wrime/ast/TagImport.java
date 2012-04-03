@@ -7,6 +7,7 @@ public class TagImport extends WrimeTag {
     private final LocatableString packageTarget;
 
     public TagImport(List<LocatableString> packagePath, LocatableString packageTarget) {
+        super("import");
         this.packagePath = packagePath;
         this.packageTarget = packageTarget;
     }

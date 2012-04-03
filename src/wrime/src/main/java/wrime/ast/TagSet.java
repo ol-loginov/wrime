@@ -5,6 +5,7 @@ public class TagSet extends WrimeTag {
     private final Emitter value;
 
     public TagSet(LocatableString variable, Emitter value) {
+        super("set");
         this.value = value;
         this.variable = variable;
     }

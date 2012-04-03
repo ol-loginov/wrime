@@ -12,8 +12,4 @@ public abstract class Emitter extends Locatable {
     public void setReturnType(TypeName returnType) {
         this.returnType = returnType;
     }
-
-    public boolean isReturnTypeResolvable() {
-        return true;
-    }
 }

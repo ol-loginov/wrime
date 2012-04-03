@@ -16,8 +16,6 @@ import wrime.ops.Operand;
 import wrime.ops.OperandRendererDefault;
 import wrime.output.WrimeWriter;
 import wrime.scanner.WrimeScanner;
-import wrime.tags.PathContext;
-import wrime.tags.RootReceiver;
 import wrime.tags.TagFactory;
 import wrime.util.*;
 
@@ -39,7 +37,7 @@ public class SourceComposer implements ExpressionRuntime {
 
     private Body renderContentBody;
 
-    private ExpressionContextImpl expressionContext;
+    private ExpressionContextRoot expressionContext;
 
     private boolean classDone;
     private String className;
@@ -54,7 +52,7 @@ public class SourceComposer implements ExpressionRuntime {
 
     public SourceComposer(ClassLoader classLoader, Map<String, Object> functors, Map<String, TagFactory> customTags) throws WrimeException {
         renderContentBody = new Body();
-        expressionContext = new ExpressionContextImpl(this, classLoader);
+        expressionContext = new ExpressionContextRoot(this, classLoader);
 
         for (Map.Entry<String, Object> kv : functors.entrySet()) {
             functorNames.put(kv.getKey(), new FunctorName(kv.getKey(), kv.getValue().getClass(), toFieldIdentifier(kv.getKey())));
@@ -181,9 +179,7 @@ public class SourceComposer implements ExpressionRuntime {
         if (parameterNames.containsKey(parameterName)) {
             error("duplicate for model parameter " + parameterName);
         }
-        TypeName def = new TypeName();
-        def.setType(parameterClass);
-        def.setAlias(parameterTypeDef);
+        TypeName def = new TypeName(parameterClass, parameterTypeDef);
         expressionContext.addVar(parameterName, def);
         parameterNames.put(parameterName, new ParameterName(parameterName, def, option));
     }
@@ -430,9 +426,11 @@ public class SourceComposer implements ExpressionRuntime {
         }
 
         private void commandExpression(Emitter expression, boolean rawOutput) {
+            /*
             DirectCallRenderer callRenderer = new DirectCallRenderer();
             RootReceiver rootReceiver = new RootReceiver(tagFactories, callRenderer);
             PathContext expressionPath = new PathContext(callRenderer, rootReceiver);
+            */
         }
 
         private void commandTag(WrimeTag tag) {

@@ -5,12 +5,12 @@ import wrime.ops.Chain;
 import wrime.ops.Operand;
 import wrime.ops.Raw;
 import wrime.scanner.WrimeScanner;
-import wrime.util.ExpressionContext;
+import wrime.util.ExpressionContextChild;
 import wrime.util.ExpressionContextKeeper;
 import wrime.util.TypeName;
 import wrime.util.TypeWrap;
 
-public class ForReceiver extends PathReceiver {
+public class ForTagProcessor extends PathReceiver implements TagProcessor {
     private enum Status {
         NO_DECISION,
         WAIT_VAR,
@@ -57,9 +57,9 @@ public class ForReceiver extends PathReceiver {
                 chain.getOperands().add(new Raw(") {"));
                 path.render(chain);
 
-                ExpressionContext context = scope.openScope();
-                context.addAttribute(ContinueFactory.SCOPE_ATTRIBUTE);
-                context.addAttribute(BreakFactory.SCOPE_ATTRIBUTE);
+                ExpressionContextChild context = scope.openScope();
+                context.addAttribute(ContinueTagFactory.SCOPE_ATTRIBUTE);
+                context.addAttribute(BreakTagFactory.SCOPE_ATTRIBUTE);
                 context.addVar(varName, new TypeName(iteratorType.getType()));
 
                 break;

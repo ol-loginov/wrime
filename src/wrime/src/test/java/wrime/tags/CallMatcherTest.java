@@ -4,15 +4,16 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Test;
+import wrime.ExpressionScopeMock;
 import wrime.Location;
 import wrime.antlr.EmitterFactory;
 import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
-import wrime.util.ExpressionContextImpl;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class CallMatcherTest {
@@ -25,29 +26,28 @@ public class CallMatcherTest {
         return cmd.expression;
     }
 
-    private Emitter match(String expression, Class returnType) {
+    private void match(String expression, Class returnType) throws IOException, RecognitionException {
+        ExpressionScopeMock scope = createScope();
         Emitter emitter = getExpression(expression);
         CallMatcher matcher = new CallMatcher(emitter);
-        matcher.matchTypes(new ExpressionContextImpl());
+        matcher.matchTypes(scope);
+        assertEquals(returnType, emitter.getReturnType().getType());
+    }
+
+    private ExpressionScopeMock createScope() {
+        return new ExpressionScopeMock();
     }
 
     @Test
     public void солянка() throws RecognitionException, IOException {
-        assertEq
-        checkExpression("1 and 2 or 3", "1 && 2 || 3");
-        checkExpression("0 xor (1 and 2) or 3", "0 ^ (1 && 2) || 3");
-        checkExpression("1 and (2 or 3)", "1 && (2 || 3)");
-        checkExpression("1 and not (2 or 3)", "1 && !(2 || 3)");
+        match(" true ", boolean.class);
+        match(" false ", boolean.class);
+        match("true and false", boolean.class);
+        match("true or false", boolean.class);
+        match("true xor false", boolean.class);
 
-        checkExpression("1 gt (2 lt 3 gte 3)", "1 > (2 < 3 >= 3)");
-        checkExpression("1 gt 2 lt 3 gte 3 lte 4 eq 5 neq 6", "1 > 2 < 3 >= 3 <= 4 == 5 != 6");
-
-        checkExpression("1+2-3*4/5%4", "1 + 2 - 3 * 4 / 5 % 4");
-
-        checkExpression("true   and    false        or      null", "true && false || null");
-        checkExpression("'true'   and    \"false\"        or      \"nu'll\"", "\"true\" && \"false\" || \"nu'll\"");
-
-        checkExpression("i18n:translate('asdasd', 100)", "this.$$i18n.translate(\"asdasd\", 100)");
-        checkExpression("agone.bubba.value", "agone.bubba.value()");
+        match("1", int.class);
+        match("1.1", float.class);
+        match("" + (Float.MAX_VALUE + 1), double.class);
     }
 }

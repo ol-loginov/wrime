@@ -1,6 +1,6 @@
 package wrime;
 
-import wrime.bytecode.WrimeCompiler;
+import wrime.bytecode.SourceComposer;
 
 import java.io.StringWriter;
 import java.util.Map;
@@ -15,10 +15,10 @@ public class TestClass {
         resources = new TestResource(getClass());
     }
 
-    protected WrimeCompiler parse(ScriptResource resource) throws WrimeException {
+    protected SourceComposer parse(ScriptResource resource) throws WrimeException {
         WrimeEngine engine = getEngine();
         try {
-            return getEngine().parse(resource);
+            return getEngine().compose(resource);
         } finally {
             engine.getRootPath().delete();
         }
@@ -36,7 +36,7 @@ public class TestClass {
     }
 
     protected void parseAndVerify(String resource) throws WrimeException {
-        WrimeCompiler compiler = parse(resources.load(resource + ".txt"));
+        SourceComposer compiler = parse(resources.load(resource + ".txt"));
         resources.verify(resource + ".code", compiler.getClassCode());
     }
 

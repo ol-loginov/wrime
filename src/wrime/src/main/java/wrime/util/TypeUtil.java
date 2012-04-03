@@ -13,9 +13,7 @@ import java.util.Arrays;
 
 public class TypeUtil {
     private static TypeName createReturnTypeDef(Method method) {
-        TypeName def = new TypeName();
-        def.setType(method.getGenericReturnType());
-        return def;
+        return new TypeName(method.getGenericReturnType());
     }
 
     private static boolean isCallableWithTypes(Method m, Type[] arguments) {

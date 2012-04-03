@@ -7,7 +7,6 @@ import wrime.tags.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.TreeMap;
 
 public class WrimeEngineFactory {
@@ -29,16 +28,16 @@ public class WrimeEngineFactory {
     }
 
     public void initializeTags(WrimeEngine engine) {
-        engine.setTags(Arrays.asList(
-                new ParamFactory(),
-                new IncludeFactory(),
-                new ImportFactory(),
-                new ForFactory(),
-                new ContinueFactory(),
-                new BreakFactory(),
-                new IfFactory(),
-                new SetFactory()
-        ));
+        engine.setTags(new TreeMap<String, TagFactory>() {{
+            put("param", new ParamTagFactory());
+            put("include", new IncludeTagFactory());
+            put("import", new ImportTagFactory());
+            put("for", new ForTagFactory());
+            put("continue", new ContinueTagFactory());
+            put("param", new ParamTagFactory());
+            put("if", new IfTagFactory());
+            put("set", new SetTagFactory());
+        }});
     }
 
     public void initializeOptions(WrimeEngine engine) {

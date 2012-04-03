@@ -11,6 +11,7 @@ public class TagIf extends WrimeTag {
     }
 
     public TagIf(Mode mode, Emitter test) {
+        super("if");
         this.mode = mode;
         this.test = test;
     }

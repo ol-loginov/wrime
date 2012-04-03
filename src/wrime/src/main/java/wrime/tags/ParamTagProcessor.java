@@ -3,7 +3,7 @@ package wrime.tags;
 import wrime.WrimeException;
 import wrime.util.ExpressionContextKeeper;
 
-public class ParamReceiver extends PathReceiver {
+public class ParamTagProcessor extends PathReceiver implements TagProcessor {
     public static enum Status {
         EXPECT_NAME,
         EXPECT_OPTION

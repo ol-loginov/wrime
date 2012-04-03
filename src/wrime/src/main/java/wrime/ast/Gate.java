@@ -22,8 +22,4 @@ public class Gate extends Emitter {
     public GateRule getRule() {
         return rule;
     }
-
-    public boolean isReturnTypeResolvable() {
-        return left.isReturnTypeResolvable() && right.isReturnTypeResolvable();
-    }
 }

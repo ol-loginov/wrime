@@ -8,6 +8,7 @@ public class TagInclude extends WrimeTag {
     private final Emitter source;
 
     public TagInclude(Emitter source) {
+        super("include");
         this.source = source;
     }
 

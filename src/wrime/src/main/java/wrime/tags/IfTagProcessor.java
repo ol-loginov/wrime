@@ -5,11 +5,11 @@ import wrime.ops.Chain;
 import wrime.ops.Operand;
 import wrime.ops.Raw;
 import wrime.scanner.WrimeScanner;
-import wrime.util.ExpressionContext;
+import wrime.util.ExpressionContextChild;
 import wrime.util.ExpressionContextKeeper;
 import wrime.util.TypeWrap;
 
-public class IfReceiver extends PathReceiver {
+public class IfTagProcessor extends PathReceiver implements TagProcessor {
     public static final String SCOPE_ATTRIBUTE = "ifable";
 
     enum Status {
@@ -51,7 +51,7 @@ public class IfReceiver extends PathReceiver {
 
                 renderStatement(scope, new Chain());
 
-                ExpressionContext context = scope.openScope();
+                ExpressionContextChild context = scope.openScope();
                 context.addAttribute(SCOPE_ATTRIBUTE);
 
                 break;

@@ -10,6 +10,7 @@ public class TagParam extends WrimeTag {
     private final LocatableString paramName;
 
     public TagParam(ClassName className, LocatableString paramName) {
+        super("param");
         this.paramName = paramName;
         this.className = className;
     }

@@ -10,8 +10,4 @@ public class Inverter extends Emitter {
     public Emitter getInner() {
         return inner;
     }
-
-    public boolean isReturnTypeResolvable() {
-        return inner.isReturnTypeResolvable();
-    }
 }

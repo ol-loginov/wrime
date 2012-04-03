@@ -3,7 +3,7 @@ package wrime.tags;
 import wrime.WrimeException;
 import wrime.util.ExpressionContextKeeper;
 
-public class ImportReceiver extends PathReceiver {
+public class ImportTagProcessor extends PathReceiver implements TagProcessor {
     private String imports = "";
 
     @Override
