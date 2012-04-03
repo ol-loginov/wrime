@@ -45,9 +45,13 @@ public class CallMatcherTest {
         match("true and false", boolean.class);
         match("true or false", boolean.class);
         match("true xor false", boolean.class);
+        match("not true or not false", boolean.class);
 
         match("1", int.class);
         match("1.1", float.class);
         match("" + (Float.MAX_VALUE + 1), double.class);
+
+        match("1 lt -3 and 2 gt 3", boolean.class);
+        match("1 - 3 + 3", int.class);
     }
 }

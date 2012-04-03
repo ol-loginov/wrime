@@ -78,6 +78,7 @@ public static interface EmitterFactory {
     Algebraic makeMath(Emitter l, Token o, Emitter r);
     Func makeFunc(String functor, List<Name> path, List<Emitter> arguments);
     Assignment makeAssignment(LocatableString varName);
+    Oppositer makeOpposite(Token o, Emitter e);
 
     TagImport makeTagImport(Location location,List<LocatableString> packagePath, LocatableString packageName);
     TagSet makeTagSet(Location location, LocatableString var, Emitter e);
@@ -274,6 +275,9 @@ addExpr returns [Emitter e]
 			o= (MINUS|PLUS) 
 			r= multExpr                     {$e=ef.makeMath($e,o,r.e);}
 		)*
+	| o= MINUS
+		r= multExpr                     {$e=ef.makeOpposite(o,r.e);}
+
 	;
 	
 multExpr returns [Emitter e]

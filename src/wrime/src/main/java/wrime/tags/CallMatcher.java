@@ -57,16 +57,18 @@ public class CallMatcher {
             matchTypes0((Group) request.emitter, request.firstPass);
         } else if (request.emitter instanceof Inverter) {
             matchTypes0((Inverter) request.emitter, request.firstPass);
-//        } else if (emitter instanceof Comparison) {
-//            matchTypes0(emitters, (Comparison) emitter, scope);
-//        } else if (emitter instanceof Algebraic) {
-//            matchTypes0(emitters, (Algebraic) emitter, scope);
+        } else if (request.emitter instanceof Oppositer) {
+            matchTypes0((Oppositer) request.emitter, request.firstPass);
+        } else if (request.emitter instanceof Comparison) {
+            matchTypes0((Comparison) request.emitter, request.firstPass);
+        } else if (request.emitter instanceof Algebraic) {
+            matchTypes0((Algebraic) request.emitter, request.firstPass);
 //        } else if (emitter instanceof StringValue) {
 //            matchTypes0(emitters, (StringValue) emitter, scope);
 //        } else if (emitter instanceof Func) {
 //            matchTypes0(emitters, (Func) emitter, scope);
         } else {
-            throw new WrimeException("No way to write emitter of type " + request.emitter.getClass(), null);
+            throw new WrimeException("No way to match emitter of type " + request.emitter.getClass(), null);
         }
     }
 
@@ -101,10 +103,38 @@ public class CallMatcher {
         }
     }
 
-    private void matchTypes0(Stack<Emitter> emitters, Comparison emitter, ExpressionScope scope) {
+    private void matchTypes0(Comparison emitter, boolean firstPass) {
+        if (firstPass) {
+            emittersToMatch.push(new MatchRequest(emitter, false));
+            emittersToMatch.push(new MatchRequest(emitter.getLeft()));
+            emittersToMatch.push(new MatchRequest(emitter.getRight()));
+        } else {
+            requireNumberReturnType(emitter.getLeft(), "required for comparison " + emitter.getRule());
+            requireNumberReturnType(emitter.getRight(), "required for comparison " + emitter.getRule());
+            emitter.setReturnType(new TypeName(boolean.class));
+        }
     }
 
-    private void matchTypes0(Stack<Emitter> emitters, Algebraic emitter, ExpressionScope scope) {
+    private void matchTypes0(Oppositer emitter, boolean firstPass) {
+        if (firstPass) {
+            emittersToMatch.push(new MatchRequest(emitter, false));
+            emittersToMatch.push(new MatchRequest(emitter.getInner()));
+        } else {
+            requireNumberReturnType(emitter.getInner(), "required for negative expression");
+            emitter.setReturnType(emitter.getInner().getReturnType());
+        }
+    }
+
+    private void matchTypes0(Algebraic emitter, boolean firstPass) {
+        if (firstPass) {
+            emittersToMatch.push(new MatchRequest(emitter, false));
+            emittersToMatch.push(new MatchRequest(emitter.getLeft()));
+            emittersToMatch.push(new MatchRequest(emitter.getRight()));
+        } else {
+            requireNumberReturnType(emitter.getLeft(), "required for algebraic " + emitter.getRule());
+            requireNumberReturnType(emitter.getRight(), "required for algebraic " + emitter.getRule());
+            emitter.setReturnType(getWidestNumberType(emitter.getLeft().getReturnType(), emitter.getRight().getReturnType()));
+        }
     }
 
     private void matchTypes0(Stack<Emitter> emitters, StringValue emitter, ExpressionScope scope) {
@@ -125,9 +155,48 @@ public class CallMatcher {
         }
     }
 
-    private boolean isBoolean(TypeName typeName) {
-        return typeName != null
-                && !typeName.isNullType()
-                && (typeName.getType().equals(boolean.class) || typeName.getType().equals(Boolean.TYPE));
+    private void requireNumberReturnType(Emitter emitter, String need) {
+        if (!isAnyNumber(emitter.getReturnType())) {
+            throw new WrimeException("component is not of number type (" + need + ")", null, emitter.getLocation());
+        }
+    }
+
+    private TypeName getWidestNumberType(TypeName a, TypeName b) {
+        return getNumberTypeWeight(a) >= getNumberTypeWeight(b) ? a : b;
+    }
+
+    private int getNumberTypeWeight(TypeName a) {
+        if (byte.class.equals(a.getType()) || Byte.TYPE.equals(a.getType()))
+            return 0;
+        if (short.class.equals(a.getType()) || Short.TYPE.equals(a.getType()))
+            return 1;
+        if (int.class.equals(a.getType()) || Integer.TYPE.equals(a.getType()))
+            return 2;
+        if (long.class.equals(a.getType()) || Long.TYPE.equals(a.getType()))
+            return 3;
+        if (float.class.equals(a.getType()) || Float.TYPE.equals(a.getType()))
+            return 4;
+        if (double.class.equals(a.getType()) || Double.TYPE.equals(a.getType()))
+            return 5;
+        throw new WrimeException("cannot work with number type " + a, null);
+    }
+
+    private boolean isAnyNumber(TypeName type) {
+        if (type == null || type.isNullType()) {
+            return false;
+        }
+        return byte.class.equals(type.getType()) || Byte.TYPE.equals(type.getType())
+                || short.class.equals(type.getType()) || Short.TYPE.equals(type.getType())
+                || int.class.equals(type.getType()) || Integer.TYPE.equals(type.getType())
+                || long.class.equals(type.getType()) || Long.TYPE.equals(type.getType())
+                || float.class.equals(type.getType()) || Float.TYPE.equals(type.getType())
+                || double.class.equals(type.getType()) || Double.TYPE.equals(type.getType());
+    }
+
+    private boolean isBoolean(TypeName type) {
+        if (type == null || type.isNullType()) {
+            return false;
+        }
+        return boolean.class.equals(type.getType()) || Boolean.TYPE.equals(type.getType());
     }
 }

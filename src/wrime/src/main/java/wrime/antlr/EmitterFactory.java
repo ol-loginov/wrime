@@ -132,6 +132,11 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     }
 
     @Override
+    public Oppositer makeOpposite(Token o, Emitter e) {
+        return locatable(new Oppositer(e), o);
+    }
+
+    @Override
     public Inverter makeInversion(Token o, Emitter e) {
         return locatable(new Inverter(e), o);
     }
