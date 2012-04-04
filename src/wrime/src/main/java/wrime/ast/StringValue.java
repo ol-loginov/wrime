@@ -1,5 +1,7 @@
 package wrime.ast;
 
+import wrime.util.TypeName;
+
 public class StringValue extends Emitter {
     private final String value;
 
@@ -11,6 +13,7 @@ public class StringValue extends Emitter {
         } else {
             this.value = value;
         }
+        setReturnType(new TypeName(String.class));
     }
 
     private static boolean isQuoted(String value, String quote) {
@@ -23,5 +26,10 @@ public class StringValue extends Emitter {
 
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return '"' + value + '"';
     }
 }

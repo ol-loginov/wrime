@@ -13,6 +13,7 @@ options
 
 tokens {
     IMPORT='import';
+    DOT='.';
     STAR='*';
     SET='set';
     EQUAL='=';
@@ -66,7 +67,6 @@ public static interface EmitterFactory {
     Emitter getBool(Token o, boolean value);
     Emitter getNull(Token o);
     Emitter getString(Token o);
-    Name getName(Token o);
     LocatableString getLocatableString(Token token);
     Location getLocation(Token token);
     ClassName getClassName(List<LocatableString> packageName, LocatableString className);
@@ -76,9 +76,10 @@ public static interface EmitterFactory {
 	Comparison makeComparison(Emitter l, Token o, Emitter r);
     Inverter makeInversion(Token o, Emitter e);
     Algebraic makeMath(Emitter l, Token o, Emitter r);
-    Func makeFunc(String functor, List<Name> path, List<Emitter> arguments);
     Assignment makeAssignment(LocatableString varName);
     Oppositer makeOpposite(Token o, Emitter e);
+    Funcall makeFuncall(LocatableString functor, LocatableString method, List<Emitter> arguments);
+    Funcall makeFuncallChain(Funcall invocable, LocatableString method, List<Emitter> arguments);
 
     TagImport makeTagImport(Location location,List<LocatableString> packagePath, LocatableString packageName);
     TagSet makeTagSet(Location location, LocatableString var, Emitter e);
@@ -308,25 +309,21 @@ literal returns [Emitter e]
     
 /*----------- Member Access or Func Call ---------------*/
 
-funcall returns [Emitter e]
+funcall returns [Funcall e]
 	:	f= functorExpr? 
-        p= memberExpr 
-        a= funcallArguments?                {$e=ef.makeFunc(f==null?null:f.name,p.path,a==null?null:a.list);}
+        n= Identifier
+        a= funcallArguments?                {$e=ef.makeFuncall(f==null?null:f.name, ef.getLocatableString(n), a==null?null:a.list);}
+        (
+            DOT
+            n= Identifier
+            a= funcallArguments?                {$e=ef.makeFuncallChain($e, ef.getLocatableString(n), a==null?null:a.list);}
+        ) *
 	;
 
-functorExpr returns [String name] 
-	:	t= Identifier ':'                   {$name=t.getText();}
+functorExpr returns [LocatableString name]
+	:	t= Identifier ':'                   {$name=ef.getLocatableString(t);}
 	;	
 	
-memberExpr returns [List<Name> path]
-@init { $path = new ArrayList<Name>(); }
-	:	t= Identifier                           {$path.add(ef.getName(t));}
-	    (
-	        '.'
-	        t= Identifier                       {$path.add(ef.getName(t));}
-        )*
-	;
-	    
 funcallArguments returns [List<Emitter> list]
 @init { $list = new ArrayList<Emitter>(); }
 	:   '(' 

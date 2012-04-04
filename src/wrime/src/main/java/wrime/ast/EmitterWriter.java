@@ -57,19 +57,31 @@ public class EmitterWriter {
             return toJavaWords0((Algebraic) emitter);
         } else if (emitter instanceof StringValue) {
             return toJavaWords0((StringValue) emitter);
-        } else if (emitter instanceof Func) {
-            return toJavaWords0((Func) emitter);
+        } else if (emitter instanceof Funcall) {
+            return toJavaWords0((Funcall) emitter);
         } else {
             throw new WrimeException("No way to write emitter of type " + emitter.getClass(), null);
         }
     }
 
-    private List<Object> toJavaWords0(Func func) {
+    private List<Object> toJavaWords0(Funcall func) {
         List<Object> result = new ArrayList<Object>();
-        if (func.getFunctor() != null) {
-            result.add("this.$$" + func.getFunctor() + ".");
+        if (func.getInvocable() != null) {
+            result.add(func.getInvocable());
+        } else {
+            switch (func.getMode()) {
+                case FUNCTOR_METHOD:
+                    result.add("this.$$" + func.getFunctor() + ".");
+                    result.add(func.getMethodOrVariableName());
+                    break;
+                case VARIABLE:
+                    result.add("this." + func.getMethodOrVariableName() + ".");
+                    break;
+                case OBJECT_METHOD:
+                    result.add(func.getMethodOrVariableName() + ".");
+                    break;
+            }
         }
-        result.addAll(toJavaWords(func.getPath()));
         result.add("(");
         if (func.getArguments() != null) {
             boolean first = true;
@@ -82,19 +94,6 @@ public class EmitterWriter {
             }
         }
         result.add(")");
-        return result;
-    }
-
-    private List<Object> toJavaWords(NamePath path) {
-        List<Object> result = new ArrayList<Object>();
-        boolean first = true;
-        for (Name item : path.getPath()) {
-            if (!first) {
-                result.add(".");
-            }
-            first = false;
-            result.add(item.getName());
-        }
         return result;
     }
 

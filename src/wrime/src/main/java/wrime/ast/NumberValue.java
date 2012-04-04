@@ -50,4 +50,9 @@ public class NumberValue extends Emitter {
     public String getText() {
         return text;
     }
+
+    @Override
+    public String toString() {
+        return text;
+    }
 }

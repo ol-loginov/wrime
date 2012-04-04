@@ -53,6 +53,8 @@ public class CallMatcher {
             requireReturnType(request.emitter, "should be hardcoded");
         } else if (request.emitter instanceof NullValue) {
             requireReturnType(request.emitter, "should be hardcoded");
+        } else if (request.emitter instanceof StringValue) {
+            requireReturnType(request.emitter, "should be hardcoded");
         } else if (request.emitter instanceof Group) {
             matchTypes0((Group) request.emitter, request.firstPass);
         } else if (request.emitter instanceof Inverter) {
@@ -63,10 +65,8 @@ public class CallMatcher {
             matchTypes0((Comparison) request.emitter, request.firstPass);
         } else if (request.emitter instanceof Algebraic) {
             matchTypes0((Algebraic) request.emitter, request.firstPass);
-//        } else if (emitter instanceof StringValue) {
-//            matchTypes0(emitters, (StringValue) emitter, scope);
-//        } else if (emitter instanceof Func) {
-//            matchTypes0(emitters, (Func) emitter, scope);
+        } else if (request.emitter instanceof Funcall) {
+            matchTypes0((Funcall) request.emitter, scope, request.firstPass);
         } else {
             throw new WrimeException("No way to match emitter of type " + request.emitter.getClass(), null);
         }
@@ -137,10 +137,20 @@ public class CallMatcher {
         }
     }
 
-    private void matchTypes0(Stack<Emitter> emitters, StringValue emitter, ExpressionScope scope) {
-    }
+    private void matchTypes0(Funcall emitter, ExpressionScope scope, boolean firstPass) {
+        if (firstPass) {
+            emittersToMatch.push(new MatchRequest(emitter, false));
+            if (emitter.getInvocable() != null) {
+                emittersToMatch.push(new MatchRequest(emitter.getInvocable()));
+            }
+            if (emitter.hasArguments()) {
+                for (Emitter argument : emitter.getArguments()) {
+                    emittersToMatch.push(new MatchRequest(argument));
+                }
+            }
+        } else {
 
-    private void matchTypes0(Stack<Emitter> emitters, Func emitter, ExpressionScope scope) {
+        }
     }
 
     private void requireReturnType(Emitter emitter, String need) {

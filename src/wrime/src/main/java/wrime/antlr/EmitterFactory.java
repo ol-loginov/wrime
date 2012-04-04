@@ -54,11 +54,6 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     }
 
     @Override
-    public Name getName(Token token) {
-        return locatable(new Name(token.getText()), token);
-    }
-
-    @Override
     public LocatableString getLocatableString(Token n) {
         return locatable(new LocatableString(n.getText()), n);
     }
@@ -142,8 +137,14 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     }
 
     @Override
-    public Func makeFunc(String functor, List<Name> memberPath, List<Emitter> arguments) {
-        return new Func(functor, new NamePath(memberPath), arguments);
+    public Funcall makeFuncall(LocatableString functor, LocatableString method, List<Emitter> arguments) {
+        Location location = functor == null ? method.getLocation() : functor.getLocation();
+        return locatable(new Funcall(functor == null ? null : functor.getText(), method, arguments), location);
+    }
+
+    @Override
+    public Funcall makeFuncallChain(Funcall invocable, LocatableString method, List<Emitter> arguments) {
+        return locatable(new Funcall(invocable, method, arguments), method.getLocation());
     }
 
     @Override

@@ -10,6 +10,10 @@ import wrime.antlr.EmitterFactory;
 import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
+import wrime.model.Bean0;
+import wrime.model.Bean1;
+import wrime.model.Bean2;
+import wrime.util.TypeName;
 
 import java.io.IOException;
 
@@ -27,15 +31,19 @@ public class CallMatcherTest {
     }
 
     private void match(String expression, Class returnType) throws IOException, RecognitionException {
-        ExpressionScopeMock scope = createScope();
         Emitter emitter = getExpression(expression);
         CallMatcher matcher = new CallMatcher(emitter);
-        matcher.matchTypes(scope);
+        matcher.matchTypes(new ExpressionScopeMock());
         assertEquals(returnType, emitter.getReturnType().getType());
     }
 
-    private ExpressionScopeMock createScope() {
-        return new ExpressionScopeMock();
+    private void match(String expression, Class returnType, ExpressionScopeMock scope) throws IOException, RecognitionException {
+        Emitter emitter = getExpression(expression);
+        CallMatcher matcher = new CallMatcher(emitter);
+        matcher.matchTypes(scope);
+        assertNotNull(emitter.getReturnType());
+        assertNotNull(emitter.getReturnType().getType());
+        assertEquals(returnType, emitter.getReturnType().getType());
     }
 
     @Test
@@ -53,5 +61,20 @@ public class CallMatcherTest {
 
         match("1 lt -3 and 2 gt 3", boolean.class);
         match("1 - 3 + 3", int.class);
+
+        match("' '", String.class);
+    }
+
+    @Test
+    public void variables() throws RecognitionException, IOException {
+        ExpressionScopeMock variables = new ExpressionScopeMock() {{
+            getVariables().put("self", new TypeName(CallMatcher.class));
+            getVariables().put("bean0", new TypeName(Bean0.class));
+            getVariables().put("bean1", new TypeName(Bean1.class));
+            getVariables().put("bean2", new TypeName(Bean2.class));
+        }};
+
+        match("self.a(1,2).b(2,2)", CallMatcher.class, variables);
+        match("self", CallMatcher.class, variables);
     }
 }
