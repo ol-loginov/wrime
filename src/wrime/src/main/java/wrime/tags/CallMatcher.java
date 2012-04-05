@@ -5,7 +5,12 @@ import wrime.ast.*;
 import wrime.ast.StringValue;
 import wrime.util.ExpressionScope;
 import wrime.util.TypeName;
+import wrime.util.TypeUtil;
+import wrime.util.TypeWrap;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -38,6 +43,14 @@ public class CallMatcher {
         }};
     }
 
+    private void matchNeeded(Emitter emitter) {
+        emittersToMatch.push(new MatchRequest(emitter));
+    }
+
+    private void matchLater(Emitter emitter) {
+        emittersToMatch.push(new MatchRequest(emitter, false));
+    }
+
     public void matchTypes(ExpressionScope scope) {
         while (!emittersToMatch.empty()) {
             matchTypes(emittersToMatch.pop(), scope);
@@ -46,7 +59,7 @@ public class CallMatcher {
 
     private void matchTypes(MatchRequest request, ExpressionScope scope) {
         if (request.emitter instanceof Gate) {
-            matchTypes0((Gate) request.emitter, request.firstPass);
+            doMatchTypes((Gate) request.emitter, request.firstPass);
         } else if (request.emitter instanceof NumberValue) {
             requireReturnType(request.emitter, "should be hardcoded");
         } else if (request.emitter instanceof BoolValue) {
@@ -56,27 +69,45 @@ public class CallMatcher {
         } else if (request.emitter instanceof StringValue) {
             requireReturnType(request.emitter, "should be hardcoded");
         } else if (request.emitter instanceof Group) {
-            matchTypes0((Group) request.emitter, request.firstPass);
+            doMatchTypes((Group) request.emitter, request.firstPass);
         } else if (request.emitter instanceof Inverter) {
-            matchTypes0((Inverter) request.emitter, request.firstPass);
+            doMatchTypes((Inverter) request.emitter, request.firstPass);
         } else if (request.emitter instanceof Oppositer) {
-            matchTypes0((Oppositer) request.emitter, request.firstPass);
+            doMatchTypes((Oppositer) request.emitter, request.firstPass);
         } else if (request.emitter instanceof Comparison) {
-            matchTypes0((Comparison) request.emitter, request.firstPass);
+            doMatchTypes((Comparison) request.emitter, request.firstPass);
         } else if (request.emitter instanceof Algebraic) {
-            matchTypes0((Algebraic) request.emitter, request.firstPass);
-        } else if (request.emitter instanceof Funcall) {
-            matchTypes0((Funcall) request.emitter, scope, request.firstPass);
+            doMatchTypes((Algebraic) request.emitter, request.firstPass);
+        } else if (request.emitter instanceof MethodCall) {
+            doMatchTypes((MethodCall) request.emitter, request.firstPass);
+        } else if (request.emitter instanceof VariableRef) {
+            doMatchTypes((VariableRef) request.emitter, scope);
+        } else if (request.emitter instanceof FunctorRef) {
+            doMatchTypes((FunctorRef) request.emitter, scope);
         } else {
             throw new WrimeException("No way to match emitter of type " + request.emitter.getClass(), null);
         }
     }
 
-    private void matchTypes0(Gate emitter, boolean firstPass) {
+    private void doMatchTypes(FunctorRef emitter, ExpressionScope scope) {
+        if (!scope.hasFunctor(emitter.getName())) {
+            throw new WrimeException("No functor '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());
+        }
+        emitter.setReturnType(scope.getFunctorType(emitter.getName()));
+    }
+
+    private void doMatchTypes(VariableRef emitter, ExpressionScope scope) {
+        if (!scope.hasVar(emitter.getName())) {
+            throw new WrimeException("No variable '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());
+        }
+        emitter.setReturnType(scope.getVarType(emitter.getName()));
+    }
+
+    private void doMatchTypes(Gate emitter, boolean firstPass) {
         if (firstPass) {
-            emittersToMatch.push(new MatchRequest(emitter, false));
-            emittersToMatch.push(new MatchRequest(emitter.getLeft()));
-            emittersToMatch.push(new MatchRequest(emitter.getRight()));
+            matchLater(emitter);
+            matchNeeded(emitter.getLeft());
+            matchNeeded(emitter.getRight());
         } else {
             requireBooleanReturnType(emitter.getLeft(), "required for gate " + emitter.getRule());
             requireBooleanReturnType(emitter.getRight(), "required for gate " + emitter.getRule());
@@ -84,30 +115,30 @@ public class CallMatcher {
         }
     }
 
-    private void matchTypes0(Group emitter, boolean firstPass) {
+    private void doMatchTypes(Group emitter, boolean firstPass) {
         if (firstPass) {
-            emittersToMatch.push(new MatchRequest(emitter, false));
-            emittersToMatch.push(new MatchRequest(emitter.getInner()));
+            matchLater(emitter);
+            matchNeeded(emitter.getInner());
         } else {
             requireReturnType(emitter.getInner(), "required for inner expression");
         }
     }
 
-    private void matchTypes0(Inverter emitter, boolean firstPass) {
+    private void doMatchTypes(Inverter emitter, boolean firstPass) {
         if (firstPass) {
-            emittersToMatch.push(new MatchRequest(emitter, false));
-            emittersToMatch.push(new MatchRequest(emitter.getInner()));
+            matchLater(emitter);
+            matchNeeded(emitter.getInner());
         } else {
             requireBooleanReturnType(emitter.getInner(), "required for inverting expression");
             emitter.setReturnType(new TypeName(boolean.class));
         }
     }
 
-    private void matchTypes0(Comparison emitter, boolean firstPass) {
+    private void doMatchTypes(Comparison emitter, boolean firstPass) {
         if (firstPass) {
-            emittersToMatch.push(new MatchRequest(emitter, false));
-            emittersToMatch.push(new MatchRequest(emitter.getLeft()));
-            emittersToMatch.push(new MatchRequest(emitter.getRight()));
+            matchLater(emitter);
+            matchNeeded(emitter.getLeft());
+            matchNeeded(emitter.getRight());
         } else {
             requireNumberReturnType(emitter.getLeft(), "required for comparison " + emitter.getRule());
             requireNumberReturnType(emitter.getRight(), "required for comparison " + emitter.getRule());
@@ -115,21 +146,21 @@ public class CallMatcher {
         }
     }
 
-    private void matchTypes0(Oppositer emitter, boolean firstPass) {
+    private void doMatchTypes(Oppositer emitter, boolean firstPass) {
         if (firstPass) {
-            emittersToMatch.push(new MatchRequest(emitter, false));
-            emittersToMatch.push(new MatchRequest(emitter.getInner()));
+            matchLater(emitter);
+            matchNeeded(emitter.getInner());
         } else {
             requireNumberReturnType(emitter.getInner(), "required for negative expression");
             emitter.setReturnType(emitter.getInner().getReturnType());
         }
     }
 
-    private void matchTypes0(Algebraic emitter, boolean firstPass) {
+    private void doMatchTypes(Algebraic emitter, boolean firstPass) {
         if (firstPass) {
-            emittersToMatch.push(new MatchRequest(emitter, false));
-            emittersToMatch.push(new MatchRequest(emitter.getLeft()));
-            emittersToMatch.push(new MatchRequest(emitter.getRight()));
+            matchLater(emitter);
+            matchNeeded(emitter.getLeft());
+            matchNeeded(emitter.getRight());
         } else {
             requireNumberReturnType(emitter.getLeft(), "required for algebraic " + emitter.getRule());
             requireNumberReturnType(emitter.getRight(), "required for algebraic " + emitter.getRule());
@@ -137,25 +168,49 @@ public class CallMatcher {
         }
     }
 
-    private void matchTypes0(Funcall emitter, ExpressionScope scope, boolean firstPass) {
+    private void doMatchTypes(MethodCall emitter, boolean firstPass) {
         if (firstPass) {
-            emittersToMatch.push(new MatchRequest(emitter, false));
-            if (emitter.getInvocable() != null) {
-                emittersToMatch.push(new MatchRequest(emitter.getInvocable()));
-            }
+            matchLater(emitter);
+            matchNeeded(emitter.getInvocable());
             if (emitter.hasArguments()) {
                 for (Emitter argument : emitter.getArguments()) {
-                    emittersToMatch.push(new MatchRequest(argument));
+                    matchNeeded(argument);
                 }
             }
         } else {
+            Emitter invocable = emitter.getInvocable();
+            requireReturnType(invocable, "required for method identification");
 
+            List<TypeName> argumentTypes = new ArrayList<TypeName>();
+            if (emitter.hasArguments()) {
+                for (Emitter argument : emitter.getArguments()) {
+                    requireReturnType(argument, "required for method identification");
+                    argumentTypes.add(argument.getReturnType());
+                }
+            }
+
+            Method method = TypeUtil.findMethodOrGetter(
+                    invocable.getReturnType(),
+                    emitter.getMethodName(),
+                    argumentTypes.toArray(new TypeName[argumentTypes.size()]));
+            if (method == null) {
+                throw new WrimeException("No method '" + emitter.getMethodName() + "' found in type " + invocable.getReturnType(), null, emitter.getLocation());
+            }
+            emitter.setInvocation(method);
+            emitter.setReturnType(TypeUtil.createReturnTypeDef(method));
         }
     }
 
-    private void requireReturnType(Emitter emitter, String need) {
-        if (emitter.getReturnType() == null) {
+    public static void requireReturnType(Emitter emitter, String need) {
+        if (emitter.getReturnType() == null || emitter.getReturnType().isNullType()) {
             throw new WrimeException("component has no defined return type (" + need + ")", null, emitter.getLocation());
+        }
+    }
+
+    public static void requireReturnType(Emitter emitter, Class clazz, String need) {
+        requireReturnType(emitter, need);
+        if (!TypeWrap.create(emitter.getReturnType().getType()).isAssignableTo(clazz)) {
+            throw new WrimeException("statement is not of type needed (" + need + ")", null, emitter.getLocation());
         }
     }
 

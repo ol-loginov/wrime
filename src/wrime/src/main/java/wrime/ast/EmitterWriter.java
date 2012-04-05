@@ -46,7 +46,7 @@ public class EmitterWriter {
         } else if (emitter instanceof BoolValue) {
             return toJavaWords0((BoolValue) emitter);
         } else if (emitter instanceof NullValue) {
-            return toJavaWords0((NullValue) emitter);
+            return toJavaWords0();
         } else if (emitter instanceof Group) {
             return toJavaWords0((Group) emitter);
         } else if (emitter instanceof Inverter) {
@@ -57,31 +57,33 @@ public class EmitterWriter {
             return toJavaWords0((Algebraic) emitter);
         } else if (emitter instanceof StringValue) {
             return toJavaWords0((StringValue) emitter);
-        } else if (emitter instanceof Funcall) {
-            return toJavaWords0((Funcall) emitter);
+        } else if (emitter instanceof MethodCall) {
+            return toJavaWords0((MethodCall) emitter);
+        } else if (emitter instanceof FunctorRef) {
+            return toJavaWords0((FunctorRef) emitter);
+        } else if (emitter instanceof VariableRef) {
+            return toJavaWords0((VariableRef) emitter);
         } else {
             throw new WrimeException("No way to write emitter of type " + emitter.getClass(), null);
         }
     }
 
-    private List<Object> toJavaWords0(Funcall func) {
+    private List<Object> toJavaWords0(VariableRef emitter) {
         List<Object> result = new ArrayList<Object>();
-        if (func.getInvocable() != null) {
-            result.add(func.getInvocable());
-        } else {
-            switch (func.getMode()) {
-                case FUNCTOR_METHOD:
-                    result.add("this.$$" + func.getFunctor() + ".");
-                    result.add(func.getMethodOrVariableName());
-                    break;
-                case VARIABLE:
-                    result.add("this." + func.getMethodOrVariableName() + ".");
-                    break;
-                case OBJECT_METHOD:
-                    result.add(func.getMethodOrVariableName() + ".");
-                    break;
-            }
-        }
+        result.add(emitter.getName());
+        return result;
+    }
+
+    private List<Object> toJavaWords0(FunctorRef emitter) {
+        List<Object> result = new ArrayList<Object>();
+        result.add("this.$$" + emitter.getName());
+        return result;
+    }
+
+    private List<Object> toJavaWords0(MethodCall func) {
+        List<Object> result = new ArrayList<Object>();
+        result.add(func.getInvocable());
+        result.add("." + func.getInvocationName());
         result.add("(");
         if (func.getArguments() != null) {
             boolean first = true;
@@ -101,7 +103,7 @@ public class EmitterWriter {
         return asList('"' + EscapeUtils.escapeJavaString(emitter.getValue()) + '"');
     }
 
-    private List<Object> toJavaWords0(NullValue emitter) {
+    private List<Object> toJavaWords0() {
         return asList("null");
     }
 

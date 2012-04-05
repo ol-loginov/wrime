@@ -32,4 +32,9 @@ public class TypeName {
     public boolean isNullType() {
         return this == NULL_TYPE;
     }
+
+    @Override
+    public String toString() {
+        return isNullType() ? "<null>" : type.toString();
+    }
 }

@@ -10,6 +10,7 @@ import wrime.antlr.EmitterFactory;
 import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
+import wrime.functor.StringFunctor;
 import wrime.model.Bean0;
 import wrime.model.Bean1;
 import wrime.model.Bean2;
@@ -72,9 +73,18 @@ public class CallMatcherTest {
             getVariables().put("bean0", new TypeName(Bean0.class));
             getVariables().put("bean1", new TypeName(Bean1.class));
             getVariables().put("bean2", new TypeName(Bean2.class));
+
+            getFunctors().put("str", new TypeName(StringFunctor.class));
         }};
 
-        match("self.a(1,2).b(2,2)", CallMatcher.class, variables);
+        match("bean2.callSelf(1).call(2)", Void.TYPE, variables);
         match("self", CallMatcher.class, variables);
+        match("bean1.bean.arg1()", String.class, variables);
+        match("bean1.bean.hello", String.class, variables);
+
+        match("str:concat('12', '1', '3')", String.class, variables);
+        match("str:repeat('12', 3)", String.class, variables);
+        match("str:ne(null)", boolean.class, variables);
+        match("str:ne('1')", boolean.class, variables);
     }
 }

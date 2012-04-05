@@ -1,80 +1,28 @@
 package wrime.tags;
 
-import wrime.WrimeException;
-import wrime.util.ExpressionContextKeeper;
+import wrime.ast.TagParam;
+import wrime.util.ExpressionContextRoot;
 
-public class ParamTagProcessor extends PathReceiver implements TagProcessor {
-    public static enum Status {
-        EXPECT_NAME,
-        EXPECT_OPTION
-    }
+import java.io.IOException;
+import java.io.StringWriter;
 
-    private String paramType = "";
-    private String paramName = "";
-    private String paramOption = "";
+public class ParamTagProcessor implements TagProcessor {
+    private final TagParam tag;
 
-    private Status status = Status.EXPECT_NAME;
-
-    @Override
-    public void error(String message) throws WrimeException {
-        super.error("incomplete ${param ...} expression, " + message);
+    public ParamTagProcessor(TagParam tag) {
+        this.tag = tag;
     }
 
     @Override
-    public void complete(ExpressionContextKeeper scope) throws WrimeException {
-        switch (status) {
-            case EXPECT_NAME:
-                error("incomplete parameter definition");
-                break;
-            case EXPECT_OPTION:
-                scope.addModelParameter(paramType, paramName, scope.findClass(paramType), paramOption);
-                break;
-            default:
-                error("incomplete statement");
+    public void render(ExpressionContextRoot scope, StringWriter body) throws IOException {
+        String option = "";
+        if (tag.getOptions().size() > 0) {
+            option = tag.getOptions().get(0).getText();
         }
-    }
-
-    @Override
-    public void pushDelimiter(ExpressionContextKeeper scope, String delimiter) throws WrimeException {
-        if (!".".equals(delimiter) || status != Status.EXPECT_NAME) {
-            errorUnexpected(delimiter);
-        }
-        paramType += ".";
-    }
-
-    @Override
-    public void pushToken(ExpressionContextKeeper scope, String name) throws WrimeException {
-        switch (status) {
-            case EXPECT_NAME:
-                // situation if we received "." before
-                if (paramType.endsWith(".")) {
-                    paramType += name;
-                }
-                // this is definitely not after "."
-                else {
-                    // we check for paramType. if it's is empty, then this is class name
-                    if (paramType.length() == 0) {
-                        paramType = name;
-                    }
-                    // otherwise we check for existence this type. and set parameter name
-                    else {
-                        if (scope.findClass(paramType) == null) {
-                            error("invalid class name " + paramType);
-                        }
-                        status = Status.EXPECT_NAME;
-                        paramName = name;
-                        status = Status.EXPECT_OPTION;
-                    }
-                }
-                break;
-            case EXPECT_OPTION:
-                if (paramOption.length() > 0) {
-                    paramOption += " ";
-                }
-                paramOption += name;
-                break;
-            default:
-                error("invalid syntax");
-        }
+        scope.addModelParameter(
+                tag.getClassName().toString(),
+                tag.getParamName().getText(),
+                scope.findClass(tag.getClassName()),
+                option);
     }
 }

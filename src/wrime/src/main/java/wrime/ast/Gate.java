@@ -1,11 +1,27 @@
 package wrime.ast;
 
 public class Gate extends Emitter {
+    public enum Rule {
+        AND("&&"),
+        XOR("^"),
+        OR("||");
+
+        private final String javaSymbol;
+
+        private Rule(String javaSymbol) {
+            this.javaSymbol = javaSymbol;
+        }
+
+        public String getJavaSymbol() {
+            return javaSymbol;
+        }
+    }
+
     private final Emitter left;
     private final Emitter right;
-    private final GateRule rule;
+    private final Rule rule;
 
-    public Gate(Emitter left, GateRule rule, Emitter right) {
+    public Gate(Emitter left, Rule rule, Emitter right) {
         this.rule = rule;
         this.left = left;
         this.right = right;
@@ -19,7 +35,7 @@ public class Gate extends Emitter {
         return right;
     }
 
-    public GateRule getRule() {
+    public Rule getRule() {
         return rule;
     }
 }

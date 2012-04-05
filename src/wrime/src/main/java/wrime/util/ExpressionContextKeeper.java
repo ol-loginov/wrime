@@ -1,13 +1,14 @@
 package wrime.util;
 
 import wrime.WrimeException;
+import wrime.ast.ClassName;
 
 import java.util.Collection;
 
 public interface ExpressionContextKeeper {
     ExpressionContextChild current();
 
-    Class findClass(String className);
+    Class findClass(ClassName className);
 
     void addImport(String className);
 
@@ -19,7 +20,7 @@ public interface ExpressionContextKeeper {
 
     ExpressionContextChild closeScope();
 
-    TypeName findFunctorType(String name);
+    TypeName getFunctorType(String name);
 
     boolean inheritAttribute(String attribute);
 }

@@ -59,7 +59,7 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     }
 
     @Override
-    public ClassName getClassName(List<LocatableString> packageName, LocatableString className) {
+    public ClassName getClassName(String packageName, LocatableString className) {
         ClassName result = new ClassName();
         result.setClassName(className);
         result.setPackageName(packageName);
@@ -71,11 +71,11 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
         Location ruleLocation = location.move(o.getLine(), o.getCharPositionInLine());
         switch (o.getType()) {
             case WrimeExpressionParser.AND:
-                return locatable(new Gate(l, GateRule.AND, r), ruleLocation);
+                return locatable(new Gate(l, Gate.Rule.AND, r), ruleLocation);
             case WrimeExpressionParser.OR:
-                return locatable(new Gate(l, GateRule.OR, r), ruleLocation);
+                return locatable(new Gate(l, Gate.Rule.OR, r), ruleLocation);
             case WrimeExpressionParser.XOR:
-                return locatable(new Gate(l, GateRule.XOR, r), ruleLocation);
+                return locatable(new Gate(l, Gate.Rule.XOR, r), ruleLocation);
             default:
                 throw new WrimeException("Unrecognized gate operation '" + o.getText() + "'", null, ruleLocation);
         }
@@ -86,17 +86,17 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
         Location ruleLocation = location.move(o.getLine(), o.getCharPositionInLine());
         switch (o.getType()) {
             case WrimeExpressionParser.LT:
-                return locatable(new Comparison(l, ComparisonRule.Less, r), ruleLocation);
+                return locatable(new Comparison(l, Comparison.Rule.Less, r), ruleLocation);
             case WrimeExpressionParser.LTE:
-                return locatable(new Comparison(l, ComparisonRule.LessOrEqual, r), ruleLocation);
+                return locatable(new Comparison(l, Comparison.Rule.LessOrEqual, r), ruleLocation);
             case WrimeExpressionParser.GT:
-                return locatable(new Comparison(l, ComparisonRule.Greater, r), ruleLocation);
+                return locatable(new Comparison(l, Comparison.Rule.Greater, r), ruleLocation);
             case WrimeExpressionParser.GTE:
-                return locatable(new Comparison(l, ComparisonRule.GreaterOrEqual, r), ruleLocation);
+                return locatable(new Comparison(l, Comparison.Rule.GreaterOrEqual, r), ruleLocation);
             case WrimeExpressionParser.EQ:
-                return locatable(new Comparison(l, ComparisonRule.Equal, r), ruleLocation);
+                return locatable(new Comparison(l, Comparison.Rule.Equal, r), ruleLocation);
             case WrimeExpressionParser.NEQ:
-                return locatable(new Comparison(l, ComparisonRule.NotEqual, r), ruleLocation);
+                return locatable(new Comparison(l, Comparison.Rule.NotEqual, r), ruleLocation);
             default:
                 throw new WrimeException("Unrecognized gate operation '" + o.getText() + "'", null, ruleLocation);
         }
@@ -107,15 +107,15 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
         Location ruleLocation = location.move(o.getLine(), o.getCharPositionInLine());
         switch (o.getType()) {
             case WrimeExpressionParser.PLUS:
-                return locatable(new Algebraic(l, AlgebraicRule.PLUS, r), ruleLocation);
+                return locatable(new Algebraic(l, Algebraic.Rule.PLUS, r), ruleLocation);
             case WrimeExpressionParser.MINUS:
-                return locatable(new Algebraic(l, AlgebraicRule.MINUS, r), ruleLocation);
+                return locatable(new Algebraic(l, Algebraic.Rule.MINUS, r), ruleLocation);
             case WrimeExpressionParser.STAR:
-                return locatable(new Algebraic(l, AlgebraicRule.MUL, r), ruleLocation);
+                return locatable(new Algebraic(l, Algebraic.Rule.MUL, r), ruleLocation);
             case WrimeExpressionParser.DIV:
-                return locatable(new Algebraic(l, AlgebraicRule.DIV, r), ruleLocation);
+                return locatable(new Algebraic(l, Algebraic.Rule.DIV, r), ruleLocation);
             case WrimeExpressionParser.MOD:
-                return locatable(new Algebraic(l, AlgebraicRule.MOD, r), ruleLocation);
+                return locatable(new Algebraic(l, Algebraic.Rule.MOD, r), ruleLocation);
             default:
                 throw new WrimeException("Unrecognized gate operation '" + o.getText() + "'", null, ruleLocation);
         }
@@ -137,14 +137,18 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     }
 
     @Override
-    public Funcall makeFuncall(LocatableString functor, LocatableString method, List<Emitter> arguments) {
-        Location location = functor == null ? method.getLocation() : functor.getLocation();
-        return locatable(new Funcall(functor == null ? null : functor.getText(), method, arguments), location);
+    public VariableRef makeVariableAccess(LocatableString name) {
+        return locatable(new VariableRef(name.getText()), name.getLocation());
     }
 
     @Override
-    public Funcall makeFuncallChain(Funcall invocable, LocatableString method, List<Emitter> arguments) {
-        return locatable(new Funcall(invocable, method, arguments), method.getLocation());
+    public FunctorRef makeFunctorAccess(LocatableString name) {
+        return locatable(new FunctorRef(name.getText()), name.getLocation());
+    }
+
+    @Override
+    public MethodCall makeMethodCall(Emitter invocable, LocatableString method, List<Emitter> arguments) {
+        return locatable(new MethodCall(invocable, method.getText(), arguments), method.getLocation());
     }
 
     @Override
@@ -195,7 +199,7 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     }
 
     @Override
-    public TagImport makeTagImport(Location location, List<LocatableString> packagePath, LocatableString packageName) {
+    public TagImport makeTagImport(Location location, String packagePath, LocatableString packageName) {
         return locatable(new TagImport(packagePath, packageName), location);
     }
 

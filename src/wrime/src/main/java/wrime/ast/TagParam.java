@@ -19,6 +19,10 @@ public class TagParam extends WrimeTag {
         options.add(value);
     }
 
+    public List<LocatableString> getOptions() {
+        return options;
+    }
+
     public ClassName getClassName() {
         return className;
     }

@@ -1,18 +1,16 @@
 package wrime.ast;
 
-import java.util.List;
-
 public class TagImport extends WrimeTag {
-    private final List<LocatableString> packagePath;
+    private final String packagePath;
     private final LocatableString packageTarget;
 
-    public TagImport(List<LocatableString> packagePath, LocatableString packageTarget) {
+    public TagImport(String packagePath, LocatableString packageTarget) {
         super("import");
         this.packagePath = packagePath;
         this.packageTarget = packageTarget;
     }
 
-    public List<LocatableString> getPackagePath() {
+    public String getPackagePath() {
         return packagePath;
     }
 

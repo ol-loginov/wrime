@@ -3,6 +3,7 @@ package wrime.util;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import wrime.WrimeException;
+import wrime.ast.ClassName;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -40,12 +41,13 @@ public class ExpressionContextRoot extends ExpressionContextChild implements Exp
     }
 
     @Override
-    public Class findClass(String className) {
-        Class instance = tryClass(className);
+    public Class findClass(ClassName className) {
+        String genericTypeName = className.getPackageName() + className.getClassName().getText();
+        Class instance = tryClass(genericTypeName);
         if (instance != null) {
             return instance;
         }
-        String classSelfName = getPublicClassName(className);
+        String classSelfName = getPublicClassName(genericTypeName);
         for (String imports : runtime.getImports()) {
             if (imports.endsWith("." + classSelfName)) {
                 return tryClass(imports);
@@ -120,7 +122,7 @@ public class ExpressionContextRoot extends ExpressionContextChild implements Exp
     }
 
     @Override
-    public TypeName findFunctorType(String name) {
+    public TypeName getFunctorType(String name) {
         return runtime.findFunctorType(name);
     }
 

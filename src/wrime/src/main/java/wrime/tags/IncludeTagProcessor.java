@@ -1,135 +1,29 @@
 package wrime.tags;
 
-import wrime.WrimeException;
-import wrime.ops.Chain;
-import wrime.ops.Operand;
-import wrime.ops.Raw;
-import wrime.scanner.WrimeScanner;
-import wrime.util.EscapeUtils;
-import wrime.util.ExpressionContextKeeper;
-import wrime.util.ParameterName;
+import wrime.ast.EmitterWriter;
+import wrime.ast.TagInclude;
+import wrime.util.ExpressionContextRoot;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.io.StringWriter;
 
-public class IncludeTagProcessor extends PathReceiver implements TagProcessor {
-    enum Status {
-        WAIT_START,
-        WAIT_PATH,
-        WAIT_PARAMETER,
-        COMPLETE
-    }
+public class IncludeTagProcessor implements TagProcessor {
+    private final TagInclude tag;
 
-    static class TemplateParameter {
-        String name;
-        Operand getter;
-    }
-
-    private Status status = Status.WAIT_START;
-
-    private Operand templatePath;
-    private List<TemplateParameter> templateModel = new ArrayList<TemplateParameter>();
-
-    public void errorIncomplete(String message) throws WrimeException {
-        super.error("incomplete ${include(...)} expression, " + message);
+    public IncludeTagProcessor(TagInclude tag) {
+        this.tag = tag;
     }
 
     @Override
-    public void beginList(ExpressionContextKeeper scope) throws WrimeException {
-        switch (status) {
-            case WAIT_START:
-                storeTransientParameters(scope);
-                waitForPath(scope);
-                break;
-            default:
-                errorUnexpected(WrimeScanner.OPEN_LIST_SYMBOL);
-        }
-    }
+    public void render(ExpressionContextRoot scope, StringWriter body) throws IOException {
+        CallMatcher matcher = new CallMatcher(tag.getSource());
+        matcher.matchTypes(scope);
+        CallMatcher.requireReturnType(tag.getSource(), String.class, "should be String");
 
-    private void storeTransientParameters(ExpressionContextKeeper scope) {
-        for (ParameterName parameter : scope.getModelParameters()) {
-            if (parameter.getOption().contains("transient")) {
-                TemplateParameter model = new TemplateParameter();
-                model.name = parameter.getName();
-                model.getter = new Raw("this." + parameter.getName());
-                templateModel.add(model);
-            }
-        }
-    }
+        String modelName = String.format("m$$%d$%d", tag.getLocation().getLine(), tag.getLocation().getColumn());
 
-    private void waitForPath(ExpressionContextKeeper scope) throws WrimeException {
-        path.push(new CallReceiver().setCloser(createPathCloser()), scope);
-    }
-
-    private CompleteCallback createPathCloser() {
-        return new CompleteCallback() {
-            @Override
-            public void complete(PathReceiver child, ExpressionContextKeeper scope, boolean last) throws WrimeException {
-                path.remove(child);
-                status = last ? Status.COMPLETE : Status.WAIT_PARAMETER;
-                templatePath = ((CallReceiver) child).getOperand();
-                if (!last) {
-                    waitForParameter(scope);
-                }
-            }
-        };
-    }
-
-    private void waitForParameter(ExpressionContextKeeper scope) throws WrimeException {
-        path.push(new AssignReceiver().setCompleteCallback(createParameterCloser()), scope);
-    }
-
-    private CompleteCallback createParameterCloser() {
-        return new CompleteCallback() {
-            @Override
-            public void complete(PathReceiver child, ExpressionContextKeeper scope, boolean last) throws WrimeException {
-                path.remove(child);
-                status = last ? Status.COMPLETE : Status.WAIT_PARAMETER;
-
-                TemplateParameter parameter = new TemplateParameter();
-                parameter.name = ((AssignReceiver) child).getAlias();
-                parameter.getter = ((AssignReceiver) child).getSource();
-                templateModel.add(parameter);
-
-                if (!last) {
-                    waitForParameter(scope);
-                } else {
-                }
-            }
-        };
-    }
-
-    @Override
-    public String getHumanName() {
-        return "Template invoker";
-    }
-
-    @Override
-    public void complete(ExpressionContextKeeper scope) throws WrimeException {
-        switch (status) {
-            case COMPLETE:
-                Chain chain = new Chain();
-
-                String model;
-                if (templateModel.size() > 0) {
-                    model = String.format("$includeAt_%d_%d", path.getLine(), path.getColumn());
-                    chain.getOperands().add(new Raw(String.format("Map<String,Object> %s = new TreeMap<String,Object>();\n", model)));
-                    for (TemplateParameter parameter : templateModel) {
-                        chain.getOperands().add(new Raw(String.format("%s.put(\"%s\", ", model, EscapeUtils.escapeJavaString(parameter.name))));
-                        chain.getOperands().add(parameter.getter);
-                        chain.getOperands().add(new Raw(");\n"));
-                    }
-                } else {
-                    model = "null";
-                }
-
-                chain.getOperands().add(new Raw(String.format("this.include(")));
-                chain.getOperands().add(templatePath);
-                chain.getOperands().add(new Raw(String.format(", %s);", model)));
-                path.render(chain);
-                break;
-            default:
-                errorIncomplete("waiting for more parameters");
-        }
+        body.append("this.$$include(");
+        new EmitterWriter(body).write(tag.getSource());
+        body.append(",").append(modelName).append(");");
     }
 }

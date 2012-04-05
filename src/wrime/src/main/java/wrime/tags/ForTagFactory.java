@@ -1,11 +1,12 @@
 package wrime.tags;
 
 import wrime.WrimeException;
+import wrime.ast.TagFor;
 import wrime.ast.WrimeTag;
 
 public class ForTagFactory implements TagFactory {
     @Override
     public ForTagProcessor createProcessor(WrimeTag tag) throws WrimeException {
-        return new ForTagProcessor();
+        return new ForTagProcessor((TagFor) tag);
     }
 }

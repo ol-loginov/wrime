@@ -19,6 +19,10 @@ public class Bean2 implements Face1 {
         return this;
     }
 
+    public Bean2 callSelf(int value) {
+        return this;
+    }
+
     public void varg(int calls, int... object) {
     }
 

@@ -3,9 +3,11 @@ package wrime.bytecode;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
+import wrime.Location;
 import wrime.ScriptResource;
 import wrime.WrimeEngine;
 import wrime.WrimeException;
+import wrime.antlr.EmitterFactory;
 import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
@@ -17,6 +19,7 @@ import wrime.ops.OperandRendererDefault;
 import wrime.output.WrimeWriter;
 import wrime.scanner.WrimeScanner;
 import wrime.tags.TagFactory;
+import wrime.tags.TagProcessor;
 import wrime.util.*;
 
 import java.io.IOException;
@@ -232,10 +235,12 @@ public class SourceComposer implements ExpressionRuntime {
         }
 
         public Body everyLine(String bunchOfLines) {
-            Scanner scanner = new Scanner(new StringReader(bunchOfLines));
-            scanner.useDelimiter(Pattern.compile(Pattern.quote(EOL)));
-            while (scanner.hasNext()) {
-                l(scanner.next());
+            if (bunchOfLines.length() > 0) {
+                Scanner scanner = new Scanner(new StringReader(bunchOfLines));
+                scanner.useDelimiter(Pattern.compile(Pattern.quote(EOL)));
+                while (scanner.hasNext()) {
+                    l(scanner.next());
+                }
             }
             return this;
         }
@@ -405,6 +410,7 @@ public class SourceComposer implements ExpressionRuntime {
             WrimeExpressionLexer lexer = new WrimeExpressionLexer(new ANTLRStringStream(command));
             WrimeExpressionParser parser = new WrimeExpressionParser(new CommonTokenStream(lexer));
             parser.setRecognitionErrorListener(recognitionErrorListener);
+            parser.setEmitterFactory(new EmitterFactory(new Location(path, line, column)));
 
             WrimeExpressionParser.command_return cmd;
             try {
@@ -414,15 +420,28 @@ public class SourceComposer implements ExpressionRuntime {
                 cmd = null;
             }
 
-            if (cmd == null || cmd.expression == null || cmd.tag == null) {
-                throw new WrimeException("empty expression", null, path, line, column);
+            try {
+                renderCommand(rawRender, cmd);
+            } catch (IOException e) {
+                throw new WrimeException("error printing render body", e, path, line + 1, column + 1);
+            }
+        }
+
+        private void renderCommand(boolean rawRender, WrimeExpressionParser.command_return cmd) throws IOException {
+            if (cmd != null && cmd.expression != null) {
+                commandExpression(cmd.expression, rawRender);
+                return;
             }
 
-            if (cmd.expression != null) {
-                commandExpression(cmd.expression, rawRender);
-            } else if (cmd.tag != null) {
-                commandTag(cmd.tag);
+            if (cmd != null && cmd.tag != null) {
+                TagProcessor processor = commandTag(cmd.tag);
+                StringWriter content = new StringWriter();
+                processor.render(expressionContext, content);
+                renderContentBody.everyLine(content.toString());
+                return;
             }
+
+            throw new WrimeException("empty expression", null, path, line + 1, column + 1);
         }
 
         private void commandExpression(Emitter expression, boolean rawOutput) {
@@ -433,12 +452,18 @@ public class SourceComposer implements ExpressionRuntime {
             */
         }
 
-        private void commandTag(WrimeTag tag) {
-            String processor = (tag.isCustomTag() ? "$" : "") + tag.getProcessor();
-            TagFactory factory = tagFactories.get(processor);
+        private TagProcessor commandTag(WrimeTag tag) {
+            String processorKey = (tag.isCustomTag() ? "$" : "") + tag.getProcessor();
+            TagFactory factory = tagFactories.get(processorKey);
             if (factory == null) {
-                throw new WrimeException("No tag factory for name '" + processor + "'", null, tag.getLocation());
+                throw new WrimeException("No tag factory for name '" + processorKey + "'", null, tag.getLocation());
             }
+
+            TagProcessor processor = factory.createProcessor(tag);
+            if (processor == null) {
+                throw new WrimeException("No tag processor for name '" + processorKey + "'", null, tag.getLocation());
+            }
+            return processor;
         }
 
         @Override

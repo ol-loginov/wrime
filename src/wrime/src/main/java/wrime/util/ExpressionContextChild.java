@@ -48,6 +48,7 @@ public class ExpressionContextChild implements ExpressionScope {
         localVariables.put(name, classDef);
     }
 
+    @Override
     public TypeName getVarType(String name) {
         TypeName classDef = localVariables.get(name);
         if (classDef != null) {
@@ -56,7 +57,18 @@ public class ExpressionContextChild implements ExpressionScope {
         return parentScope != null ? parentScope.getVarType(name) : null;
     }
 
+    @Override
     public boolean hasVar(String name) {
         return localVariables.get(name) != null || (parentScope != null && parentScope.hasVar(name));
+    }
+
+    @Override
+    public boolean hasFunctor(String name) {
+        return parentScope != null && parentScope.hasFunctor(name);
+    }
+
+    @Override
+    public TypeName getFunctorType(String name) {
+        return parentScope != null ? parentScope.getFunctorType(name) : null;
     }
 }

@@ -69,7 +69,7 @@ public static interface EmitterFactory {
     Emitter getString(Token o);
     LocatableString getLocatableString(Token token);
     Location getLocation(Token token);
-    ClassName getClassName(List<LocatableString> packageName, LocatableString className);
+    ClassName getClassName(String packageName, LocatableString className);
 
     Group makeGroup(Token o, Emitter e);
 	Gate makeGate(Emitter l, Token o, Emitter r);
@@ -78,10 +78,11 @@ public static interface EmitterFactory {
     Algebraic makeMath(Emitter l, Token o, Emitter r);
     Assignment makeAssignment(LocatableString varName);
     Oppositer makeOpposite(Token o, Emitter e);
-    Funcall makeFuncall(LocatableString functor, LocatableString method, List<Emitter> arguments);
-    Funcall makeFuncallChain(Funcall invocable, LocatableString method, List<Emitter> arguments);
+    VariableRef makeVariableAccess(LocatableString name);
+    FunctorRef makeFunctorAccess(LocatableString name);
+    MethodCall makeMethodCall(Emitter invocable, LocatableString method, List<Emitter> arguments);
 
-    TagImport makeTagImport(Location location,List<LocatableString> packagePath, LocatableString packageName);
+    TagImport makeTagImport(Location location, String packagePath, LocatableString packageName);
     TagSet makeTagSet(Location location, LocatableString var, Emitter e);
     TagContinue makeTagContinue(Location location);
     TagBreak makeTagBreak(Location location);
@@ -177,10 +178,10 @@ className returns [ClassName name]
         g= genericSpec?             {$name.setGenericTypes(g==null ? null : g.spec);}
 	;
 
-packageName returns [List<LocatableString> path]
-@init { $path=new ArrayList<LocatableString>(); }
+packageName returns [String path]
+@init { $path=""; }
 	:	(
-            n= Identifier           {$path.add(ef.getLocatableString(n));}
+            n= Identifier           {$path += n.getText() + '.';}
             '.'
         )+
 	;
@@ -309,21 +310,25 @@ literal returns [Emitter e]
     
 /*----------- Member Access or Func Call ---------------*/
 
-funcall returns [Funcall e]
-	:	f= functorExpr? 
-        n= Identifier
-        a= funcallArguments?                {$e=ef.makeFuncall(f==null?null:f.name, ef.getLocatableString(n), a==null?null:a.list);}
+funcall returns [Emitter e]
+	:	(
+	        t= Identifier ':'                         {$e=ef.makeFunctorAccess(ef.getLocatableString(t));}
+            r= funcallRest[$e]                {$e=r.e;}
+        |
+            t= Identifier                           {$e=ef.makeVariableAccess(ef.getLocatableString(t));}
+        )
         (
             DOT
-            n= Identifier
-            a= funcallArguments?                {$e=ef.makeFuncallChain($e, ef.getLocatableString(n), a==null?null:a.list);}
+            r= funcallRest[$e]                {$e=r.e;}
         ) *
 	;
 
-functorExpr returns [LocatableString name]
-	:	t= Identifier ':'                   {$name=ef.getLocatableString(t);}
-	;	
-	
+funcallRest[Emitter invocable] returns [Emitter e]
+    :
+            n= Identifier
+            a= funcallArguments?                {$e=ef.makeMethodCall(invocable, ef.getLocatableString(n), a==null?null:a.list);}
+    ;
+
 funcallArguments returns [List<Emitter> list]
 @init { $list = new ArrayList<Emitter>(); }
 	:   '(' 

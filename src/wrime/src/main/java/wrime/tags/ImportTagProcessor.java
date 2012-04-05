@@ -1,30 +1,20 @@
 package wrime.tags;
 
-import wrime.WrimeException;
-import wrime.util.ExpressionContextKeeper;
+import wrime.ast.TagImport;
+import wrime.util.ExpressionContextRoot;
 
-public class ImportTagProcessor extends PathReceiver implements TagProcessor {
-    private String imports = "";
+import java.io.IOException;
+import java.io.StringWriter;
 
-    @Override
-    public void complete(ExpressionContextKeeper scope) throws WrimeException {
-        if (imports.length() == 0) {
-            error("empty import value");
-        }
-        scope.addImport(imports);
+public class ImportTagProcessor implements TagProcessor {
+    private final TagImport tag;
+
+    public ImportTagProcessor(TagImport tag) {
+        this.tag = tag;
     }
 
     @Override
-    public void pushToken(ExpressionContextKeeper scope, String name) throws WrimeException {
-        imports += name;
-    }
-
-    @Override
-    public void pushDelimiter(ExpressionContextKeeper scope, String delimiter) throws WrimeException {
-        if (".".equals(delimiter) || "*".equals(delimiter)) {
-            imports += delimiter;
-        } else {
-            errorUnexpected(delimiter);
-        }
+    public void render(ExpressionContextRoot scope, StringWriter body) throws IOException {
+        scope.addImport(tag.getPackagePath() + tag.getPackageTarget().getText());
     }
 }

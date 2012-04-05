@@ -1,11 +1,30 @@
 package wrime.ast;
 
 public class Comparison extends Emitter {
+    public static enum Rule {
+        Less("<"),
+        Greater(">"),
+        LessOrEqual("<="),
+        GreaterOrEqual(">="),
+        Equal("=="),
+        NotEqual("!=");
+
+        private final String javaSymbol;
+
+        private Rule(String javaSymbol) {
+            this.javaSymbol = javaSymbol;
+        }
+
+        public String getJavaSymbol() {
+            return javaSymbol;
+        }
+    }
+
     private final Emitter left;
     private final Emitter right;
-    private final ComparisonRule rule;
+    private final Rule rule;
 
-    public Comparison(Emitter left, ComparisonRule rule, Emitter right) {
+    public Comparison(Emitter left, Rule rule, Emitter right) {
         this.rule = rule;
         this.left = left;
         this.right = right;
@@ -19,7 +38,7 @@ public class Comparison extends Emitter {
         return right;
     }
 
-    public ComparisonRule getRule() {
+    public Rule getRule() {
         return rule;
     }
 }
