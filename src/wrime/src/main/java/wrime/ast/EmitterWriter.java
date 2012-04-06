@@ -76,7 +76,7 @@ public class EmitterWriter {
 
     private List<Object> toJavaWords0(FunctorRef emitter) {
         List<Object> result = new ArrayList<Object>();
-        result.add("this.$$" + emitter.getName());
+        result.add("this.$" + emitter.getName());
         return result;
     }
 
@@ -89,7 +89,7 @@ public class EmitterWriter {
             boolean first = true;
             for (Emitter arg : func.getArguments()) {
                 if (!first) {
-                    result.add(", ");
+                    result.add(",");
                 }
                 result.add(arg);
                 first = false;

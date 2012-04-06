@@ -153,6 +153,23 @@ public abstract class TypeWrap {
         public Type getTypeParameterOf(Class generic, int index) {
             return type.getActualTypeArguments()[index];
         }
+
+        @Override
+        public String getJavaSourceName() {
+            StringBuilder builder = new StringBuilder();
+            builder.append(((Class) type.getRawType()).getName());
+            builder.append("<");
+            boolean first = true;
+            for (Type typeArgument : type.getActualTypeArguments()) {
+                if (!first) {
+                    builder.append(", ");
+                }
+                first = false;
+                builder.append(TypeWrap.create(typeArgument).getJavaSourceName());
+            }
+            builder.append(">");
+            return builder.toString();
+        }
     }
 
     static class WildcardWrap extends TypeWrap {

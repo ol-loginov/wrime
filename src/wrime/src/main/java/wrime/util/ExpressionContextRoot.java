@@ -122,6 +122,11 @@ public class ExpressionContextRoot extends ExpressionContextChild implements Exp
     }
 
     @Override
+    public boolean hasFunctor(String name) {
+        return getFunctorType(name) != null;
+    }
+
+    @Override
     public TypeName getFunctorType(String name) {
         return runtime.findFunctorType(name);
     }

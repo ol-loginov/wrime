@@ -2,7 +2,6 @@ package wrime;
 
 import org.junit.Test;
 import wrime.functor.I18Nizer;
-import wrime.functor.StringFunctor;
 
 import java.util.TreeMap;
 
@@ -23,7 +22,7 @@ public class FunctionCallTest extends TestClass {
 
     @Test
     public void argumentCountCheck() throws WrimeException {
-        parseWithError("012", "Expression analyser reports an error: cannot find suitable method with name 'call' (FunctionCallTest/012.txt:2, column 37)");
+        parseWithError("012", "No suitable method 'call' found in type wrime.model.Bean2 (FunctionCallTest/012.txt:2, column 7)");
     }
 
     @Test
@@ -38,6 +37,6 @@ public class FunctionCallTest extends TestClass {
 
     @Test
     public void callOnVoidResult() throws WrimeException {
-        parseWithError("014", "Expression analyser reports an error: no invocable at the point (FunctionCallTest/014.txt:2, column 16)");
+        parseWithError("014", "No suitable method 'no_getter' found in type void (FunctionCallTest/014.txt:2, column 15)");
     }
 }

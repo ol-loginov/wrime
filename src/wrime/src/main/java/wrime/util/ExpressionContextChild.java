@@ -33,8 +33,9 @@ public class ExpressionContextChild implements ExpressionScope {
         return Collections.unmodifiableCollection(attributes);
     }
 
-    public void addAttribute(String attribute) {
+    public ExpressionContextChild addAttribute(String attribute) {
         attributes.add(attribute);
+        return this;
     }
 
     public void addAttributeAll(Collection<String> attributeList) {

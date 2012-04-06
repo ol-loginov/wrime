@@ -1,10 +1,10 @@
 package wrime.tags;
 
 import wrime.ast.TagParam;
+import wrime.output.BodyWriter;
 import wrime.util.ExpressionContextRoot;
 
 import java.io.IOException;
-import java.io.StringWriter;
 
 public class ParamTagProcessor implements TagProcessor {
     private final TagParam tag;
@@ -14,7 +14,7 @@ public class ParamTagProcessor implements TagProcessor {
     }
 
     @Override
-    public void render(ExpressionContextRoot scope, StringWriter body) throws IOException {
+    public void render(ExpressionContextRoot scope, BodyWriter body) throws IOException {
         String option = "";
         if (tag.getOptions().size() > 0) {
             option = tag.getOptions().get(0).getText();

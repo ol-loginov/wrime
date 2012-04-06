@@ -35,6 +35,6 @@ public class TypeName {
 
     @Override
     public String toString() {
-        return isNullType() ? "<null>" : type.toString();
+        return isNullType() ? "<null>" : TypeWrap.create(type).getJavaSourceName();
     }
 }

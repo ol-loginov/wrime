@@ -22,6 +22,6 @@ public class FunctorCallTest extends TestClass {
 
     @Test
     public void callUnknownFunctor() throws WrimeException {
-        parseWithError("001", "Expression analyser reports an error: unknown tag, variable or functor 'no_module' (FunctorCallTest/001.txt:1, column 3)");
+        parseWithError("001", "No functor 'no_module' defined at a point (FunctorCallTest/001.txt:1, column 2)");
     }
 }

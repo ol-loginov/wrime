@@ -11,13 +11,12 @@ import wrime.antlr.EmitterFactory;
 import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
+import wrime.ast.EmitterWriter;
 import wrime.ast.WrimeTag;
-import wrime.ops.EscapedRenderer;
-import wrime.ops.Functor;
-import wrime.ops.Operand;
-import wrime.ops.OperandRendererDefault;
+import wrime.output.BodyWriter;
 import wrime.output.WrimeWriter;
 import wrime.scanner.WrimeScanner;
+import wrime.tags.CallMatcher;
 import wrime.tags.TagFactory;
 import wrime.tags.TagProcessor;
 import wrime.util.*;
@@ -25,7 +24,6 @@ import wrime.util.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -115,34 +113,34 @@ public class SourceComposer implements ExpressionRuntime {
         return className;
     }
 
-    public String getClassCode() {
+    public String getClassCode() throws IOException {
         Body body = new Body();
         for (String name : importNames) {
-            body.l(String.format("import %s;", name));
+            body.line(String.format("import %s;", name));
         }
 
-        body.nl().l(String.format("public class %s extends %s {", className, WrimeWriter.class.getName()))
+        body.nl().line(String.format("public class %s extends %s {", className, WrimeWriter.class.getName()))
                 .scope()
 
                 .a(new ModelParameterListDeclarator())
                 .a(new ModelFunctorListDeclarator())
                 .a(new DeclarationDelimiter())
 
-                .l(String.format("public %s(Writer writer) {", className))
-                .scope().l("super(writer);").leave()
-                .l("}").nl()
+                .line(String.format("public %s(Writer writer) {", className))
+                .scope().line("super(writer);").leave()
+                .line("}").nl()
 
-                .l(String.format("protected void clear() {"))
-                .scope().a(new ModelParameterListCleaner()).a(new ModelFunctorListCleaner()).l("super.clear();").leave()
-                .l("}").nl()
+                .line(String.format("protected void clear() {"))
+                .scope().a(new ModelParameterListCleaner()).a(new ModelFunctorListCleaner()).line("super.clear();").leave()
+                .line("}").nl()
 
-                .l(String.format("protected void assignFields(Map<String, Object> model) {"))
-                .scope().l("super.assignFields(model);").a(new ModelParameterListInitializer()).a(new ModelFunctorListInitializer()).leave()
-                .l("}").nl()
+                .line(String.format("protected void assignFields(Map<String, Object> model) {"))
+                .scope().line("super.assignFields(model);").a(new ModelParameterListInitializer()).a(new ModelFunctorListInitializer()).leave()
+                .line("}").nl()
 
-                .l(String.format("protected void renderContent() throws Exception {"))
+                .line(String.format("protected void renderContent() throws Exception {"))
                 .scope().a(renderContentBody).leave()
-                .l("}")
+                .line("}")
 
                 .leave()
                 .a("}");
@@ -208,9 +206,34 @@ public class SourceComposer implements ExpressionRuntime {
         return functor != null ? new TypeName(functor.getType()) : null;
     }
 
-    private static class Body {
+    private abstract static class BodyWriterForward implements BodyWriter {
+        public abstract BodyWriter getWriter();
+
+        @Override
+        public BodyWriter append(Emitter emitter) throws IOException {
+            return getWriter().append(emitter);
+        }
+
+        @Override
+        public BodyWriter append(CharSequence string) throws IOException {
+            return getWriter().append(string);
+        }
+
+        @Override
+        public BodyWriter nl() throws IOException {
+            return getWriter().nl();
+        }
+
+        @Override
+        public BodyWriter line(CharSequence string) throws IOException {
+            return getWriter().line(string);
+        }
+    }
+
+    private static class Body implements BodyWriter {
         private final StringBuilder body;
         private final String prefix;
+        private boolean addPrefix;
 
         public Body() {
             this(new StringBuilder(), "");
@@ -219,34 +242,54 @@ public class SourceComposer implements ExpressionRuntime {
         public Body(StringBuilder body, String prefix) {
             this.body = body;
             this.prefix = prefix;
+            this.addPrefix = true;
         }
 
-        public Body a(String text) {
-            body.append(prefix).append(text);
+        @Override
+        public Body nl() {
+            body.append(EOL);
+            addPrefix = true;
             return this;
         }
 
-        public Body l(String text) {
-            return a(text).nl();
+        @Override
+        public Body append(CharSequence string) throws IOException {
+            if (addPrefix) {
+                body.append(prefix);
+                addPrefix = false;
+            }
+            body.append(string);
+            return this;
         }
 
-        public Body a(Body other) {
+        @Override
+        public Body append(Emitter emitter) throws IOException {
+            StringWriter emitterBody = new StringWriter();
+            new EmitterWriter(emitterBody).write(emitter);
+            return append(emitterBody.toString());
+        }
+
+        @Override
+        public Body line(CharSequence string) throws IOException {
+            return append(string).nl();
+        }
+
+        public Body a(String text) throws IOException {
+            return append(text);
+        }
+
+        public Body a(Body other) throws IOException {
             return everyLine(other.toString());
         }
 
-        public Body everyLine(String bunchOfLines) {
+        public Body everyLine(String bunchOfLines) throws IOException {
             if (bunchOfLines.length() > 0) {
                 Scanner scanner = new Scanner(new StringReader(bunchOfLines));
                 scanner.useDelimiter(Pattern.compile(Pattern.quote(EOL)));
                 while (scanner.hasNext()) {
-                    l(scanner.next());
+                    line(scanner.next());
                 }
             }
-            return this;
-        }
-
-        public Body nl() {
-            body.append(EOL);
             return this;
         }
 
@@ -262,19 +305,19 @@ public class SourceComposer implements ExpressionRuntime {
             return new Body(body, prefix.substring(SCOPE_IDENT.length()));
         }
 
-        public Body a(BodyCallback callback) {
+        public Body a(BodyCallback callback) throws IOException {
             callback.in(this);
             return this;
         }
     }
 
     private interface BodyCallback {
-        void in(Body body);
+        void in(BodyWriter body) throws IOException;
     }
 
     private class DeclarationDelimiter implements BodyCallback {
         @Override
-        public void in(Body body) {
+        public void in(BodyWriter body) throws IOException {
             if (getModelParameters().size() > 0 || functorNames.size() > 0) {
                 body.nl();
             }
@@ -283,31 +326,27 @@ public class SourceComposer implements ExpressionRuntime {
 
     private class ModelParameterListDeclarator implements BodyCallback {
         @Override
-        public void in(Body body) {
+        public void in(BodyWriter body) throws IOException {
             for (ParameterName parameter : getModelParameters()) {
-                body.l(String.format("private %s %s;",
-                        parameter.getType().getAlias(),
-                        parameter.getName()));
+                body.line(String.format("private %s %s;", parameter.getType().getAlias(), parameter.getName()));
             }
         }
     }
 
     private class ModelParameterListCleaner implements BodyCallback {
         @Override
-        public void in(Body body) {
+        public void in(BodyWriter body) throws IOException {
             for (ParameterName parameter : getModelParameters()) {
-                body.l(String.format("this.%s=%s;",
-                        parameter.getName(),
-                        Defaults.getDefaultValueString(parameter.getType().getType())));
+                body.line(String.format("this.%s=%s;", parameter.getName(), Defaults.getDefaultValueString(parameter.getType().getType())));
             }
         }
     }
 
     private class ModelParameterListInitializer implements BodyCallback {
         @Override
-        public void in(Body body) {
+        public void in(BodyWriter body) throws IOException {
             for (ParameterName parameter : getModelParameters()) {
-                body.l(String.format("this.%s=(%s)model.get(\"%s\");",
+                body.line(String.format("this.%s=(%s)model.get(\"%s\");",
                         parameter.getName(),
                         parameter.getType().getAlias(),
                         EscapeUtils.escapeJavaString(parameter.getName())));
@@ -317,9 +356,9 @@ public class SourceComposer implements ExpressionRuntime {
 
     private class ModelFunctorListDeclarator implements BodyCallback {
         @Override
-        public void in(Body body) {
+        public void in(BodyWriter body) throws IOException {
             for (FunctorName functor : functorNames.values()) {
-                body.l(String.format("private %s %s;",
+                body.line(String.format("private %s %s;",
                         TypeWrap.create(functor.getType()).getJavaSourceName(),
                         functor.getField()));
             }
@@ -328,19 +367,19 @@ public class SourceComposer implements ExpressionRuntime {
 
     private class ModelFunctorListCleaner implements BodyCallback {
         @Override
-        public void in(Body body) {
+        public void in(BodyWriter body) throws IOException {
             for (FunctorName functor : functorNames.values()) {
-                body.l(String.format("this.%s=null;", functor.getField()));
+                body.line(String.format("this.%s=null;", functor.getField()));
             }
         }
     }
 
     private class ModelFunctorListInitializer implements BodyCallback {
         @Override
-        public void in(Body body) {
+        public void in(BodyWriter body) throws IOException {
             for (FunctorName functor : functorNames.values()) {
                 String functorKey = functorPrefix + functor.getName();
-                body.l(String.format("this.%s=(%s)model.get(\"%s\");", functor.getField(), TypeWrap.create(functor.getType()).getJavaSourceName(), functorKey));
+                body.line(String.format("this.%s=(%s)model.get(\"%s\");", functor.getField(), TypeWrap.create(functor.getType()).getJavaSourceName(), functorKey));
             }
         }
     }
@@ -434,22 +473,36 @@ public class SourceComposer implements ExpressionRuntime {
             }
 
             if (cmd != null && cmd.tag != null) {
-                TagProcessor processor = commandTag(cmd.tag);
-                StringWriter content = new StringWriter();
-                processor.render(expressionContext, content);
-                renderContentBody.everyLine(content.toString());
+                commandTag(cmd.tag).render(expressionContext, new BodyWriterForward() {
+                    @Override
+                    public BodyWriter getWriter() {
+                        return renderContentBody;
+                    }
+                });
                 return;
             }
 
             throw new WrimeException("empty expression", null, path, line + 1, column + 1);
         }
 
-        private void commandExpression(Emitter expression, boolean rawOutput) {
-            /*
-            DirectCallRenderer callRenderer = new DirectCallRenderer();
-            RootReceiver rootReceiver = new RootReceiver(tagFactories, callRenderer);
-            PathContext expressionPath = new PathContext(callRenderer, rootReceiver);
-            */
+        private void commandExpression(Emitter expression, boolean rawOutput) throws IOException {
+            new CallMatcher(expression).matchTypes(expressionContext.current());
+
+            StringWriter writer = new StringWriter();
+            boolean renderReturnValue = !expression.getReturnType().isVoid();
+
+            new EmitterWriter(writer).write(expression);
+
+            if (renderReturnValue) {
+                renderContentBody
+                        .append(rawOutput ? RAW_WRITE_METHOD : ESCAPED_WRITE_METHOD).append("(")
+                        .append(writer.toString())
+                        .line(");");
+            } else {
+                renderContentBody
+                        .append(writer.toString())
+                        .line(";");
+            }
         }
 
         private TagProcessor commandTag(WrimeTag tag) {
@@ -484,59 +537,14 @@ public class SourceComposer implements ExpressionRuntime {
         @Override
         public void text(String text) throws WrimeException {
             ensureNotReady();
-            if (text != null && text.length() > 0) {
-                renderContentBody.l(String.format("%s(\"%s\");", TEXT_WRITE_METHOD, EscapeUtils.escapeJavaString(text)));
-            }
-        }
-    }
-
-    private class DirectCallRenderer extends OperandRendererDefault implements EscapedRenderer {
-        private boolean escapeBeforeWrite;
-
-        @Override
-        public void escapeBeforeWrite(boolean enable) {
-            this.escapeBeforeWrite = enable;
-        }
-
-        @Override
-        public void render(Operand operand) throws WrimeException {
-            if (operand == null) {
+            if (text == null || text.length() <= 0) {
                 return;
             }
-
-            StringWriter writer = new StringWriter();
             try {
-                super.render(operand, writer);
+                renderContentBody.line(String.format("%s(\"%s\");", TEXT_WRITE_METHOD, EscapeUtils.escapeJavaString(text)));
             } catch (IOException e) {
-                error("writer error", e);
+                throw new WrimeException("i/o error", e);
             }
-
-            String closer = "";
-            if (operand.isStatement()) {
-                closer = ";";
-            }
-
-            String format;
-            if (isWritable(operand.getResult())) {
-                if (escapeBeforeWrite) {
-                    format = ESCAPED_WRITE_METHOD + "(%s)%s";
-                } else {
-                    format = RAW_WRITE_METHOD + "(%s)%s";
-                }
-            } else {
-                format = "%s%s";
-            }
-            renderContentBody.everyLine(String.format(format, writer.toString(), closer));
-        }
-
-        @Override
-        public void render(Functor operand, Writer writer) throws IOException {
-            FunctorName functor = functorNames.get(operand.getName());
-            writer.append(String.format("this.%s", functor.getField()));
-        }
-
-        private boolean isWritable(TypeName def) {
-            return def != null && def.getType() != null && !def.getType().equals(Void.TYPE);
         }
     }
 }

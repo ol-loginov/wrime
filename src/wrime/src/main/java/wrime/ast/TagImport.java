@@ -21,4 +21,8 @@ public class TagImport extends WrimeTag {
     public boolean isAllFromPackage() {
         return packageTarget == null;
     }
+
+    public String getJavaImport() {
+        return getPackagePath() + (isAllFromPackage() ? "*" : getPackageTarget().getText());
+    }
 }

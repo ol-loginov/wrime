@@ -45,8 +45,8 @@ public class WrimeScannerImpl implements WrimeScanner {
         ScanContext context = new ScanContext();
         while (scanner.next(context.token)) {
             try {
-                receiver.setLocation(path, context.token.line, context.token.column);
                 accept(receiver, context);
+                receiver.setLocation(path, context.token.line, context.token.column);
                 if (context.token.type == TokenType.EOF) {
                     return;
                 }

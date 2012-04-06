@@ -34,6 +34,7 @@ public class WrimeEngineFactory {
             put("import", new ImportTagFactory());
             put("for", new ForTagFactory());
             put("continue", new ContinueTagFactory());
+            put("break", new BreakTagFactory());
             put("param", new ParamTagFactory());
             put("if", new IfTagFactory());
             put("set", new SetTagFactory());

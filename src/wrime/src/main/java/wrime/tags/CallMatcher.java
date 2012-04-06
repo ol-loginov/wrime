@@ -18,7 +18,7 @@ import java.util.Stack;
  */
 public class CallMatcher {
     private final Stack<MatchRequest> emittersToMatch;
-
+    private final Emitter root;
 
     private static class MatchRequest {
         public final Emitter emitter;
@@ -34,12 +34,13 @@ public class CallMatcher {
         }
     }
 
-    public CallMatcher(final Emitter emitter) {
+    public CallMatcher(Emitter emitter) {
         if (emitter == null) {
             throw new IllegalArgumentException("emitter is null");
         }
+        this.root = emitter;
         this.emittersToMatch = new Stack<MatchRequest>() {{
-            push(new MatchRequest(emitter));
+            push(new MatchRequest(root));
         }};
     }
 
@@ -51,10 +52,11 @@ public class CallMatcher {
         emittersToMatch.push(new MatchRequest(emitter, false));
     }
 
-    public void matchTypes(ExpressionScope scope) {
+    public CallMatcher matchTypes(ExpressionScope scope) {
         while (!emittersToMatch.empty()) {
             matchTypes(emittersToMatch.pop(), scope);
         }
+        return this;
     }
 
     private void matchTypes(MatchRequest request, ExpressionScope scope) {
@@ -194,7 +196,7 @@ public class CallMatcher {
                     emitter.getMethodName(),
                     argumentTypes.toArray(new TypeName[argumentTypes.size()]));
             if (method == null) {
-                throw new WrimeException("No method '" + emitter.getMethodName() + "' found in type " + invocable.getReturnType(), null, emitter.getLocation());
+                throw new WrimeException("No suitable method '" + emitter.getMethodName() + "' found in type " + invocable.getReturnType(), null, emitter.getLocation());
             }
             emitter.setInvocation(method);
             emitter.setReturnType(TypeUtil.createReturnTypeDef(method));
@@ -202,7 +204,7 @@ public class CallMatcher {
     }
 
     public static void requireReturnType(Emitter emitter, String need) {
-        if (emitter.getReturnType() == null || emitter.getReturnType().isNullType()) {
+        if (emitter.getReturnType() == null) {
             throw new WrimeException("component has no defined return type (" + need + ")", null, emitter.getLocation());
         }
     }
@@ -211,6 +213,12 @@ public class CallMatcher {
         requireReturnType(emitter, need);
         if (!TypeWrap.create(emitter.getReturnType().getType()).isAssignableTo(clazz)) {
             throw new WrimeException("statement is not of type needed (" + need + ")", null, emitter.getLocation());
+        }
+    }
+
+    public void requireBooleanReturnType(String need) {
+        if (!isBoolean(root.getReturnType())) {
+            throw new WrimeException("component is not of boolean type (" + need + ")", null, root.getLocation());
         }
     }
 

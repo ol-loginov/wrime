@@ -2,6 +2,7 @@ package wrime;
 
 import wrime.bytecode.SourceComposer;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 
@@ -37,7 +38,11 @@ public class TestClass {
 
     protected void parseAndVerify(String resource) throws WrimeException {
         SourceComposer compiler = parse(resources.load(resource + ".txt"));
-        resources.verify(resource + ".code", compiler.getClassCode());
+        try {
+            resources.verify(resource + ".code", compiler.getClassCode());
+        } catch (IOException e) {
+            throw new WrimeException("i/o error", e);
+        }
     }
 
     protected void renderAndVerify(String resource, Map<String, Object> model) throws WrimeException {
