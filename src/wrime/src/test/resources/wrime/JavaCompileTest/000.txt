@@ -13,8 +13,8 @@ ${set b=""}
 <ul>
 ${for(ch : a.toCharArray())}
  ${set b=str:repeat(ch, 10)}
- ${if(l:eq(ch,"@"))}${continue}${if}
- ${if(l:eq(ch,"#"))}${break}${if}
+ ${if(ch eq "@")}${continue}${if}
+ ${if(ch eq "#")}${break}${if}
 <li>
 <a>${ch}</a>
 <span>${#b}</span>

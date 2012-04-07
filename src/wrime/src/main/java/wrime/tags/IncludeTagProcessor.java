@@ -26,7 +26,7 @@ public class IncludeTagProcessor implements TagProcessor {
         } else {
             modelName = String.format("$includeAt$%d$%d", tag.getLocation().getLine(), tag.getLocation().getColumn());
 
-            body.line(String.format("Map<String, Object> %s = new TreeMap<String, Object>()", modelName));
+            body.line(String.format("Map<String, Object> %s = new TreeMap<String, Object>();", modelName));
 
             for (Assignment assignment : tag.getArguments()) {
                 body.append(String.format("%s.put(\"%s\", ", modelName, assignment.getVar().getText()));

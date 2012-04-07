@@ -27,9 +27,9 @@ public class W$JavaCompileTest$001_txt extends wrime.output.WrimeWriter {
 
   protected void renderContent() throws Exception {
     for(char ch : a.toCharArray()) {
-      Map<String,Object> $includeAt_2_35 = new TreeMap<String,Object>();
-      $includeAt_2_35.put("value", ch);
-      this.include("001-char.txt", $includeAt_2_35);
+      Map<String, Object> $includeAt$3$24 = new TreeMap<String, Object>();
+      $includeAt$3$24.put("value", ch);
+      this.$$include("001-char.txt", $includeAt$3$24);
       this.$$t("|");
     }
   }

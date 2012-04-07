@@ -7,7 +7,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class WrimeWriter {
+public abstract class WrimeWriter extends WrimeWriterComparisonMixin {
     private final Writer writer;
     private IncludeWriterListener $$includeWriterListener;
     private Map<String, Object> model;
@@ -68,19 +68,7 @@ public abstract class WrimeWriter {
         writer.write(value.toString());
     }
 
-    protected boolean ifTrue(boolean bool) {
-        return bool;
-    }
-
-    protected boolean ifTrue(Boolean bool) {
-        return Boolean.TRUE.equals(bool);
-    }
-
-    protected boolean ifTrue(Object bool) {
-        return bool != null;
-    }
-
-    protected void include(String resource, Map<String, Object> model) {
+    protected void $$include(String resource, Map<String, Object> model) {
         if (this.$$includeWriterListener == null) {
             throw new WrimeException("cannot handle include statement", null);
         }

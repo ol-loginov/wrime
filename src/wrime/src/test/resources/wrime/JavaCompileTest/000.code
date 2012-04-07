@@ -42,16 +42,16 @@ public class W$JavaCompileTest$000_txt extends wrime.output.WrimeWriter {
     this.$$t("</head>\n<title>");
     this.$$r(a.length());
     this.$$t("</title>\n<body>\n<h1>");
-    this.$$e(this.$str.concat(a,a,a));
+    this.$$e(this.$str.concat(a, a, a));
     this.$$t("</h1>");
     java.lang.String b = "";
     this.$$t("\n<ul>");
     for(char ch : a.toCharArray()) {
-      b = this.$str.repeat(ch,10);
-      if(ifTrue(this.$l.eq(ch,"@"))) {
+      b = this.$str.repeat(ch, 10);
+      if ($c$Equal(ch, "@")) {
         continue;
       }
-      if(ifTrue(this.$l.eq(ch,"#"))) {
+      if ($c$Equal(ch, "#")) {
         break;
       }
       this.$$t("\n<li>\n<a>");
