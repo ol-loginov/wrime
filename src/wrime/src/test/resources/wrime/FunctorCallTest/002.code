@@ -21,7 +21,7 @@ public class W$FunctorCallTest$002_txt extends wrime.output.WrimeWriter {
 
   protected void renderContent() throws Exception {
     this.$$e(this.$i18n.translate("Call me the greatest!"));
-    this.$$e(this.$i18n.translate("Call me the greatest!","бугагашеньки"));
+    this.$$e(this.$i18n.translate("Call me the greatest!", "бугагашеньки"));
     this.$$r(this.$i18n.translate("\\\\b"));
   }
 }

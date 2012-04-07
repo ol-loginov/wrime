@@ -10,7 +10,7 @@ public class IfTest extends TestClass {
 
     @Test
     public void voidInIf() throws WrimeException {
-        parseWithError("001", "IF builder reports an error: call is not conditional statement (IfTest/001.txt:2, column 21)");
+        parseWithError("001", "component is not of boolean type (needed for test expression) (IfTest/001.txt:2, column 10)");
     }
 
     @Test
@@ -20,16 +20,16 @@ public class IfTest extends TestClass {
 
     @Test
     public void elseWithoutIf() throws WrimeException {
-        parseWithError("003", "ELSE builder reports an error: current scope is not IF scope (IfTest/003.txt:2, column 7)");
+        parseWithError("003", "Current scope is not FOR (IfTest/003.txt:2, column 7)");
     }
 
     @Test
     public void elifWithoutIf() throws WrimeException {
-        parseWithError("004", "ELIF builder reports an error: current scope is not IF scope (IfTest/004.txt:2, column 3)");
+        parseWithError("004", "lexical error in command (IfTest/004.txt:1, column 1)");
     }
 
     @Test
     public void elifEmpty() throws WrimeException {
-        parseWithError("005", "ELIF builder reports an error: no condition specified (IfTest/005.txt:3, column 7)");
+        parseWithError("005", "lexical error in command (IfTest/005.txt:2, column 1)");
     }
 }

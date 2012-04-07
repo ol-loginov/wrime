@@ -1,20 +1,30 @@
 package wrime.ast;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class TagSet extends WrimeTag {
-    private final LocatableString variable;
-    private final Emitter value;
+    public static class Variable {
+        public String variable;
+        public Emitter value;
+    }
+
+    private final List<Variable> variables = new ArrayList<Variable>();
 
     public TagSet(LocatableString variable, Emitter value) {
         super("set");
-        this.value = value;
-        this.variable = variable;
+        addVariable(variable, value);
     }
 
-    public LocatableString getVariable() {
-        return variable;
+    public List<Variable> getVariables() {
+        return Collections.unmodifiableList(variables);
     }
 
-    public Emitter getValue() {
-        return value;
+    public void addVariable(final LocatableString varName, final Emitter varValue) {
+        variables.add(new Variable() {{
+            this.variable = varName.getText();
+            this.value = varValue;
+        }});
     }
 }

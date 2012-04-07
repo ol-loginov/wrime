@@ -24,7 +24,7 @@ public class W$FunctionCallTest$013_txt extends wrime.output.WrimeWriter {
 
   protected void renderContent() throws Exception {
     this.$$t("\nA");
-    bean.varg(bean.getInteger(),bean.getString(),bean.getString());
+    bean.varg(bean.getInteger(), bean.getString(), bean.getString());
     this.$$t("G");
   }
 }

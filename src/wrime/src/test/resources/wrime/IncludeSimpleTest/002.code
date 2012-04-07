@@ -21,10 +21,10 @@ public class W$IncludeSimpleTest$002_txt extends wrime.output.WrimeWriter {
 
   protected void renderContent() throws Exception {
     for(char ch : b.toCharArray()) {
-      Map<String,Object> $includeAt_2_40 = new TreeMap<String,Object>();
-      $includeAt_2_40.put("ch", ch);
-      $includeAt_2_40.put("ch2", ch);
-      this.include("000-include.txt", $includeAt_2_40);
+      Map<String, Object> $includeAt$3$27 = new TreeMap<String, Object>()
+      $includeAt$3$27.put("ch", ch);
+      $includeAt$3$27.put("ch2", ch);
+      this.$$include("000-include.txt", $includeAt$3$27);
     }
   }
 }

@@ -23,6 +23,6 @@ public class W$FunctionCallTest$010_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    this.$$e(bean.arg2(bean.getHello(),bean.getHello()));
+    this.$$e(bean.arg2(bean.getHello(), bean.getHello()));
   }
 }

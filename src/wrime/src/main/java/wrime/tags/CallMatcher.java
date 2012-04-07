@@ -142,8 +142,8 @@ public class CallMatcher {
             matchNeeded(emitter.getLeft());
             matchNeeded(emitter.getRight());
         } else {
-            requireNumberReturnType(emitter.getLeft(), "required for comparison " + emitter.getRule());
-            requireNumberReturnType(emitter.getRight(), "required for comparison " + emitter.getRule());
+            requireNoVoidType(emitter.getLeft(), "required for comparison " + emitter.getRule());
+            requireNoVoidType(emitter.getRight(), "required for comparison " + emitter.getRule());
             emitter.setReturnType(new TypeName(boolean.class));
         }
     }
@@ -203,8 +203,18 @@ public class CallMatcher {
         }
     }
 
+    public void requireReturnType(String need) {
+        requireReturnType(root, need);
+    }
+
     public static void requireReturnType(Emitter emitter, String need) {
         if (emitter.getReturnType() == null) {
+            throw new WrimeException("component has no defined return type (" + need + ")", null, emitter.getLocation());
+        }
+    }
+
+    public static void requireNoVoidType(Emitter emitter, String need) {
+        if (emitter.getReturnType() == null || emitter.getReturnType().isVoid()) {
             throw new WrimeException("component has no defined return type (" + need + ")", null, emitter.getLocation());
         }
     }
@@ -239,17 +249,17 @@ public class CallMatcher {
     }
 
     private int getNumberTypeWeight(TypeName a) {
-        if (byte.class.equals(a.getType()) || Byte.TYPE.equals(a.getType()))
+        if (byte.class.equals(a.getType()) || Byte.class.equals(a.getType()))
             return 0;
-        if (short.class.equals(a.getType()) || Short.TYPE.equals(a.getType()))
+        if (short.class.equals(a.getType()) || Short.class.equals(a.getType()))
             return 1;
-        if (int.class.equals(a.getType()) || Integer.TYPE.equals(a.getType()))
+        if (int.class.equals(a.getType()) || Integer.class.equals(a.getType()))
             return 2;
-        if (long.class.equals(a.getType()) || Long.TYPE.equals(a.getType()))
+        if (long.class.equals(a.getType()) || Long.class.equals(a.getType()))
             return 3;
-        if (float.class.equals(a.getType()) || Float.TYPE.equals(a.getType()))
+        if (float.class.equals(a.getType()) || Float.class.equals(a.getType()))
             return 4;
-        if (double.class.equals(a.getType()) || Double.TYPE.equals(a.getType()))
+        if (double.class.equals(a.getType()) || Double.class.equals(a.getType()))
             return 5;
         throw new WrimeException("cannot work with number type " + a, null);
     }
@@ -258,18 +268,18 @@ public class CallMatcher {
         if (type == null || type.isNullType()) {
             return false;
         }
-        return byte.class.equals(type.getType()) || Byte.TYPE.equals(type.getType())
-                || short.class.equals(type.getType()) || Short.TYPE.equals(type.getType())
-                || int.class.equals(type.getType()) || Integer.TYPE.equals(type.getType())
-                || long.class.equals(type.getType()) || Long.TYPE.equals(type.getType())
-                || float.class.equals(type.getType()) || Float.TYPE.equals(type.getType())
-                || double.class.equals(type.getType()) || Double.TYPE.equals(type.getType());
+        return byte.class.equals(type.getType()) || Byte.class.equals(type.getType())
+                || short.class.equals(type.getType()) || Short.class.equals(type.getType())
+                || int.class.equals(type.getType()) || Integer.class.equals(type.getType())
+                || long.class.equals(type.getType()) || Long.class.equals(type.getType())
+                || float.class.equals(type.getType()) || Float.class.equals(type.getType())
+                || double.class.equals(type.getType()) || Double.class.equals(type.getType());
     }
 
     private boolean isBoolean(TypeName type) {
         if (type == null || type.isNullType()) {
             return false;
         }
-        return boolean.class.equals(type.getType()) || Boolean.TYPE.equals(type.getType());
+        return boolean.class.equals(type.getType()) || Boolean.class.equals(type.getType());
     }
 }

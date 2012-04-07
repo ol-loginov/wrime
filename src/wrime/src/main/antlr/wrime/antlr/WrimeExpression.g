@@ -154,9 +154,15 @@ tagImport returns [TagImport tag]
 	
 tagSet returns [TagSet tag]
 	:	o= SET
-        t= Identifier 
+        t= Identifier
         EQUAL
         e= expression               {$tag=ef.makeTagSet(ef.getLocation(o),ef.getLocatableString(t),e.e);}
+	    (
+	        ','
+            t= Identifier
+            EQUAL
+            e= expression               {$tag.addVariable(ef.getLocatableString(t),e.e);}
+        )*
 	;
 
 tagParam returns [TagParam tag]
@@ -200,7 +206,7 @@ genericSpec returns [List<ClassName> spec]
 tagInclude returns [TagInclude tag]
 	:	o= INCLUDE
         '(' 
-        f= funcall                          {$tag=ef.makeTagInclude(ef.getLocation(o),f.e);}
+        f= atom                          {$tag=ef.makeTagInclude(ef.getLocation(o),f.e);}
         (
             ',' 
             p= assignOrIdentifierExpr       {$tag.addAssignment(p.a);}

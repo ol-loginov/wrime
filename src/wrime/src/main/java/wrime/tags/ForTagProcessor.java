@@ -22,11 +22,19 @@ public class ForTagProcessor implements TagProcessor {
         ExpressionContextChild scope = context.current();
         switch (tag.getMode()) {
             case OPEN:
-                new CallMatcher(tag.getIterable()).matchTypes(scope);
-                CallMatcher.requireReturnType(tag.getIterable(), Iterable.class, "");
+                new CallMatcher(tag.getIterable())
+                        .matchTypes(scope);
 
                 TypeName iterableType = tag.getIterable().getReturnType();
-                TypeName iteratorType = new TypeName(TypeWrap.create(iterableType.getType()).getTypeParameterOf(Iterable.class, 0));
+                TypeWrap iterableTypeWrap = TypeWrap.create(iterableType.getType());
+                TypeName iteratorType;
+                if (iterableTypeWrap.isAssignableTo(Iterable.class)) {
+                    iteratorType = new TypeName(iterableTypeWrap.getTypeParameterOf(Iterable.class, 0));
+                } else if (iterableTypeWrap.isArray()) {
+                    iteratorType = new TypeName(iterableTypeWrap.getComponentType());
+                } else {
+                    throw new WrimeException("iterable neither Array type nor Iterable", null, tag.getIterable().getLocation());
+                }
 
                 body.append(String.format("for(%s %s : ", iteratorType.toString(), tag.getVariable().getText()))
                         .append(tag.getIterable())

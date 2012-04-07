@@ -22,7 +22,7 @@ public class W$SetTest$000_txt extends wrime.output.WrimeWriter {
   protected void renderContent() throws Exception {
     java.lang.String s = "";
     int n = 1;
-    java.lang.String s2 = this.$str.repeat("s2",2);
+    java.lang.String s2 = this.$str.repeat("s2", 2);
     n = 2;
     s = s2.substring(1);
     this.$$r(s);

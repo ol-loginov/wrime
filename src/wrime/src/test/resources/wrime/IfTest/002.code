@@ -20,8 +20,8 @@ public class W$IfTest$002_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    if(ifTrue(bean.getBool())) {
-    } else if(ifTrue(bean.getBoolean())) {
+    if (bean.getBool()) {
+    } else if (bean.getBoolean()) {
     } else {
     }
   }

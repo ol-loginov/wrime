@@ -89,7 +89,7 @@ public class EmitterWriter {
             boolean first = true;
             for (Emitter arg : func.getArguments()) {
                 if (!first) {
-                    result.add(",");
+                    result.add(", ");
                 }
                 result.add(arg);
                 first = false;
@@ -116,7 +116,7 @@ public class EmitterWriter {
     }
 
     private List<Object> toJavaWords0(Comparison c) {
-        return asList(c.getLeft(), " " + c.getRule().getJavaSymbol() + " ", c.getRight());
+        return asList("$c$" + c.getRule(), "(", c.getLeft(), ", ", c.getRight(), ")");
     }
 
     private List<Object> toJavaWords0(Inverter emitter) {

@@ -33,15 +33,15 @@ public class EmitTest {
         checkExpression("1 and (2 or 3)", "1 && (2 || 3)");
         checkExpression("1 and not (2 or 3)", "1 && !(2 || 3)");
 
-        checkExpression("1 gt (2 lt 3 gte 3)", "1 > (2 < 3 >= 3)");
-        checkExpression("1 gt 2 lt 3 gte 3 lte 4 eq 5 neq 6", "1 > 2 < 3 >= 3 <= 4 == 5 != 6");
+        checkExpression("1 gt (2 lt 3 gte 3)", "$c$Greater(1, ($c$GreaterOrEqual($c$Less(2, 3), 3)))");
+        checkExpression("1 gt 2 lt 3 gte 3 lte 4 eq 5 neq 6", "$c$NotEqual($c$Equal($c$LessOrEqual($c$GreaterOrEqual($c$Less($c$Greater(1, 2), 3), 3), 4), 5), 6)");
 
         checkExpression("1+2-3*4/5%4", "1 + 2 - 3 * 4 / 5 % 4");
 
         checkExpression("true   and    false        or      null", "true && false || null");
         checkExpression("'true'   and    \"false\"        or      \"nu'll\"", "\"true\" && \"false\" || \"nu'll\"");
 
-        checkExpression("i18n:translate('asdasd', 100)", "this.$$i18n.translate(\"asdasd\", 100)");
+        checkExpression("i18n:translate('asdasd', 100)", "this.$i18n.translate(\"asdasd\", 100)");
         checkExpression("agone.bubba.value", "agone.bubba().value()");
     }
 }

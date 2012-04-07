@@ -16,6 +16,6 @@ public class W$IncludeSimpleTest$000_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    this.include("000-include.txt", null);
+    this.$$include("000-include.txt", null);
   }
 }

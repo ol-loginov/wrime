@@ -1,9 +1,9 @@
 ${param wrime.model.IfBean bean}
-${if(bean)}
+${if(bean eq null)}
   ${if(bean.bool)}
   ${if}
   ${if(bean.boolean)}
   ${if}
-  ${if(bean.reference)}
+  ${if(bean.reference neq null)}
   ${if}
 ${if}
