@@ -3,8 +3,7 @@ package wrime.spring.webmvc;
 import wrime.WrimeEngine;
 import wrime.WrimeEngineFactory;
 
-import java.util.HashMap;
-
+@SuppressWarnings("UnusedDeclaration")
 public class WrimeEngineFactoryAdapter extends WrimeEngineFactory {
     private WrimeEngine engine;
 
@@ -19,8 +18,5 @@ public class WrimeEngineFactoryAdapter extends WrimeEngineFactory {
     @Override
     public void initializeFunctors(WrimeEngine engine) {
         super.initializeFunctors(engine);
-        engine.setFunctors(new HashMap<String, Object>() {{
-            put("servlet", new ServletFunctor());
-        }});
     }
 }

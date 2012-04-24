@@ -1,9 +1,10 @@
-package wrime.spring.webmvc;
+package wrime.spring.webmvc.functors;
 
 import org.springframework.context.MessageSource;
 
 import java.util.Locale;
 
+@SuppressWarnings("UnusedDeclaration")
 public class L18nFunctor {
     private final MessageSource source;
     private final Locale locale;

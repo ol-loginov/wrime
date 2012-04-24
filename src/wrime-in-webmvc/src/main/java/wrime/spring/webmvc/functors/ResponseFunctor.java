@@ -1,15 +1,16 @@
-package wrime.spring.webmvc;
+package wrime.spring.webmvc.functors;
 
 import org.springframework.web.context.request.ServletWebRequest;
 
-public class ServletFunctor {
+@SuppressWarnings("UnusedDeclaration")
+public class ResponseFunctor {
     private final ServletWebRequest request;
 
-    public ServletFunctor() {
+    public ResponseFunctor() {
         this(null);
     }
 
-    public ServletFunctor(ServletWebRequest request) {
+    public ResponseFunctor(ServletWebRequest request) {
         this.request = request;
     }
 
