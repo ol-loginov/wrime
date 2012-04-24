@@ -116,7 +116,7 @@ public class EmitterWriter {
     }
 
     private List<Object> toJavaWords0(Comparison c) {
-        return asList("$c$" + c.getRule(), "(", c.getLeft(), ", ", c.getRight(), ")");
+        return asList("$$c." + c.getRule(), "(", c.getLeft(), ", ", c.getRight(), ")");
     }
 
     private List<Object> toJavaWords0(Inverter emitter) {

@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("UnusedDeclaration")
-public abstract class WrimeWriter extends WrimeWriterComparisonMixin {
+public abstract class WrimeWriter {
     private final Writer writer;
-    private IncludeWriterListener $$includeWriterListener;
+    protected final WrimeWriterComparisonMixin $$c = new WrimeWriterComparisonMixin();
+
+    private IncludeCallback $$includeCallback;
     private Map<String, Object> model;
 
     protected WrimeWriter(Writer writer) {
@@ -21,8 +23,8 @@ public abstract class WrimeWriter extends WrimeWriterComparisonMixin {
         return model;
     }
 
-    public void setIncludeWriterListener(IncludeWriterListener listener) {
-        this.$$includeWriterListener = listener;
+    public void setIncludeCallback(IncludeCallback listener) {
+        this.$$includeCallback = listener;
     }
 
     public void render(Map<String, Object> model) throws WrimeException {
@@ -70,13 +72,13 @@ public abstract class WrimeWriter extends WrimeWriterComparisonMixin {
     }
 
     protected void $$include(String resource, Map<String, Object> model) {
-        if (this.$$includeWriterListener == null) {
+        if (this.$$includeCallback == null) {
             throw new WrimeException("cannot handle include statement", null);
         }
         Map<String, Object> next = new HashMap<String, Object>(this.model);
         if (model != null && !model.isEmpty()) {
             next.putAll(model);
         }
-        this.$$includeWriterListener.include(this, resource, next, writer);
+        this.$$includeCallback.include(this, resource, next, writer);
     }
 }

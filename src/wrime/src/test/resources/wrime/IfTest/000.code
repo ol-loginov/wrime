@@ -20,12 +20,12 @@ public class W$IfTest$000_txt extends wrime.output.WrimeWriter {
   }
 
   protected void renderContent() throws Exception {
-    if ($c$Equal(bean, null)) {
+    if ($$c.Equal(bean, null)) {
       if (bean.getBool()) {
       }
       if (bean.getBoolean()) {
       }
-      if ($c$NotEqual(bean.getReference(), null)) {
+      if ($$c.NotEqual(bean.getReference(), null)) {
       }
     }
   }

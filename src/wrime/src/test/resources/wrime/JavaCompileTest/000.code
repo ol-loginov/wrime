@@ -48,10 +48,10 @@ public class W$JavaCompileTest$000_txt extends wrime.output.WrimeWriter {
     this.$$t("\n<ul>");
     for(char ch : a.toCharArray()) {
       b = this.$str.repeat(ch, 10);
-      if ($c$Equal(ch, "@")) {
+      if ($$c.Equal(ch, "@")) {
         continue;
       }
-      if ($c$Equal(ch, "#")) {
+      if ($$c.Equal(ch, "#")) {
         break;
       }
       this.$$t("\n<li>\n<a>");
