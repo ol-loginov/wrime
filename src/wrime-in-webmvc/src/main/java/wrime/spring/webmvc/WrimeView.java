@@ -50,7 +50,6 @@ public class WrimeView extends AbstractTemplateView implements MessageSourceAwar
     @Override
     public void setMessageSource(MessageSource messageSource) {
         this.messageSource = messageSource;
-
     }
 
     protected WrimeEngine getWrimeEngine() {
@@ -67,7 +66,7 @@ public class WrimeView extends AbstractTemplateView implements MessageSourceAwar
         resourceLoader = context;
 
         if (getWrimeEngine() == null) {
-            // No explicit VelocityEngine: try to autodetect one.
+            // No WrimeEngine set, try to create from scratch.
             setWrimeEngine(autodetectEngine());
         }
 

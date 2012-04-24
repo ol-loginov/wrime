@@ -155,6 +155,11 @@ public abstract class TypeWrap {
         }
 
         @Override
+        public Type getSuperclass() {
+            return TypeWrap.create(type.getRawType()).getSuperclass();
+        }
+
+        @Override
         public String getJavaSourceName() {
             StringBuilder builder = new StringBuilder();
             builder.append(((Class) type.getRawType()).getName());
@@ -169,6 +174,11 @@ public abstract class TypeWrap {
             }
             builder.append(">");
             return builder.toString();
+        }
+
+        @Override
+        public Method[] getDeclaredMethods() {
+            return TypeWrap.create(type.getRawType()).getDeclaredMethods();
         }
     }
 

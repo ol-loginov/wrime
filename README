@@ -87,3 +87,10 @@ Un-escaped output
 
 ${#...}
   with hash (#) symbol right after opening you'll skip HTML escaping of output
+
+
+==============================
+TO-DO list
+==============================
+
+1) iterate over Map (using map.values and map.entrySet)

@@ -1,5 +1,6 @@
 package wrime.functor;
 
+@SuppressWarnings("UnusedDeclaration")
 public class LogicFunctor {
     public boolean eq(Object lhs, Object rhs) {
         return lhs.equals(rhs);

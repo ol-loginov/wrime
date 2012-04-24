@@ -1,5 +1,6 @@
 package wrime.functor;
 
+@SuppressWarnings("UnusedDeclaration")
 public class StringFunctor {
     public String repeat(String ch, int count) {
         StringBuilder str = new StringBuilder();
