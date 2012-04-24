@@ -20,4 +20,8 @@ public class WrimeWriterComparisonMixin {
     public boolean Equal(Object a, Object b) {
         return bothNullsOrEqual(a, b);
     }
+
+    public boolean Greater(int a, int b) {
+        return a > b;
+    }
 }
