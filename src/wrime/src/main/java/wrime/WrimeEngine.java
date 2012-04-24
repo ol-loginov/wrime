@@ -105,10 +105,14 @@ public class WrimeEngine {
             if (record != null && record.lastModified < resource.getLastModified()) {
                 resetRootLoader();
                 if (!record.sourceFile.delete()) {
-                    throw new WrimeException("unable to delete obsolete source file " + record.sourceFile.getAbsolutePath(), null);
+                    if (record.sourceFile.exists()) {
+                        throw new WrimeException("unable to delete obsolete source file " + record.sourceFile.getAbsolutePath(), null);
+                    }
                 }
                 if (!record.classFile.delete()) {
-                    throw new WrimeException("unable to delete obsolete class file " + record.classFile.getAbsolutePath(), null);
+                    if (record.classFile.exists()) {
+                        throw new WrimeException("unable to delete obsolete class file " + record.classFile.getAbsolutePath(), null);
+                    }
                 }
                 record = null;
             }
