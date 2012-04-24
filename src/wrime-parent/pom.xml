@@ -15,6 +15,7 @@
         <module>../wrime</module>
         <module>../wrime-in-spring</module>
         <module>../wrime-in-webmvc</module>
+        <module>../wrime-in-idea</module>
     </modules>
 
     <repositories>
