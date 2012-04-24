@@ -2,6 +2,7 @@ package wrime;
 
 import wrime.functor.LogicFunctor;
 import wrime.functor.MathFunctor;
+import wrime.functor.ObjectFunctor;
 import wrime.functor.StringFunctor;
 import wrime.tags.*;
 
@@ -21,9 +22,10 @@ public class WrimeEngineFactory {
 
     public void initializeFunctors(WrimeEngine engine) {
         engine.setFunctors(new TreeMap<String, Object>() {{
-            put("str", new StringFunctor());
-            put("logic", new LogicFunctor());
-            put("math", new MathFunctor());
+            put("o", new ObjectFunctor());
+            put("s", new StringFunctor());
+            put("l", new LogicFunctor());
+            put("m", new MathFunctor());
         }});
     }
 

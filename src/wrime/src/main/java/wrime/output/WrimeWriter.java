@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("UnusedDeclaration")
 public abstract class WrimeWriter extends WrimeWriterComparisonMixin {
     private final Writer writer;
     private IncludeWriterListener $$includeWriterListener;
@@ -73,7 +74,9 @@ public abstract class WrimeWriter extends WrimeWriterComparisonMixin {
             throw new WrimeException("cannot handle include statement", null);
         }
         Map<String, Object> next = new HashMap<String, Object>(this.model);
-        next.putAll(model);
+        if (model != null && !model.isEmpty()) {
+            next.putAll(model);
+        }
         this.$$includeWriterListener.include(this, resource, next, writer);
     }
 }

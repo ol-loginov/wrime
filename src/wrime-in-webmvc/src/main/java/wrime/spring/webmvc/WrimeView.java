@@ -16,6 +16,8 @@ import wrime.ScriptResource;
 import wrime.WrimeEngine;
 import wrime.WrimeEngineFactory;
 import wrime.spring.AbstractScriptSource;
+import wrime.spring.webmvc.functors.L18nFunctor;
+import wrime.spring.webmvc.functors.ResponseFunctor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,8 +26,9 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
+@SuppressWarnings("UnusedDeclaration")
 public class WrimeView extends AbstractTemplateView implements MessageSourceAware {
-    private final static String SERVLET_FUNCTOR = "servlet";
+    private final static String RESPONSE_FUNCTOR = "response";
     private final static String MESSAGE_FUNCTOR = "l18n";
 
     private ResourceLoader resourceLoader;
@@ -34,13 +37,13 @@ public class WrimeView extends AbstractTemplateView implements MessageSourceAwar
 
     protected void registerWebRequestFunctors() {
         getWrimeEngine().setFunctors(new TreeMap<String, Object>() {{
-            put(SERVLET_FUNCTOR, new ServletFunctor());
+            put(RESPONSE_FUNCTOR, new ResponseFunctor());
             put(MESSAGE_FUNCTOR, new L18nFunctor());
         }});
     }
 
-    protected void addWebRequestFunctors(ModelMap map, HttpServletRequest request, HttpServletResponse response) {
-        getWrimeEngine().addFunctorToModel(map, SERVLET_FUNCTOR, new ServletFunctor(new ServletWebRequest(request, response)));
+    protected void setupWebRequestFunctors(ModelMap map, HttpServletRequest request, HttpServletResponse response) {
+        getWrimeEngine().addFunctorToModel(map, RESPONSE_FUNCTOR, new ResponseFunctor(new ServletWebRequest(request, response)));
         getWrimeEngine().addFunctorToModel(map, MESSAGE_FUNCTOR, new L18nFunctor(messageSource, request.getLocale()));
     }
 
@@ -97,7 +100,7 @@ public class WrimeView extends AbstractTemplateView implements MessageSourceAwar
     protected void renderMergedTemplateModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
         ModelMap map = new ModelMap();
         map.addAllAttributes(model);
-        addWebRequestFunctors(map, request, response);
+        setupWebRequestFunctors(map, request, response);
 
         response.setCharacterEncoding(WrimeEngine.UTF_8.name());
 
