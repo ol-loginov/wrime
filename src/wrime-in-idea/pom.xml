@@ -85,4 +85,19 @@
             <artifactId>mockito-all</artifactId>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>machine-oregu:work1</id>
+            <activation>
+                <property>
+                    <name>env.MACHINE_GUID</name>
+                    <value>oregu:work1</value>
+                </property>
+            </activation>
+            <properties>
+                <idea.home>/home/oregu-shared/local/idea-111.167</idea.home>
+            </properties>
+        </profile>
+    </profiles>
 </project>

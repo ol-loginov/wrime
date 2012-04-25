@@ -1,0 +1,26 @@
+import java.io.Writer;
+import java.lang.*;
+import java.util.*;
+
+public class W$ForSimpleTest$003_txt extends wrime.output.WrimeWriter {
+  private wrime.model.MapHolder holder;
+
+  public W$ForSimpleTest$003_txt(Writer writer) {
+    super(writer);
+  }
+
+  protected void clear() {
+    this.holder=null;
+    super.clear();
+  }
+
+  protected void assignFields(Map<String, Object> model) {
+    super.assignFields(model);
+    this.holder=(wrime.model.MapHolder)model.get("holder");
+  }
+
+  protected void renderContent() throws Exception {
+    for(java.lang.String a : holder.getMap().values()) {
+    }
+  }
+}

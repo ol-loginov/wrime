@@ -1,0 +1,3 @@
+${param wrime.model.MapHolder holder}
+${for(a : holder.map.values)}
+${for}

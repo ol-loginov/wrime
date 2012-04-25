@@ -12,4 +12,9 @@ public class ForSimpleTest extends TestClass {
     public void autoCast() throws WrimeException {
         parseAndVerify("002");
     }
+
+    @Test
+    public void iterateMap() throws WrimeException {
+        parseAndVerify("003");
+    }
 }
