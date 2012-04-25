@@ -1,14 +1,14 @@
 package wrime;
 
 import wrime.ast.ClassName;
+import wrime.bytecode.ExpressionScope;
+import wrime.bytecode.ExpressionStack;
 import wrime.lang.TypeName;
-import wrime.util.ExpressionContextKeeper;
-import wrime.util.ExpressionScope;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ExpressionKeeperMock implements ExpressionContextKeeper {
+public class ExpressionKeeperMock implements ExpressionStack {
     private ExpressionScopeMock current = new ExpressionScopeMock();
     private final Map<String, TypeName> functors = new HashMap<String, TypeName>();
 

@@ -3,9 +3,9 @@ package wrime.tags;
 import wrime.WrimeException;
 import wrime.ast.Emitter;
 import wrime.ast.TagSet;
+import wrime.bytecode.ExpressionStack;
 import wrime.lang.TypeWrap;
 import wrime.output.BodyWriter;
-import wrime.util.ExpressionContextKeeper;
 
 import java.io.IOException;
 
@@ -17,13 +17,13 @@ public class SetTagProcessor implements TagProcessor {
     }
 
     @Override
-    public void render(ExpressionContextKeeper context, BodyWriter body) throws IOException {
+    public void render(ExpressionStack context, BodyWriter body) throws IOException {
         for (TagSet.Variable var : tag.getVariables()) {
             assignVariable(context, body, var.variable, var.value);
         }
     }
 
-    private void assignVariable(ExpressionContextKeeper context, BodyWriter body, String variable, Emitter value) throws IOException {
+    private void assignVariable(ExpressionStack context, BodyWriter body, String variable, Emitter value) throws IOException {
 
         new CallMatcher(value)
                 .matchTypes(context)

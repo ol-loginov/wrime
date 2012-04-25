@@ -1,4 +1,4 @@
-package wrime.util;
+package wrime.bytecode;
 
 import wrime.WrimeException;
 import wrime.lang.TypeName;
@@ -8,12 +8,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ExpressionChildScope implements ExpressionScope {
+public class ExpressionScopeImpl implements ExpressionScope {
     private final ExpressionScope parentScope;
     private final Map<String, TypeName> variables = new HashMap<String, TypeName>();
     private final Set<String> attributes = new HashSet<String>();
 
-    public ExpressionChildScope(ExpressionScope parentScope) {
+    public ExpressionScopeImpl(ExpressionScope parentScope) {
         this.parentScope = parentScope;
     }
 

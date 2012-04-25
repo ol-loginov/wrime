@@ -1,10 +1,11 @@
-package wrime.bytecode;
+package wrime.util;
 
 import java.io.File;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 
+@SuppressWarnings("UnusedDeclaration")
 public class FileUtils {
     public static File toFile(URL url) {
         if (url == null || !url.getProtocol().equals("file")) {

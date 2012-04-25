@@ -2,9 +2,9 @@ package wrime.tags;
 
 import wrime.WrimeException;
 import wrime.ast.TagIf;
+import wrime.bytecode.ExpressionScope;
+import wrime.bytecode.ExpressionStack;
 import wrime.output.BodyWriter;
-import wrime.util.ExpressionContextKeeper;
-import wrime.util.ExpressionScope;
 
 import java.io.IOException;
 
@@ -24,7 +24,7 @@ public class IfTagProcessor implements TagProcessor {
     }
 
     @Override
-    public void render(ExpressionContextKeeper context, BodyWriter body) throws IOException {
+    public void render(ExpressionStack context, BodyWriter body) throws IOException {
         switch (tag.getMode()) {
             case OPEN:
                 new CallMatcher(tag.getTest())

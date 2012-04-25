@@ -1,10 +1,10 @@
-package wrime.util;
+package wrime.bytecode;
 
 import wrime.WrimeException;
 import wrime.ast.ClassName;
 import wrime.lang.TypeName;
 
-public interface ExpressionContextKeeper {
+public interface ExpressionStack {
     ExpressionScope current();
 
     ExpressionScope openScope();

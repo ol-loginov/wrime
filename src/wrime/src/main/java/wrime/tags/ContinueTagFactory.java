@@ -2,8 +2,8 @@ package wrime.tags;
 
 import wrime.WrimeException;
 import wrime.ast.WrimeTag;
+import wrime.bytecode.ExpressionStack;
 import wrime.output.BodyWriter;
-import wrime.util.ExpressionContextKeeper;
 
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ public class ContinueTagFactory implements TagFactory {
     public TagProcessor createProcessor(final WrimeTag tag) throws WrimeException {
         return new TagProcessor() {
             @Override
-            public void render(ExpressionContextKeeper context, BodyWriter body) throws IOException {
+            public void render(ExpressionStack context, BodyWriter body) throws IOException {
                 if (!context.inheritAttribute(SCOPE_ATTRIBUTE)) {
                     throw new WrimeException("You may use 'continue' only inside continuable block", null, tag.getLocation());
                 }

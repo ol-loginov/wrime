@@ -1,7 +1,7 @@
 package wrime;
 
+import wrime.bytecode.ExpressionScope;
 import wrime.lang.TypeName;
-import wrime.util.ExpressionScope;
 
 import java.util.HashMap;
 import java.util.Map;

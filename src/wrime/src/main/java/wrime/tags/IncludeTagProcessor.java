@@ -2,8 +2,8 @@ package wrime.tags;
 
 import wrime.ast.Assignment;
 import wrime.ast.TagInclude;
+import wrime.bytecode.ExpressionStack;
 import wrime.output.BodyWriter;
-import wrime.util.ExpressionContextKeeper;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ public class IncludeTagProcessor implements TagProcessor {
     }
 
     @Override
-    public void render(ExpressionContextKeeper context, BodyWriter body) throws IOException {
+    public void render(ExpressionStack context, BodyWriter body) throws IOException {
         new CallMatcher(tag.getSource())
                 .matchTypes(context);
         CallMatcher.requireReturnType(tag.getSource(), String.class, "should be String");

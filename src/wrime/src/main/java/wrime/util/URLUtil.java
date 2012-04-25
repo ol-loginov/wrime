@@ -1,10 +1,11 @@
-package wrime.bytecode;
+package wrime.util;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("UnusedDeclaration")
 public class URLUtil {
 
     /**
@@ -71,8 +72,8 @@ public class URLUtil {
     /**
      * Check if given URL is matching Jar pattern for different servers
      *
-     * @param fileUrl
-     * @return
+     * @param fileUrl url to test
+     * @return true if this is JAR-ed url
      */
     public static boolean isJarURL(URL fileUrl) {
         Matcher jarMatcher = URLUtil.JAR_PATTERN.matcher(fileUrl.getPath());
@@ -82,8 +83,8 @@ public class URLUtil {
     /**
      * Check if given URL is pointing to JBoss 5 VFS resource
      *
-     * @param fileUrl
-     * @return
+     * @param fileUrl url to test
+     * @return verification result
      */
     public static boolean isJBoss5Url(URL fileUrl) {
         final String protocol = fileUrl.getProtocol();

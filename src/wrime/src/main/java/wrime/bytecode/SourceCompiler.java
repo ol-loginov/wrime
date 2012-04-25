@@ -4,6 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wrime.WrimeEngine;
 import wrime.util.EscapeUtils;
+import wrime.util.FileUtils;
+import wrime.util.URLUtil;
+import wrime.util.UrlSet;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -61,21 +64,10 @@ public class SourceCompiler {
 
         for (URL url : urls) {
             URL normalizedUrl = URLUtil.normalizeToFileProtocol(url);
-            File file = FileUtils.toFile((URL) EscapeUtils.defaultIfNull(normalizedUrl, url));
+            File file = FileUtils.toFile(EscapeUtils.defaultIfNull(normalizedUrl, url));
             if (file.exists())
                 classPath.add(file.getAbsolutePath());
         }
-
-        //these should be in the list already, but I am feeling paranoid
-
-        //this jar
-        //classPath.add(FileUtils.getJarUrl(EmbeddedJSPResult.class));
-
-        //servlet api
-        //classPath.add(FileUtils.getJarUrl(Servlet.class));
-
-        //jsp api
-        //classPath.add(FileUtils.getJarUrl(JspPage.class));
 
         //add extra classpath entries (jars where tlds were found will be here)
         classPath.addAll(extraClassPath);

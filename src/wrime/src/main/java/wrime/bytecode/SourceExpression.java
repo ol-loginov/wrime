@@ -1,42 +1,63 @@
-package wrime.util;
+package wrime.bytecode;
 
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import wrime.WrimeException;
 import wrime.ast.ClassName;
 import wrime.lang.TypeName;
+import wrime.util.FunctorName;
+import wrime.util.ParameterName;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ExpressionRootScope implements ExpressionContextKeeper {
-    private final Stack<ExpressionScope> contextStack;
+public class SourceExpression implements ExpressionStack {
+    private final Stack<ExpressionScope> contextStack = new Stack<ExpressionScope>();
     private final ClassLoader classLoader;
-    private final ExpressionRuntime runtime;
 
-    public ExpressionRootScope(ExpressionRuntime runtime, ClassLoader classLoader) {
-        this.runtime = runtime;
+    private final SourceExpressionListener listener;
+
+    private List<String> imports = new ArrayList<String>();
+    private Map<String, ParameterName> parameters = new HashMap<String, ParameterName>();
+    private Map<String, FunctorName> functors;
+
+    public SourceExpression(ClassLoader classLoader, Map<String, FunctorName> functors, SourceExpressionListener listener) {
+        this.listener = listener;
         this.classLoader = classLoader;
-        this.contextStack = new Stack<ExpressionScope>() {{
-            push(new ExpressionChildScopeEx());
-        }};
+        this.functors = functors;
+        this.contextStack.push(new ExpressionScopeImpl(null) {
+            @Override
+            public TypeName getVarType(String name) {
+                TypeName def = super.getVarType(name);
+                if (def != null) {
+                    return def;
+                }
+                ParameterName parameter = parameters.get(name);
+                return parameter != null ? parameter.getType() : null;
+            }
+        });
+    }
+
+    public List<String> getImports() {
+        return imports;
+    }
+
+    public Map<String, ParameterName> getParameters() {
+        return parameters;
     }
 
     @Override
     public ExpressionScope openScope() {
-        runtime.scopeAdded();
-        ExpressionChildScope child = new ExpressionChildScope(current());
+        listener.scopeAdded();
+        ExpressionScopeImpl child = new ExpressionScopeImpl(current());
         contextStack.push(child);
         return child;
     }
 
     @Override
     public ExpressionScope closeScope() {
-        runtime.scopeRemoved();
+        listener.scopeRemoved();
         return contextStack.pop();
     }
 
@@ -47,7 +68,7 @@ public class ExpressionRootScope implements ExpressionContextKeeper {
 
     @Override
     public TypeName getFunctorType(String functor) {
-        FunctorName instance = runtime.getFunctor(functor);
+        FunctorName instance = functors.get(functor);
         return instance == null ? null : new TypeName(instance.getType());
     }
 
@@ -59,7 +80,7 @@ public class ExpressionRootScope implements ExpressionContextKeeper {
             return instance;
         }
         String classSelfName = getPublicClassName(genericTypeName);
-        for (String imports : runtime.getImports()) {
+        for (String imports : getImports()) {
             if (imports.endsWith("." + classSelfName)) {
                 return tryClass(imports);
             }
@@ -103,12 +124,19 @@ public class ExpressionRootScope implements ExpressionContextKeeper {
 
     @Override
     public void addImport(String className) {
-        runtime.addImport(className);
+        imports.add(className);
     }
 
     @Override
     public void addParameter(String parameterName, Class parameterClass, String option) throws WrimeException {
-        runtime.addParameter(parameterName, parameterClass, option);
+        if (!SourceComposer.isIdentifier(parameterName)) {
+            SourceComposer.throwError("not a Java identifier " + parameterName);
+        }
+        if (parameters.containsKey(parameterName)) {
+            SourceComposer.throwError("duplicate for model parameter " + parameterName);
+        }
+        TypeName parameterType = new TypeName(parameterClass);
+        parameters.put(parameterName, new ParameterName(parameterName, parameterType, option));
     }
 
     @Override
@@ -121,24 +149,5 @@ public class ExpressionRootScope implements ExpressionContextKeeper {
             }
         }
         return false;
-    }
-
-    private class ExpressionChildScopeEx extends ExpressionChildScope {
-        public ExpressionChildScopeEx() {
-            super(null);
-        }
-
-        @Override
-        public TypeName getVarType(String name) {
-            TypeName def = super.getVarType(name);
-            if (def != null) {
-                return def;
-            }
-            ParameterName parameter = runtime.getModelParameter(name);
-            if (parameter != null) {
-                return parameter.getType();
-            }
-            return null;
-        }
     }
 }

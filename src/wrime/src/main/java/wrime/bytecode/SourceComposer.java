@@ -13,7 +13,6 @@ import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
 import wrime.ast.EmitterWriter;
 import wrime.ast.WrimeTag;
-import wrime.lang.TypeName;
 import wrime.lang.TypeWrap;
 import wrime.output.BodyWriter;
 import wrime.output.WrimeWriter;
@@ -21,16 +20,21 @@ import wrime.scanner.WrimeScanner;
 import wrime.tags.CallMatcher;
 import wrime.tags.TagFactory;
 import wrime.tags.TagProcessor;
-import wrime.util.*;
+import wrime.util.DefaultUtil;
+import wrime.util.EscapeUtils;
+import wrime.util.FunctorName;
+import wrime.util.ParameterName;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-public class SourceComposer implements ExpressionRuntime {
+public class SourceComposer implements SourceExpressionListener {
     private static final String EOL = System.getProperty("line.separator");
     private static final String SCOPE_IDENT = "  ";
 
@@ -40,13 +44,10 @@ public class SourceComposer implements ExpressionRuntime {
 
     private Body renderContentBody;
 
-    private ExpressionRootScope expressionContext;
+    private SourceExpression sourceExpression;
 
     private boolean classDone;
     private String className;
-
-    private List<String> importNames = new ArrayList<String>();
-    private Map<String, ParameterName> parameterNames = new HashMap<String, ParameterName>();
 
     private String functorPrefix;
     private Map<String, FunctorName> functorNames = new HashMap<String, FunctorName>();
@@ -55,7 +56,7 @@ public class SourceComposer implements ExpressionRuntime {
 
     public SourceComposer(ClassLoader classLoader, Map<String, Object> functors, Map<String, TagFactory> customTags) throws WrimeException {
         renderContentBody = new Body();
-        expressionContext = new ExpressionRootScope(this, classLoader);
+        sourceExpression = new SourceExpression(classLoader, functorNames, this);
 
         for (Map.Entry<String, Object> kv : functors.entrySet()) {
             functorNames.put(kv.getKey(), new FunctorName(kv.getKey(), kv.getValue().getClass(), toFieldIdentifier(kv.getKey())));
@@ -68,15 +69,15 @@ public class SourceComposer implements ExpressionRuntime {
         functorPrefix = options.get(WrimeEngine.Compiler.FUNCTOR_PREFIX);
     }
 
-    private void error(String name) throws WrimeException {
-        error(name, null);
+    public static void throwError(String name) throws WrimeException {
+        throwError(name, null);
     }
 
-    private void error(String name, Throwable cause) throws WrimeException {
+    public static void throwError(String name, Throwable cause) throws WrimeException {
         throw new WrimeException("Compiler exception: " + name, cause);
     }
 
-    private static boolean isIdentifier(String name) {
+    public static boolean isIdentifier(String name) {
         boolean firstPassed = false;
         boolean valid = true;
         for (char ch : name.toCharArray()) {
@@ -90,7 +91,7 @@ public class SourceComposer implements ExpressionRuntime {
         return firstPassed && valid;
     }
 
-    private static String toFieldIdentifier(String name) throws WrimeException {
+    public static String toFieldIdentifier(String name) throws WrimeException {
         StringBuilder builder = new StringBuilder();
         builder.append("$");
         for (char ch : name.toCharArray()) {
@@ -117,7 +118,7 @@ public class SourceComposer implements ExpressionRuntime {
 
     public String getClassCode() throws IOException {
         Body body = new Body();
-        for (String name : importNames) {
+        for (String name : sourceExpression.getImports()) {
             body.line(String.format("import %s;", name));
         }
 
@@ -151,49 +152,12 @@ public class SourceComposer implements ExpressionRuntime {
 
     private void ensureNotReady() throws WrimeException {
         if (classDone) {
-            error("class is ready");
+            throwError("class is ready");
         }
-    }
-
-    @Override
-    public void addImport(String clazz) {
-        importNames.add(clazz);
-    }
-
-    @Override
-    public Collection<String> getImports() {
-        return importNames;
     }
 
     public WrimeScanner.Receiver createReceiver() {
         return new ScannerReceiver();
-    }
-
-    @Override
-    public FunctorName getFunctor(String functor) {
-        return functorNames.get(functor);
-    }
-
-    @Override
-    public Collection<ParameterName> getModelParameters() {
-        return parameterNames.values();
-    }
-
-    @Override
-    public void addParameter(String parameterName, Class parameterClass, String option) throws WrimeException {
-        if (!isIdentifier(parameterName)) {
-            error("not a Java identifier " + parameterName);
-        }
-        if (parameterNames.containsKey(parameterName)) {
-            error("duplicate for model parameter " + parameterName);
-        }
-        TypeName parameterType = new TypeName(parameterClass);
-        parameterNames.put(parameterName, new ParameterName(parameterName, parameterType, option));
-    }
-
-    @Override
-    public ParameterName getModelParameter(String name) {
-        return parameterNames.get(name);
     }
 
     @Override
@@ -318,7 +282,7 @@ public class SourceComposer implements ExpressionRuntime {
     private class DeclarationDelimiter implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            if (getModelParameters().size() > 0 || functorNames.size() > 0) {
+            if (!sourceExpression.getParameters().isEmpty() || !functorNames.isEmpty()) {
                 body.nl();
             }
         }
@@ -327,7 +291,7 @@ public class SourceComposer implements ExpressionRuntime {
     private class ModelParameterListDeclarator implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (ParameterName parameter : getModelParameters()) {
+            for (ParameterName parameter : sourceExpression.getParameters().values()) {
                 body.line(String.format("private %s %s;", TypeWrap.create(parameter.getType().getType()).getJavaSourceName(), parameter.getName()));
             }
         }
@@ -336,8 +300,8 @@ public class SourceComposer implements ExpressionRuntime {
     private class ModelParameterListCleaner implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (ParameterName parameter : getModelParameters()) {
-                body.line(String.format("this.%s=%s;", parameter.getName(), Defaults.getDefaultValueString(parameter.getType().getType())));
+            for (ParameterName parameter : sourceExpression.getParameters().values()) {
+                body.line(String.format("this.%s=%s;", parameter.getName(), DefaultUtil.getDefault(parameter.getType().getType())));
             }
         }
     }
@@ -345,7 +309,7 @@ public class SourceComposer implements ExpressionRuntime {
     private class ModelParameterListInitializer implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (ParameterName parameter : getModelParameters()) {
+            for (ParameterName parameter : sourceExpression.getParameters().values()) {
                 body.line(String.format("this.%s=(%s)model.get(\"%s\");",
                         parameter.getName(),
                         TypeWrap.create(parameter.getType().getType()).getJavaSourceName(),
@@ -380,37 +344,6 @@ public class SourceComposer implements ExpressionRuntime {
             for (FunctorName functor : functorNames.values()) {
                 String functorKey = functorPrefix + functor.getName();
                 body.line(String.format("this.%s=(%s)model.get(\"%s\");", functor.getField(), TypeWrap.create(functor.getType()).getJavaSourceName(), functorKey));
-            }
-        }
-    }
-
-    public static class Defaults {
-        // These gets initialized to their default values
-        private static boolean DEFAULT_BOOLEAN;
-        private static byte DEFAULT_BYTE;
-        private static short DEFAULT_SHORT;
-        private static int DEFAULT_INT;
-        private static long DEFAULT_LONG;
-        private static float DEFAULT_FLOAT;
-        private static double DEFAULT_DOUBLE;
-
-        public static Object getDefaultValueString(Type type) {
-            if (type.equals(boolean.class)) {
-                return DEFAULT_BOOLEAN;
-            } else if (type.equals(byte.class)) {
-                return DEFAULT_BYTE;
-            } else if (type.equals(short.class)) {
-                return DEFAULT_SHORT;
-            } else if (type.equals(int.class)) {
-                return DEFAULT_INT;
-            } else if (type.equals(long.class)) {
-                return DEFAULT_LONG;
-            } else if (type.equals(float.class)) {
-                return DEFAULT_FLOAT;
-            } else if (type.equals(double.class)) {
-                return DEFAULT_DOUBLE;
-            } else {
-                return "null";
             }
         }
     }
@@ -473,7 +406,7 @@ public class SourceComposer implements ExpressionRuntime {
             }
 
             if (cmd != null && cmd.tag != null) {
-                commandTag(cmd.tag).render(expressionContext, new BodyWriterForward() {
+                commandTag(cmd.tag).render(sourceExpression, new BodyWriterForward() {
                     @Override
                     public BodyWriter getWriter() {
                         return renderContentBody;
@@ -486,7 +419,7 @@ public class SourceComposer implements ExpressionRuntime {
         }
 
         private void commandExpression(Emitter expression, boolean rawOutput) throws IOException {
-            new CallMatcher(expression).matchTypes(expressionContext);
+            new CallMatcher(expression).matchTypes(sourceExpression);
 
             StringWriter writer = new StringWriter();
             boolean renderReturnValue = !expression.getReturnType().isVoid();
@@ -522,9 +455,9 @@ public class SourceComposer implements ExpressionRuntime {
         @Override
         public void startResource(ScriptResource resource) throws WrimeException {
             ensureNotReady();
-            addImport(java.io.Writer.class.getName());
-            expressionContext.addImport("java.lang.*");
-            expressionContext.addImport("java.util.*");
+            sourceExpression.addImport(java.io.Writer.class.getName());
+            sourceExpression.addImport("java.lang.*");
+            sourceExpression.addImport("java.util.*");
             className = toClassIdentifier(resource.getPath());
         }
 

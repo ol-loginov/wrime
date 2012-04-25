@@ -3,11 +3,11 @@ package wrime.tags;
 import wrime.WrimeException;
 import wrime.ast.*;
 import wrime.ast.StringValue;
+import wrime.bytecode.ExpressionScope;
+import wrime.bytecode.ExpressionStack;
 import wrime.lang.TypeName;
 import wrime.lang.TypeUtil;
 import wrime.lang.TypeWrap;
-import wrime.util.ExpressionContextKeeper;
-import wrime.util.ExpressionScope;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -53,14 +53,14 @@ public class CallMatcher {
         emittersToMatch.push(new MatchRequest(emitter, false));
     }
 
-    public CallMatcher matchTypes(ExpressionContextKeeper scope) {
+    public CallMatcher matchTypes(ExpressionStack scope) {
         while (!emittersToMatch.empty()) {
             matchTypes(emittersToMatch.pop(), scope);
         }
         return this;
     }
 
-    private void matchTypes(MatchRequest request, ExpressionContextKeeper scope) {
+    private void matchTypes(MatchRequest request, ExpressionStack scope) {
         if (request.emitter instanceof Gate) {
             doMatchTypes((Gate) request.emitter, request.firstPass);
         } else if (request.emitter instanceof NumberValue) {
@@ -92,7 +92,7 @@ public class CallMatcher {
         }
     }
 
-    private void doMatchTypes(FunctorRef emitter, ExpressionContextKeeper scope) {
+    private void doMatchTypes(FunctorRef emitter, ExpressionStack scope) {
         TypeName functorType = scope.getFunctorType(emitter.getName());
         if (functorType == null) {
             throw new WrimeException("No functor '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());

@@ -1,8 +1,8 @@
-package wrime.bytecode;
+package wrime.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import wrime.util.EscapeUtils;
+import wrime.bytecode.ClassLoaderInterface;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,7 @@ import java.util.*;
  * @author David Blevins
  * @version $Rev: 894090 $ $Date: 2009-12-27 19:18:29 +0100 (Sun, 27 Dec 2009) $
  */
+@SuppressWarnings("UnusedDeclaration")
 public class UrlSet {
     private static final Logger LOG = LoggerFactory.getLogger(UrlSet.class);
     private final Map<String, URL> urls;
@@ -48,7 +49,7 @@ public class UrlSet {
     /**
      * Ignores all URLs that are not "jar" or "file"
      *
-     * @param urls
+     * @param urls interesting urls
      */
     public UrlSet(Collection<URL> urls) {
         this.urls = new HashMap<String, URL>();
@@ -95,8 +96,8 @@ public class UrlSet {
     /**
      * Calls excludePaths(System.getProperty("java.ext.dirs"))
      *
-     * @return
-     * @throws MalformedURLException
+     * @return some set
+     * @throws MalformedURLException if path contains malformed URLs
      */
     public UrlSet excludeJavaExtDirs() throws MalformedURLException {
         return excludePaths(System.getProperty("java.ext.dirs", ""));
@@ -105,8 +106,8 @@ public class UrlSet {
     /**
      * Calls excludePaths(System.getProperty("java.endorsed.dirs"))
      *
-     * @return
-     * @throws MalformedURLException
+     * @return some set
+     * @throws MalformedURLException if path contains malformed URLs
      */
     public UrlSet excludeJavaEndorsedDirs() throws MalformedURLException {
         return excludePaths(System.getProperty("java.endorsed.dirs", ""));
@@ -152,6 +153,10 @@ public class UrlSet {
 
     /**
      * Try to find a classes directory inside a war file add its normalized url to this set
+     *
+     * @param classLoaderInterface interface to class loader
+     * @return url set found
+     * @throws java.io.IOException in case of any IO error
      */
     public UrlSet includeClassesUrl(ClassLoaderInterface classLoaderInterface) throws IOException {
         Enumeration<URL> rootUrlEnumeration = classLoaderInterface.getResources("");
@@ -163,7 +168,7 @@ public class UrlSet {
                 externalForm = EscapeUtils.substringBefore(externalForm, "/WEB-INF/classes");
                 URL warUrl = new URL(externalForm);
                 URL normalizedUrl = URLUtil.normalizeToFileProtocol(warUrl);
-                URL finalUrl = (URL) EscapeUtils.defaultIfNull(normalizedUrl, warUrl);
+                URL finalUrl = EscapeUtils.defaultIfNull(normalizedUrl, warUrl);
 
                 Map<String, URL> newUrls = new HashMap<String, URL>(this.urls);
                 newUrls.put(finalUrl.toExternalForm(), finalUrl);

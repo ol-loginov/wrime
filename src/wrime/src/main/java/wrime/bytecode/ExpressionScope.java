@@ -1,4 +1,4 @@
-package wrime.util;
+package wrime.bytecode;
 
 import wrime.lang.TypeName;
 

@@ -2,11 +2,10 @@ package wrime.tags;
 
 import wrime.WrimeException;
 import wrime.ast.TagFor;
+import wrime.bytecode.ExpressionStack;
 import wrime.lang.TypeName;
 import wrime.lang.TypeWrap;
 import wrime.output.BodyWriter;
-import wrime.util.ExpressionContextKeeper;
-import wrime.util.ExpressionScope;
 
 import java.io.IOException;
 
@@ -18,8 +17,7 @@ public class ForTagProcessor implements TagProcessor {
     }
 
     @Override
-    public void render(ExpressionContextKeeper context, BodyWriter body) throws IOException {
-        ExpressionScope scope = context.current();
+    public void render(ExpressionStack context, BodyWriter body) throws IOException {
         switch (tag.getMode()) {
             case OPEN:
                 new CallMatcher(tag.getIterable())
