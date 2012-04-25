@@ -4,7 +4,7 @@ import java.util.*;
 import wrime.model.*;
 
 public class W$SimpleCompilerTest$009_txt extends wrime.output.WrimeWriter {
-  private Bean1 bean;
+  private wrime.model.Bean1 bean;
 
   public W$SimpleCompilerTest$009_txt(Writer writer) {
     super(writer);
@@ -17,7 +17,7 @@ public class W$SimpleCompilerTest$009_txt extends wrime.output.WrimeWriter {
 
   protected void assignFields(Map<String, Object> model) {
     super.assignFields(model);
-    this.bean=(Bean1)model.get("bean");
+    this.bean=(wrime.model.Bean1)model.get("bean");
   }
 
   protected void renderContent() throws Exception {

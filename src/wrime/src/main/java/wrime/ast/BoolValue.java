@@ -1,6 +1,6 @@
 package wrime.ast;
 
-import wrime.util.TypeName;
+import wrime.lang.TypeName;
 
 public class BoolValue extends Emitter {
     private boolean value;

@@ -3,7 +3,7 @@ package wrime.tags;
 import wrime.ast.Assignment;
 import wrime.ast.TagInclude;
 import wrime.output.BodyWriter;
-import wrime.util.ExpressionContextRoot;
+import wrime.util.ExpressionContextKeeper;
 
 import java.io.IOException;
 
@@ -15,9 +15,9 @@ public class IncludeTagProcessor implements TagProcessor {
     }
 
     @Override
-    public void render(ExpressionContextRoot scope, BodyWriter body) throws IOException {
-        CallMatcher matcher = new CallMatcher(tag.getSource());
-        matcher.matchTypes(scope);
+    public void render(ExpressionContextKeeper context, BodyWriter body) throws IOException {
+        new CallMatcher(tag.getSource())
+                .matchTypes(context);
         CallMatcher.requireReturnType(tag.getSource(), String.class, "should be String");
 
         String modelName;

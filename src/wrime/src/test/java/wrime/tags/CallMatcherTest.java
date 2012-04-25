@@ -4,17 +4,17 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.junit.Test;
-import wrime.ExpressionScopeMock;
+import wrime.ExpressionKeeperMock;
 import wrime.Location;
 import wrime.antlr.EmitterFactory;
 import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
 import wrime.functor.StringFunctor;
+import wrime.lang.TypeName;
 import wrime.model.Bean0;
 import wrime.model.Bean1;
 import wrime.model.Bean2;
-import wrime.util.TypeName;
 
 import java.io.IOException;
 
@@ -34,11 +34,11 @@ public class CallMatcherTest {
     private void match(String expression, Class returnType) throws IOException, RecognitionException {
         Emitter emitter = getExpression(expression);
         CallMatcher matcher = new CallMatcher(emitter);
-        matcher.matchTypes(new ExpressionScopeMock());
+        matcher.matchTypes(new ExpressionKeeperMock());
         assertEquals(returnType, emitter.getReturnType().getType());
     }
 
-    private void match(String expression, Class returnType, ExpressionScopeMock scope) throws IOException, RecognitionException {
+    private void match(String expression, Class returnType, ExpressionKeeperMock scope) throws IOException, RecognitionException {
         Emitter emitter = getExpression(expression);
         CallMatcher matcher = new CallMatcher(emitter);
         matcher.matchTypes(scope);
@@ -68,23 +68,21 @@ public class CallMatcherTest {
 
     @Test
     public void variables() throws RecognitionException, IOException {
-        ExpressionScopeMock variables = new ExpressionScopeMock() {{
-            getVariables().put("self", new TypeName(CallMatcher.class));
-            getVariables().put("bean0", new TypeName(Bean0.class));
-            getVariables().put("bean1", new TypeName(Bean1.class));
-            getVariables().put("bean2", new TypeName(Bean2.class));
+        ExpressionKeeperMock keeper = new ExpressionKeeperMock();
+        keeper.current().getVariables().put("self", new TypeName(CallMatcher.class));
+        keeper.current().getVariables().put("bean0", new TypeName(Bean0.class));
+        keeper.current().getVariables().put("bean1", new TypeName(Bean1.class));
+        keeper.current().getVariables().put("bean2", new TypeName(Bean2.class));
+        keeper.getFunctors().put("str", new TypeName(StringFunctor.class));
 
-            getFunctors().put("str", new TypeName(StringFunctor.class));
-        }};
+        match("bean2.callSelf(1).call(2)", Void.TYPE, keeper);
+        match("self", CallMatcher.class, keeper);
+        match("bean1.bean.arg1()", String.class, keeper);
+        match("bean1.bean.hello", String.class, keeper);
 
-        match("bean2.callSelf(1).call(2)", Void.TYPE, variables);
-        match("self", CallMatcher.class, variables);
-        match("bean1.bean.arg1()", String.class, variables);
-        match("bean1.bean.hello", String.class, variables);
-
-        match("str:concat('12', '1', '3')", String.class, variables);
-        match("str:repeat('12', 3)", String.class, variables);
-        match("str:ne(null)", boolean.class, variables);
-        match("str:ne('1')", boolean.class, variables);
+        match("str:concat('12', '1', '3')", String.class, keeper);
+        match("str:repeat('12', 3)", String.class, keeper);
+        match("str:ne(null)", boolean.class, keeper);
+        match("str:ne('1')", boolean.class, keeper);
     }
 }

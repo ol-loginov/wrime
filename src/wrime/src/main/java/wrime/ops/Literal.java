@@ -1,6 +1,6 @@
 package wrime.ops;
 
-import wrime.util.TypeName;
+import wrime.lang.TypeName;
 
 public class Literal extends Operand {
     public static enum Value {

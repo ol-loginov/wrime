@@ -3,7 +3,7 @@ import java.lang.*;
 import java.util.*;
 
 public class W$JavaCompileTest$001_txt extends wrime.output.WrimeWriter {
-  private String a;
+  private java.lang.String a;
   private wrime.functor.StringFunctor $str;
   private wrime.functor.LogicFunctor $l;
 
@@ -20,7 +20,7 @@ public class W$JavaCompileTest$001_txt extends wrime.output.WrimeWriter {
 
   protected void assignFields(Map<String, Object> model) {
     super.assignFields(model);
-    this.a=(String)model.get("a");
+    this.a=(java.lang.String)model.get("a");
     this.$str=(wrime.functor.StringFunctor)model.get("functor:str");
     this.$l=(wrime.functor.LogicFunctor)model.get("functor:l");
   }

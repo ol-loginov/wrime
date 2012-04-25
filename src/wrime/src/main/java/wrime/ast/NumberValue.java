@@ -1,7 +1,7 @@
 package wrime.ast;
 
 import wrime.WrimeException;
-import wrime.util.TypeName;
+import wrime.lang.TypeName;
 
 public class NumberValue extends Emitter {
     private final String text;

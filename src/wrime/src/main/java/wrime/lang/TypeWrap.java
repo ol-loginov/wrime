@@ -1,4 +1,4 @@
-package wrime.util;
+package wrime.lang;
 
 import wrime.WrimeException;
 

@@ -4,10 +4,10 @@ import java.util.*;
 import wrime.model.*;
 
 public class W$JavaCompileTest$000_txt extends wrime.output.WrimeWriter {
-  private String a;
-  private Bean2 b2;
-  private ForIterator fir;
-  private IfBean bif;
+  private java.lang.String a;
+  private wrime.model.Bean2 b2;
+  private wrime.model.ForIterator fir;
+  private wrime.model.IfBean bif;
   private wrime.functor.StringFunctor $str;
   private wrime.functor.LogicFunctor $l;
 
@@ -27,10 +27,10 @@ public class W$JavaCompileTest$000_txt extends wrime.output.WrimeWriter {
 
   protected void assignFields(Map<String, Object> model) {
     super.assignFields(model);
-    this.a=(String)model.get("a");
-    this.b2=(Bean2)model.get("b2");
-    this.fir=(ForIterator)model.get("fir");
-    this.bif=(IfBean)model.get("bif");
+    this.a=(java.lang.String)model.get("a");
+    this.b2=(wrime.model.Bean2)model.get("b2");
+    this.fir=(wrime.model.ForIterator)model.get("fir");
+    this.bif=(wrime.model.IfBean)model.get("bif");
     this.$str=(wrime.functor.StringFunctor)model.get("functor:str");
     this.$l=(wrime.functor.LogicFunctor)model.get("functor:l");
   }

@@ -3,10 +3,11 @@ package wrime.tags;
 import wrime.WrimeException;
 import wrime.ast.*;
 import wrime.ast.StringValue;
+import wrime.lang.TypeName;
+import wrime.lang.TypeUtil;
+import wrime.lang.TypeWrap;
+import wrime.util.ExpressionContextKeeper;
 import wrime.util.ExpressionScope;
-import wrime.util.TypeName;
-import wrime.util.TypeUtil;
-import wrime.util.TypeWrap;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -52,14 +53,14 @@ public class CallMatcher {
         emittersToMatch.push(new MatchRequest(emitter, false));
     }
 
-    public CallMatcher matchTypes(ExpressionScope scope) {
+    public CallMatcher matchTypes(ExpressionContextKeeper scope) {
         while (!emittersToMatch.empty()) {
             matchTypes(emittersToMatch.pop(), scope);
         }
         return this;
     }
 
-    private void matchTypes(MatchRequest request, ExpressionScope scope) {
+    private void matchTypes(MatchRequest request, ExpressionContextKeeper scope) {
         if (request.emitter instanceof Gate) {
             doMatchTypes((Gate) request.emitter, request.firstPass);
         } else if (request.emitter instanceof NumberValue) {
@@ -83,7 +84,7 @@ public class CallMatcher {
         } else if (request.emitter instanceof MethodCall) {
             doMatchTypes((MethodCall) request.emitter, request.firstPass);
         } else if (request.emitter instanceof VariableRef) {
-            doMatchTypes((VariableRef) request.emitter, scope);
+            doMatchTypes((VariableRef) request.emitter, scope.current());
         } else if (request.emitter instanceof FunctorRef) {
             doMatchTypes((FunctorRef) request.emitter, scope);
         } else {
@@ -91,18 +92,20 @@ public class CallMatcher {
         }
     }
 
-    private void doMatchTypes(FunctorRef emitter, ExpressionScope scope) {
-        if (!scope.hasFunctor(emitter.getName())) {
+    private void doMatchTypes(FunctorRef emitter, ExpressionContextKeeper scope) {
+        TypeName functorType = scope.getFunctorType(emitter.getName());
+        if (functorType == null) {
             throw new WrimeException("No functor '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());
         }
-        emitter.setReturnType(scope.getFunctorType(emitter.getName()));
+        emitter.setReturnType(functorType);
     }
 
     private void doMatchTypes(VariableRef emitter, ExpressionScope scope) {
-        if (!scope.hasVar(emitter.getName())) {
+        TypeName varType = scope.getVarType(emitter.getName());
+        if (varType == null) {
             throw new WrimeException("No variable '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());
         }
-        emitter.setReturnType(scope.getVarType(emitter.getName()));
+        emitter.setReturnType(varType);
     }
 
     private void doMatchTypes(Gate emitter, boolean firstPass) {

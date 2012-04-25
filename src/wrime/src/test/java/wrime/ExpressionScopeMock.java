@@ -1,21 +1,19 @@
 package wrime;
 
+import wrime.lang.TypeName;
 import wrime.util.ExpressionScope;
-import wrime.util.TypeName;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class ExpressionScopeMock implements ExpressionScope {
     private final Map<String, TypeName> variables = new HashMap<String, TypeName>();
-    private final Map<String, TypeName> functors = new HashMap<String, TypeName>();
+    private final Set<String> attributes = new TreeSet<String>();
 
     public Map<String, TypeName> getVariables() {
         return variables;
-    }
-
-    public Map<String, TypeName> getFunctors() {
-        return functors;
     }
 
     @Override
@@ -29,12 +27,18 @@ public class ExpressionScopeMock implements ExpressionScope {
     }
 
     @Override
-    public boolean hasFunctor(String name) {
-        return functors.containsKey(name);
+    public boolean hasAttribute(String attribute) {
+        return attributes.contains(attribute);
     }
 
     @Override
-    public TypeName getFunctorType(String name) {
-        return functors.get(name);
+    public ExpressionScope addAttribute(String attribute) {
+        attributes.add(attribute);
+        return this;
+    }
+
+    @Override
+    public void addVar(String variable, TypeName variableClass) {
+        variables.put(variable, variableClass);
     }
 }

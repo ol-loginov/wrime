@@ -2,11 +2,11 @@ package wrime.tags;
 
 import wrime.WrimeException;
 import wrime.ast.TagFor;
+import wrime.lang.TypeName;
+import wrime.lang.TypeWrap;
 import wrime.output.BodyWriter;
-import wrime.util.ExpressionContextChild;
-import wrime.util.ExpressionContextRoot;
-import wrime.util.TypeName;
-import wrime.util.TypeWrap;
+import wrime.util.ExpressionContextKeeper;
+import wrime.util.ExpressionScope;
 
 import java.io.IOException;
 
@@ -18,12 +18,12 @@ public class ForTagProcessor implements TagProcessor {
     }
 
     @Override
-    public void render(ExpressionContextRoot context, BodyWriter body) throws IOException {
-        ExpressionContextChild scope = context.current();
+    public void render(ExpressionContextKeeper context, BodyWriter body) throws IOException {
+        ExpressionScope scope = context.current();
         switch (tag.getMode()) {
             case OPEN:
                 new CallMatcher(tag.getIterable())
-                        .matchTypes(scope);
+                        .matchTypes(context);
 
                 TypeName iterableType = tag.getIterable().getReturnType();
                 TypeWrap iterableTypeWrap = TypeWrap.create(iterableType.getType());

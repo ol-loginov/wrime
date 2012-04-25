@@ -4,40 +4,51 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import wrime.WrimeException;
 import wrime.ast.ClassName;
+import wrime.lang.TypeName;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ExpressionContextRoot extends ExpressionContextChild implements ExpressionContextKeeper {
-    private final Stack<ExpressionContextChild> contextStack;
+public class ExpressionRootScope implements ExpressionContextKeeper {
+    private final Stack<ExpressionScope> contextStack;
+    private final ClassLoader classLoader;
     private final ExpressionRuntime runtime;
 
-    public ExpressionContextRoot(ExpressionRuntime runtime, ClassLoader classLoader) {
-        super(classLoader);
+    public ExpressionRootScope(ExpressionRuntime runtime, ClassLoader classLoader) {
         this.runtime = runtime;
-        this.contextStack = new Stack<ExpressionContextChild>() {{
-            push(ExpressionContextRoot.this);
+        this.classLoader = classLoader;
+        this.contextStack = new Stack<ExpressionScope>() {{
+            push(new ExpressionChildScopeEx());
         }};
     }
 
     @Override
-    public ExpressionContextChild openScope() {
+    public ExpressionScope openScope() {
         runtime.scopeAdded();
-        ExpressionContextChild child = new ExpressionContextChild(current(), getClassLoader());
+        ExpressionChildScope child = new ExpressionChildScope(current());
         contextStack.push(child);
         return child;
     }
 
     @Override
-    public ExpressionContextChild closeScope() {
+    public ExpressionScope closeScope() {
         runtime.scopeRemoved();
         return contextStack.pop();
     }
 
     @Override
-    public ExpressionContextChild current() {
+    public ExpressionScope current() {
         return contextStack.peek();
+    }
+
+    @Override
+    public TypeName getFunctorType(String functor) {
+        FunctorName instance = runtime.getFunctor(functor);
+        return instance == null ? null : new TypeName(instance.getType());
     }
 
     @Override
@@ -80,9 +91,9 @@ public class ExpressionContextRoot extends ExpressionContextChild implements Exp
         return name;
     }
 
-    public Class tryClass(String paramType) {
+    private Class tryClass(String paramType) {
         try {
-            return ClassUtils.forName(paramType, getClassLoader());
+            return ClassUtils.forName(paramType, classLoader);
         } catch (LinkageError e) {
             return null;
         } catch (ClassNotFoundException e) {
@@ -90,56 +101,44 @@ public class ExpressionContextRoot extends ExpressionContextChild implements Exp
         }
     }
 
-    public void addImport(Class<?> className) {
-        runtime.addImport(className.getName());
-    }
-
+    @Override
     public void addImport(String className) {
         runtime.addImport(className);
     }
 
     @Override
-    public void addModelParameter(String parameterTypeDef, String parameterName, Class parameterClass, String option) throws WrimeException {
-        runtime.addModelParameter(parameterName, parameterTypeDef, parameterClass, option);
-    }
-
-    @Override
-    public Collection<ParameterName> getModelParameters() {
-        return runtime.getModelParameters();
-    }
-
-    @Override
-    public TypeName getVarType(String name) {
-        TypeName def = super.getVarType(name);
-        if (def != null) {
-            return def;
-        }
-        ParameterName parameter = runtime.getModelParameter(name);
-        if (parameter != null) {
-            return parameter.getType();
-        }
-        return null;
-    }
-
-    @Override
-    public boolean hasFunctor(String name) {
-        return getFunctorType(name) != null;
-    }
-
-    @Override
-    public TypeName getFunctorType(String name) {
-        return runtime.findFunctorType(name);
+    public void addParameter(String parameterName, Class parameterClass, String option) throws WrimeException {
+        runtime.addParameter(parameterName, parameterClass, option);
     }
 
     @Override
     public boolean inheritAttribute(String attribute) {
-        List<ExpressionContextChild> list = new ArrayList<ExpressionContextChild>(contextStack);
+        List<ExpressionScope> list = new ArrayList<ExpressionScope>(contextStack);
         Collections.reverse(list);
-        for (ExpressionContextChild ctx : list) {
+        for (ExpressionScope ctx : list) {
             if (ctx.hasAttribute(attribute)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private class ExpressionChildScopeEx extends ExpressionChildScope {
+        public ExpressionChildScopeEx() {
+            super(null);
+        }
+
+        @Override
+        public TypeName getVarType(String name) {
+            TypeName def = super.getVarType(name);
+            if (def != null) {
+                return def;
+            }
+            ParameterName parameter = runtime.getModelParameter(name);
+            if (parameter != null) {
+                return parameter.getType();
+            }
+            return null;
+        }
     }
 }

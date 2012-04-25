@@ -4,7 +4,7 @@ import java.util.*;
 import wrime.model.*;
 
 public class W$ForSimpleTest$002_txt extends wrime.output.WrimeWriter {
-  private ForIterator2 forer;
+  private wrime.model.ForIterator2 forer;
 
   public W$ForSimpleTest$002_txt(Writer writer) {
     super(writer);
@@ -17,7 +17,7 @@ public class W$ForSimpleTest$002_txt extends wrime.output.WrimeWriter {
 
   protected void assignFields(Map<String, Object> model) {
     super.assignFields(model);
-    this.forer=(ForIterator2)model.get("forer");
+    this.forer=(wrime.model.ForIterator2)model.get("forer");
   }
 
   protected void renderContent() throws Exception {

@@ -1,10 +1,10 @@
 package wrime.tags;
 
 import wrime.output.BodyWriter;
-import wrime.util.ExpressionContextRoot;
+import wrime.util.ExpressionContextKeeper;
 
 import java.io.IOException;
 
 public interface TagProcessor {
-    void render(ExpressionContextRoot scope, BodyWriter body) throws IOException;
+    void render(ExpressionContextKeeper context, BodyWriter body) throws IOException;
 }

@@ -1,5 +1,7 @@
 package wrime.util;
 
+import wrime.lang.TypeName;
+
 public class ParameterName {
     private final TypeName type;
     private final String option;

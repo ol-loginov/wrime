@@ -3,7 +3,7 @@ import java.lang.*;
 import java.util.*;
 
 public class W$SimpleCompilerTest$006_txt extends wrime.output.WrimeWriter {
-  private String hello;
+  private java.lang.String hello;
 
   public W$SimpleCompilerTest$006_txt(Writer writer) {
     super(writer);
@@ -16,7 +16,7 @@ public class W$SimpleCompilerTest$006_txt extends wrime.output.WrimeWriter {
 
   protected void assignFields(Map<String, Object> model) {
     super.assignFields(model);
-    this.hello=(String)model.get("hello");
+    this.hello=(java.lang.String)model.get("hello");
   }
 
   protected void renderContent() throws Exception {

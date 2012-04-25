@@ -1,6 +1,6 @@
 package wrime.ast;
 
-import wrime.util.TypeName;
+import wrime.lang.TypeName;
 
 public class NullValue extends Emitter {
     public NullValue() {
