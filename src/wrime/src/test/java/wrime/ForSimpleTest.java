@@ -20,6 +20,8 @@ public class ForSimpleTest extends TestClass {
     @Test
     public void iterateMap() throws WrimeException {
         Method me = BeanUtils.findMethod(MapHolder.MapInstance.class, "iterator");
+        //me.getGenericReturnType()
+        //me.getReturnType()
         parseAndVerify("003");
     }
 }
