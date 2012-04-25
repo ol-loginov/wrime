@@ -4,10 +4,10 @@ import wrime.WrimeException;
 
 import java.lang.reflect.*;
 
-public abstract class TypeWrap {
-    public abstract Type getType();
+public abstract class TypeDescriptor {
+    abstract Type getType();
 
-    public static TypeWrap create(Type type) {
+    static TypeDescriptor create(Type type) {
         if (isClass(type)) {
             return new ClassWrap((Class) type);
         } else if (isParameterizedType(type)) {
@@ -38,7 +38,7 @@ public abstract class TypeWrap {
     }
 
     public boolean isAssignableTo(Type other) {
-        return TypeWrap.create(other).isAssignableFrom(getType());
+        return TypeDescriptor.create(other).isAssignableFrom(getType());
     }
 
     public boolean isArray() {
@@ -47,6 +47,10 @@ public abstract class TypeWrap {
 
     public Type getSuperclass() {
         throw new IllegalStateException("not implemented");
+    }
+
+    public boolean isAssignableFrom(TypeDescriptor other) {
+        return isAssignableFrom(other.getType());
     }
 
     public boolean isAssignableFrom(Type other) {
@@ -69,7 +73,7 @@ public abstract class TypeWrap {
         throw new IllegalStateException("Type is not generic");
     }
 
-    static class ClassWrap extends TypeWrap {
+    static class ClassWrap extends TypeDescriptor {
         final Class type;
 
         public ClassWrap(Class type) {
@@ -125,7 +129,7 @@ public abstract class TypeWrap {
                 return type.getTypeParameters()[index];
             }
             for (Type genericInterface : type.getGenericInterfaces()) {
-                Type result = TypeWrap.create(genericInterface).getTypeParameterOf(generic, index);
+                Type result = TypeDescriptor.create(genericInterface).getTypeParameterOf(generic, index);
                 if (result != null) {
                     return result;
                 }
@@ -133,11 +137,11 @@ public abstract class TypeWrap {
             if (null == getSuperclass()) {
                 throw new WrimeException("Type " + type + " has no specified type for generic " + generic, null);
             }
-            return TypeWrap.create(getSuperclass()).getTypeParameterOf(generic, index);
+            return TypeDescriptor.create(getSuperclass()).getTypeParameterOf(generic, index);
         }
     }
 
-    static class ParameterizedWrap extends TypeWrap {
+    static class ParameterizedWrap extends TypeDescriptor {
         final ParameterizedType type;
 
         public ParameterizedWrap(ParameterizedType type) {
@@ -156,7 +160,7 @@ public abstract class TypeWrap {
 
         @Override
         public Type getSuperclass() {
-            return TypeWrap.create(type.getRawType()).getSuperclass();
+            return TypeDescriptor.create(type.getRawType()).getSuperclass();
         }
 
         @Override
@@ -170,7 +174,7 @@ public abstract class TypeWrap {
                     builder.append(", ");
                 }
                 first = false;
-                builder.append(TypeWrap.create(typeArgument).getJavaSourceName());
+                builder.append(TypeDescriptor.create(typeArgument).getJavaSourceName());
             }
             builder.append(">");
             return builder.toString();
@@ -178,11 +182,11 @@ public abstract class TypeWrap {
 
         @Override
         public Method[] getDeclaredMethods() {
-            return TypeWrap.create(type.getRawType()).getDeclaredMethods();
+            return TypeDescriptor.create(type.getRawType()).getDeclaredMethods();
         }
     }
 
-    static class WildcardWrap extends TypeWrap {
+    static class WildcardWrap extends TypeDescriptor {
         final WildcardType type;
 
         WildcardWrap(WildcardType type) {
@@ -200,11 +204,11 @@ public abstract class TypeWrap {
             if (uppers == null || uppers.length != 1) {
                 throw new IllegalStateException("many upper bounds is not implemented");
             }
-            return TypeWrap.create(uppers[0]).getJavaSourceName();
+            return TypeDescriptor.create(uppers[0]).getJavaSourceName();
         }
     }
 
-    static class TypeVariableWrap extends TypeWrap {
+    static class TypeVariableWrap extends TypeDescriptor {
         final TypeVariable type;
 
         public TypeVariableWrap(TypeVariable type) {

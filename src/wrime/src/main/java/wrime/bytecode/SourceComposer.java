@@ -13,7 +13,7 @@ import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
 import wrime.ast.EmitterWriter;
 import wrime.ast.WrimeTag;
-import wrime.lang.TypeWrap;
+import wrime.lang.TypeInstance;
 import wrime.output.BodyWriter;
 import wrime.output.WrimeWriter;
 import wrime.scanner.WrimeScanner;
@@ -292,7 +292,8 @@ public class SourceComposer implements SourceExpressionListener {
         @Override
         public void in(BodyWriter body) throws IOException {
             for (ParameterName parameter : sourceExpression.getParameters().values()) {
-                body.line(String.format("private %s %s;", TypeWrap.create(parameter.getType().getType()).getJavaSourceName(), parameter.getName()));
+                String className = parameter.getType().getDescriptor().getJavaSourceName();
+                body.line(String.format("private %s %s;", className, parameter.getName()));
             }
         }
     }
@@ -301,7 +302,7 @@ public class SourceComposer implements SourceExpressionListener {
         @Override
         public void in(BodyWriter body) throws IOException {
             for (ParameterName parameter : sourceExpression.getParameters().values()) {
-                body.line(String.format("this.%s=%s;", parameter.getName(), DefaultUtil.getDefault(parameter.getType().getType())));
+                body.line(String.format("this.%s=%s;", parameter.getName(), DefaultUtil.getDefault(parameter.getType())));
             }
         }
     }
@@ -312,7 +313,7 @@ public class SourceComposer implements SourceExpressionListener {
             for (ParameterName parameter : sourceExpression.getParameters().values()) {
                 body.line(String.format("this.%s=(%s)model.get(\"%s\");",
                         parameter.getName(),
-                        TypeWrap.create(parameter.getType().getType()).getJavaSourceName(),
+                        parameter.getType().getDescriptor().getJavaSourceName(),
                         EscapeUtils.escapeJavaString(parameter.getName())));
             }
         }
@@ -322,8 +323,9 @@ public class SourceComposer implements SourceExpressionListener {
         @Override
         public void in(BodyWriter body) throws IOException {
             for (FunctorName functor : functorNames.values()) {
+                TypeInstance functorType = new TypeInstance(functor.getType());
                 body.line(String.format("private %s %s;",
-                        TypeWrap.create(functor.getType()).getJavaSourceName(),
+                        functorType.getDescriptor().getJavaSourceName(),
                         functor.getField()));
             }
         }
@@ -343,7 +345,8 @@ public class SourceComposer implements SourceExpressionListener {
         public void in(BodyWriter body) throws IOException {
             for (FunctorName functor : functorNames.values()) {
                 String functorKey = functorPrefix + functor.getName();
-                body.line(String.format("this.%s=(%s)model.get(\"%s\");", functor.getField(), TypeWrap.create(functor.getType()).getJavaSourceName(), functorKey));
+                TypeInstance functorType = new TypeInstance(functor.getType());
+                body.line(String.format("this.%s=(%s)model.get(\"%s\");", functor.getField(), functorType.getDescriptor().getJavaSourceName(), functorKey));
             }
         }
     }

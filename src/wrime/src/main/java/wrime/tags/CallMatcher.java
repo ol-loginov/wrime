@@ -5,9 +5,8 @@ import wrime.ast.*;
 import wrime.ast.StringValue;
 import wrime.bytecode.ExpressionScope;
 import wrime.bytecode.ExpressionStack;
-import wrime.lang.TypeName;
+import wrime.lang.TypeInstance;
 import wrime.lang.TypeUtil;
-import wrime.lang.TypeWrap;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -93,7 +92,7 @@ public class CallMatcher {
     }
 
     private void doMatchTypes(FunctorRef emitter, ExpressionStack scope) {
-        TypeName functorType = scope.getFunctorType(emitter.getName());
+        TypeInstance functorType = scope.getFunctorType(emitter.getName());
         if (functorType == null) {
             throw new WrimeException("No functor '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());
         }
@@ -101,7 +100,7 @@ public class CallMatcher {
     }
 
     private void doMatchTypes(VariableRef emitter, ExpressionScope scope) {
-        TypeName varType = scope.getVarType(emitter.getName());
+        TypeInstance varType = scope.getVarType(emitter.getName());
         if (varType == null) {
             throw new WrimeException("No variable '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());
         }
@@ -116,7 +115,7 @@ public class CallMatcher {
         } else {
             requireBooleanReturnType(emitter.getLeft(), "required for gate " + emitter.getRule());
             requireBooleanReturnType(emitter.getRight(), "required for gate " + emitter.getRule());
-            emitter.setReturnType(new TypeName(boolean.class));
+            emitter.setReturnType(new TypeInstance(boolean.class));
         }
     }
 
@@ -135,7 +134,7 @@ public class CallMatcher {
             matchNeeded(emitter.getInner());
         } else {
             requireBooleanReturnType(emitter.getInner(), "required for inverting expression");
-            emitter.setReturnType(new TypeName(boolean.class));
+            emitter.setReturnType(new TypeInstance(boolean.class));
         }
     }
 
@@ -147,7 +146,7 @@ public class CallMatcher {
         } else {
             requireNoVoidType(emitter.getLeft(), "required for comparison " + emitter.getRule());
             requireNoVoidType(emitter.getRight(), "required for comparison " + emitter.getRule());
-            emitter.setReturnType(new TypeName(boolean.class));
+            emitter.setReturnType(new TypeInstance(boolean.class));
         }
     }
 
@@ -186,7 +185,7 @@ public class CallMatcher {
             Emitter invocable = emitter.getInvocable();
             requireReturnType(invocable, "required for method identification");
 
-            List<TypeName> argumentTypes = new ArrayList<TypeName>();
+            List<TypeInstance> argumentTypes = new ArrayList<TypeInstance>();
             if (emitter.hasArguments()) {
                 for (Emitter argument : emitter.getArguments()) {
                     requireReturnType(argument, "required for method identification");
@@ -197,7 +196,7 @@ public class CallMatcher {
             Method method = TypeUtil.findMethodOrGetter(
                     invocable.getReturnType(),
                     emitter.getMethodName(),
-                    argumentTypes.toArray(new TypeName[argumentTypes.size()]));
+                    argumentTypes.toArray(new TypeInstance[argumentTypes.size()]));
             if (method == null) {
                 throw new WrimeException("No suitable method '" + emitter.getMethodName() + "' found in type " + invocable.getReturnType(), null, emitter.getLocation());
             }
@@ -224,7 +223,7 @@ public class CallMatcher {
 
     public static void requireReturnType(Emitter emitter, Class clazz, String need) {
         requireReturnType(emitter, need);
-        if (!TypeWrap.create(emitter.getReturnType().getType()).isAssignableTo(clazz)) {
+        if (!emitter.getReturnType().getDescriptor().isAssignableTo(clazz)) {
             throw new WrimeException("statement is not of type needed (" + need + ")", null, emitter.getLocation());
         }
     }
@@ -247,42 +246,42 @@ public class CallMatcher {
         }
     }
 
-    private TypeName getWidestNumberType(TypeName a, TypeName b) {
+    private TypeInstance getWidestNumberType(TypeInstance a, TypeInstance b) {
         return getNumberTypeWeight(a) >= getNumberTypeWeight(b) ? a : b;
     }
 
-    private int getNumberTypeWeight(TypeName a) {
-        if (byte.class.equals(a.getType()) || Byte.class.equals(a.getType()))
+    private int getNumberTypeWeight(TypeInstance a) {
+        if (a.isA(byte.class) || a.isA(Byte.class))
             return 0;
-        if (short.class.equals(a.getType()) || Short.class.equals(a.getType()))
+        if (a.isA(short.class) || a.isA(Short.class))
             return 1;
-        if (int.class.equals(a.getType()) || Integer.class.equals(a.getType()))
+        if (a.isA(int.class) || a.isA(Integer.class))
             return 2;
-        if (long.class.equals(a.getType()) || Long.class.equals(a.getType()))
+        if (a.isA(long.class) || a.isA(Long.class))
             return 3;
-        if (float.class.equals(a.getType()) || Float.class.equals(a.getType()))
+        if (a.isA(float.class) || a.isA(Float.class))
             return 4;
-        if (double.class.equals(a.getType()) || Double.class.equals(a.getType()))
+        if (a.isA(double.class) || a.isA(Double.class))
             return 5;
         throw new WrimeException("cannot work with number type " + a, null);
     }
 
-    private boolean isAnyNumber(TypeName type) {
+    private boolean isAnyNumber(TypeInstance type) {
         if (type == null || type.isNullType()) {
             return false;
         }
-        return byte.class.equals(type.getType()) || Byte.class.equals(type.getType())
-                || short.class.equals(type.getType()) || Short.class.equals(type.getType())
-                || int.class.equals(type.getType()) || Integer.class.equals(type.getType())
-                || long.class.equals(type.getType()) || Long.class.equals(type.getType())
-                || float.class.equals(type.getType()) || Float.class.equals(type.getType())
-                || double.class.equals(type.getType()) || Double.class.equals(type.getType());
+        return type.isA(byte.class) || type.isA(Byte.class)
+                || type.isA(short.class) || type.isA(Short.class)
+                || type.isA(int.class) || type.isA(Integer.class)
+                || type.isA(long.class) || type.isA(Long.class)
+                || type.isA(float.class) || type.isA(Float.class)
+                || type.isA(double.class) || type.isA(Double.class);
     }
 
-    private boolean isBoolean(TypeName type) {
+    private boolean isBoolean(TypeInstance type) {
         if (type == null || type.isNullType()) {
             return false;
         }
-        return boolean.class.equals(type.getType()) || Boolean.class.equals(type.getType());
+        return type.isA(boolean.class) || type.isA(Boolean.class);
     }
 }

@@ -11,15 +11,15 @@ import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
 import wrime.functor.StringFunctor;
-import wrime.lang.TypeName;
+import wrime.lang.TypeInstance;
 import wrime.model.Bean0;
 import wrime.model.Bean1;
 import wrime.model.Bean2;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class CallMatcherTest {
     private Emitter getExpression(String expression) throws RecognitionException, IOException {
@@ -35,7 +35,7 @@ public class CallMatcherTest {
         Emitter emitter = getExpression(expression);
         CallMatcher matcher = new CallMatcher(emitter);
         matcher.matchTypes(new ExpressionKeeperMock());
-        assertEquals(returnType, emitter.getReturnType().getType());
+        assertTrue(emitter.getReturnType().isA(returnType));
     }
 
     private void match(String expression, Class returnType, ExpressionKeeperMock scope) throws IOException, RecognitionException {
@@ -43,8 +43,7 @@ public class CallMatcherTest {
         CallMatcher matcher = new CallMatcher(emitter);
         matcher.matchTypes(scope);
         assertNotNull(emitter.getReturnType());
-        assertNotNull(emitter.getReturnType().getType());
-        assertEquals(returnType, emitter.getReturnType().getType());
+        assertTrue(emitter.getReturnType().isA(returnType));
     }
 
     @Test
@@ -69,11 +68,11 @@ public class CallMatcherTest {
     @Test
     public void variables() throws RecognitionException, IOException {
         ExpressionKeeperMock keeper = new ExpressionKeeperMock();
-        keeper.current().getVariables().put("self", new TypeName(CallMatcher.class));
-        keeper.current().getVariables().put("bean0", new TypeName(Bean0.class));
-        keeper.current().getVariables().put("bean1", new TypeName(Bean1.class));
-        keeper.current().getVariables().put("bean2", new TypeName(Bean2.class));
-        keeper.getFunctors().put("str", new TypeName(StringFunctor.class));
+        keeper.current().getVariables().put("self", new TypeInstance(CallMatcher.class));
+        keeper.current().getVariables().put("bean0", new TypeInstance(Bean0.class));
+        keeper.current().getVariables().put("bean1", new TypeInstance(Bean1.class));
+        keeper.current().getVariables().put("bean2", new TypeInstance(Bean2.class));
+        keeper.getFunctors().put("str", new TypeInstance(StringFunctor.class));
 
         match("bean2.callSelf(1).call(2)", Void.TYPE, keeper);
         match("self", CallMatcher.class, keeper);

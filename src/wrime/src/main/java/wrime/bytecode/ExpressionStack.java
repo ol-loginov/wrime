@@ -2,7 +2,7 @@ package wrime.bytecode;
 
 import wrime.WrimeException;
 import wrime.ast.ClassName;
-import wrime.lang.TypeName;
+import wrime.lang.TypeInstance;
 
 public interface ExpressionStack {
     ExpressionScope current();
@@ -19,5 +19,5 @@ public interface ExpressionStack {
 
     boolean inheritAttribute(String attribute);
 
-    TypeName getFunctorType(String functor);
+    TypeInstance getFunctorType(String functor);
 }

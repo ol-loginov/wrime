@@ -3,8 +3,7 @@ package wrime.tags;
 import wrime.WrimeException;
 import wrime.ast.TagFor;
 import wrime.bytecode.ExpressionStack;
-import wrime.lang.TypeName;
-import wrime.lang.TypeWrap;
+import wrime.lang.TypeInstance;
 import wrime.output.BodyWriter;
 
 import java.io.IOException;
@@ -23,13 +22,12 @@ public class ForTagProcessor implements TagProcessor {
                 new CallMatcher(tag.getIterable())
                         .matchTypes(context);
 
-                TypeName iterableType = tag.getIterable().getReturnType();
-                TypeWrap iterableTypeWrap = TypeWrap.create(iterableType.getType());
-                TypeName iteratorType;
-                if (iterableTypeWrap.isAssignableTo(Iterable.class)) {
-                    iteratorType = new TypeName(iterableTypeWrap.getTypeParameterOf(Iterable.class, 0));
-                } else if (iterableTypeWrap.isArray()) {
-                    iteratorType = new TypeName(iterableTypeWrap.getComponentType());
+                TypeInstance iterableType = tag.getIterable().getReturnType();
+                TypeInstance iteratorType;
+                if (iterableType.getDescriptor().isAssignableTo(Iterable.class)) {
+                    iteratorType = new TypeInstance(iterableType.getDescriptor().getTypeParameterOf(Iterable.class, 0));
+                } else if (iterableType.getDescriptor().isArray()) {
+                    iteratorType = new TypeInstance(iterableType.getDescriptor().getComponentType());
                 } else {
                     throw new WrimeException("iterable neither Array type nor Iterable", null, tag.getIterable().getLocation());
                 }
