@@ -2,9 +2,6 @@ package wrime.lang;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
-import wrime.ops.Getter;
-import wrime.ops.Invoker;
-import wrime.ops.Operand;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -59,25 +56,6 @@ public class TypeUtil {
         return true;
     }
 
-    private static Getter createGetter(String name, PropertyDescriptor descriptor) {
-        Getter getter = new Getter();
-        getter.setPropName(name);
-        getter.setPropMethod(descriptor.getReadMethod());
-        getter.setResult(createReturnTypeDef(getter.getPropMethod()));
-        return getter;
-    }
-
-    private static Invoker createInvoker(String name, Method method) {
-        Invoker invoker = new Invoker();
-        invoker.setMethodName(name);
-        invoker.setMethod(method);
-        if (method != null) {
-            invoker.setResult(createReturnTypeDef(method));
-        }
-        return invoker;
-    }
-
-
     private static Method findInvoker(TypeWrap invocable, String methodName, Type... argumentClasses) {
         for (Method m : invocable.getDeclaredMethods()) {
             if (!methodName.equals(m.getName())) {
@@ -116,33 +94,5 @@ public class TypeUtil {
             argumentClasses[i] = arguments[i].getType();
         }
         return findInvoker(TypeWrap.create(caller.getType()), name, argumentClasses);
-    }
-
-    public static Operand findAnyInvokerOrGetter(TypeName typeDef, String name) {
-        PropertyDescriptor propDescriptor = null;
-        try {
-            if (typeDef.getType() instanceof Class) {
-                propDescriptor = BeanUtils.getPropertyDescriptor((Class) typeDef.getType(), name);
-            }
-        } catch (BeansException be) {
-            propDescriptor = null;
-        }
-
-        if (propDescriptor != null) {
-            return createGetter(name, propDescriptor);
-        }
-
-        // no property found. try method then
-
-        Method method = null;
-        try {
-            if (typeDef.getType() instanceof Class) {
-                method = BeanUtils.findDeclaredMethodWithMinimalParameters((Class) typeDef.getType(), name);
-            }
-        } catch (IllegalArgumentException ie) {
-            return createInvoker(name, null);
-        }
-
-        return method != null ? createInvoker(name, method) : null;
     }
 }
