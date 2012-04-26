@@ -1,10 +1,8 @@
 package wrime;
 
 import org.junit.Test;
-import org.springframework.beans.BeanUtils;
+import wrime.lang.TypeDef;
 import wrime.model.MapHolder;
-
-import java.lang.reflect.Method;
 
 public class ForSimpleTest extends TestClass {
     @Test
@@ -19,9 +17,8 @@ public class ForSimpleTest extends TestClass {
 
     @Test
     public void iterateMap() throws WrimeException {
-        Method me = BeanUtils.findMethod(MapHolder.MapInstance.class, "iterator");
-        //me.getGenericReturnType()
-        //me.getReturnType()
+        Object instance = new MapHolder<Integer>();
+        TypeDef fff = new TypeDef(instance.getClass());
         parseAndVerify("003");
     }
 }

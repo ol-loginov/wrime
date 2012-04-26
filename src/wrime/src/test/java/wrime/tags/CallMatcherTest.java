@@ -11,7 +11,7 @@ import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
 import wrime.functor.StringFunctor;
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 import wrime.model.Bean0;
 import wrime.model.Bean1;
 import wrime.model.Bean2;
@@ -68,11 +68,11 @@ public class CallMatcherTest {
     @Test
     public void variables() throws RecognitionException, IOException {
         ExpressionKeeperMock keeper = new ExpressionKeeperMock();
-        keeper.current().getVariables().put("self", new TypeInstance(CallMatcher.class));
-        keeper.current().getVariables().put("bean0", new TypeInstance(Bean0.class));
-        keeper.current().getVariables().put("bean1", new TypeInstance(Bean1.class));
-        keeper.current().getVariables().put("bean2", new TypeInstance(Bean2.class));
-        keeper.getFunctors().put("str", new TypeInstance(StringFunctor.class));
+        keeper.current().getVariables().put("self", new TypeDef(CallMatcher.class));
+        keeper.current().getVariables().put("bean0", new TypeDef(Bean0.class));
+        keeper.current().getVariables().put("bean1", new TypeDef(Bean1.class));
+        keeper.current().getVariables().put("bean2", new TypeDef(Bean2.class));
+        keeper.getFunctors().put("str", new TypeDef(StringFunctor.class));
 
         match("bean2.callSelf(1).call(2)", Void.TYPE, keeper);
         match("self", CallMatcher.class, keeper);

@@ -3,16 +3,16 @@ package wrime;
 import wrime.ast.ClassName;
 import wrime.bytecode.ExpressionScope;
 import wrime.bytecode.ExpressionStack;
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ExpressionKeeperMock implements ExpressionStack {
     private ExpressionScopeMock current = new ExpressionScopeMock();
-    private final Map<String, TypeInstance> functors = new HashMap<String, TypeInstance>();
+    private final Map<String, TypeDef> functors = new HashMap<String, TypeDef>();
 
-    public Map<String, TypeInstance> getFunctors() {
+    public Map<String, TypeDef> getFunctors() {
         return functors;
     }
 
@@ -52,7 +52,7 @@ public class ExpressionKeeperMock implements ExpressionStack {
     }
 
     @Override
-    public TypeInstance getFunctorType(String functor) {
+    public TypeDef getFunctorType(String functor) {
         return functors.get(functor);
     }
 }

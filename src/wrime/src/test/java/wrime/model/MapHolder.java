@@ -1,14 +1,18 @@
 package wrime.model;
 
-import java.util.Collection;
+import java.util.TreeMap;
 
-public class MapHolder {
-    private MapInstance map; //= new MapInstance();
+public class MapHolder<T> {
+    private MapInstance<T> map; //= new MapInstance();
 
     public MapInstance getMap() {
         return map;
     }
 
-    public static abstract class MapInstance implements Collection<String> {
+    public <R> R values(R i) {
+        return null;
+    }
+
+    public static abstract class MapInstance<T> extends TreeMap<T, T> {
     }
 }

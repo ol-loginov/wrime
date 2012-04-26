@@ -1,10 +1,10 @@
 package wrime.ast;
 
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 
 public class NullValue extends Emitter {
     public NullValue() {
-        setReturnType(TypeInstance.NULL_TYPE);
+        setReturnType(TypeDef.NULL_TYPE);
     }
 
     @Override

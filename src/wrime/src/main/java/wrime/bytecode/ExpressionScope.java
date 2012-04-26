@@ -1,6 +1,6 @@
 package wrime.bytecode;
 
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 
 public interface ExpressionScope {
     boolean hasAttribute(String attribute);
@@ -9,7 +9,7 @@ public interface ExpressionScope {
 
     boolean hasVar(String name);
 
-    void addVar(String variable, TypeInstance variableClass);
+    void addVar(String variable, TypeDef variableClass);
 
-    TypeInstance getVarType(String name);
+    TypeDef getVarType(String name);
 }

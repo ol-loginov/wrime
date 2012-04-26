@@ -1,13 +1,13 @@
 package wrime.ast;
 
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 
 public class BoolValue extends Emitter {
     private boolean value;
 
     public BoolValue(boolean value) {
         this.value = value;
-        setReturnType(new TypeInstance(boolean.class));
+        setReturnType(new TypeDef(boolean.class));
     }
 
     public boolean getValue() {

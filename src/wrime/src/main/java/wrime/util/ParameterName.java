@@ -1,13 +1,13 @@
 package wrime.util;
 
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 
 public class ParameterName {
-    private final TypeInstance type;
+    private final TypeDef type;
     private final String option;
     private final String name;
 
-    public ParameterName(String name, TypeInstance type, String option) {
+    public ParameterName(String name, TypeDef type, String option) {
         this.name = name;
         this.type = type;
         this.option = option == null ? "" : option;
@@ -17,7 +17,7 @@ public class ParameterName {
         return name;
     }
 
-    public TypeInstance getType() {
+    public TypeDef getType() {
         return type;
     }
 

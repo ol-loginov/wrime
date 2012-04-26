@@ -1,7 +1,7 @@
 package wrime.bytecode;
 
 import wrime.WrimeException;
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class ExpressionScopeImpl implements ExpressionScope {
     private final ExpressionScope parentScope;
-    private final Map<String, TypeInstance> variables = new HashMap<String, TypeInstance>();
+    private final Map<String, TypeDef> variables = new HashMap<String, TypeDef>();
     private final Set<String> attributes = new HashSet<String>();
 
     public ExpressionScopeImpl(ExpressionScope parentScope) {
@@ -26,7 +26,7 @@ public class ExpressionScopeImpl implements ExpressionScope {
         return this;
     }
 
-    public void addVar(String name, TypeInstance classDef) throws WrimeException {
+    public void addVar(String name, TypeDef classDef) throws WrimeException {
         if (hasVar(name)) {
             throw new WrimeException("Variable named " + name + " is already in scope", null);
         }
@@ -34,8 +34,8 @@ public class ExpressionScopeImpl implements ExpressionScope {
     }
 
     @Override
-    public TypeInstance getVarType(String name) {
-        TypeInstance classDef = variables.get(name);
+    public TypeDef getVarType(String name) {
+        TypeDef classDef = variables.get(name);
         if (classDef != null) {
             return classDef;
         }

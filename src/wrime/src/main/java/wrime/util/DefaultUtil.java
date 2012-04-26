@@ -1,6 +1,6 @@
 package wrime.util;
 
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 
 @SuppressWarnings("UnusedDeclaration")
 public class DefaultUtil {
@@ -13,7 +13,7 @@ public class DefaultUtil {
     private static float DEFAULT_FLOAT;
     private static double DEFAULT_DOUBLE;
 
-    public static Object getDefault(TypeInstance type) {
+    public static Object getDefault(TypeDef type) {
         if (type.isA(boolean.class)) {
             return DEFAULT_BOOLEAN;
         } else if (type.isA(byte.class)) {

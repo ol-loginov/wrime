@@ -4,7 +4,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import wrime.WrimeException;
 import wrime.ast.ClassName;
-import wrime.lang.TypeInstance;
+import wrime.lang.TypeDef;
 import wrime.util.FunctorName;
 import wrime.util.ParameterName;
 
@@ -28,8 +28,8 @@ public class SourceExpression implements ExpressionStack {
         this.functors = functors;
         this.contextStack.push(new ExpressionScopeImpl(null) {
             @Override
-            public TypeInstance getVarType(String name) {
-                TypeInstance def = super.getVarType(name);
+            public TypeDef getVarType(String name) {
+                TypeDef def = super.getVarType(name);
                 if (def != null) {
                     return def;
                 }
@@ -67,9 +67,9 @@ public class SourceExpression implements ExpressionStack {
     }
 
     @Override
-    public TypeInstance getFunctorType(String functor) {
+    public TypeDef getFunctorType(String functor) {
         FunctorName instance = functors.get(functor);
-        return instance == null ? null : new TypeInstance(instance.getType());
+        return instance == null ? null : new TypeDef(instance.getType());
     }
 
     @Override
@@ -135,7 +135,7 @@ public class SourceExpression implements ExpressionStack {
         if (parameters.containsKey(parameterName)) {
             SourceComposer.throwError("duplicate for model parameter " + parameterName);
         }
-        TypeInstance parameterType = new TypeInstance(parameterClass);
+        TypeDef parameterType = new TypeDef(parameterClass);
         parameters.put(parameterName, new ParameterName(parameterName, parameterType, option));
     }
 
