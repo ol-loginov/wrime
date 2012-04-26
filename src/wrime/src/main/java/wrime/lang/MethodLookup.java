@@ -3,7 +3,6 @@ package wrime.lang;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
@@ -90,8 +89,6 @@ public abstract class MethodLookup {
         if (TypeDescriptorImpl.isClass(returnType)) {
             def.setReturnType(new TypeDef(returnType));
         } else if (TypeDescriptorImpl.isParameterizedType(returnType)) {
-            ParameterizedType parameterizedReturnType = (ParameterizedType) returnType;
-            Type[] array = parameterizedReturnType.getActualTypeArguments();
             def.setReturnType(new TypeDef(returnType));
         } else if (TypeDescriptorImpl.isTypeVariable(returnType)) {
             TypeVariable returnTypeVariable = (TypeVariable) returnType;

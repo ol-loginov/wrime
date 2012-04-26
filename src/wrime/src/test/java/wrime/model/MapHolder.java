@@ -1,18 +1,14 @@
 package wrime.model;
 
-import java.util.TreeMap;
-
+@SuppressWarnings("UnusedDeclaration")
 public class MapHolder<T> {
-    private MapInstance<T> map; //= new MapInstance();
+    private MapInstance<T> map = new MapInstance<T>();
 
-    public MapInstance getMap() {
+    public MapInstance<T> getMap() {
         return map;
     }
 
     public <R> R values(R i) {
         return null;
-    }
-
-    public static abstract class MapInstance<T> extends TreeMap<T, T> {
     }
 }
