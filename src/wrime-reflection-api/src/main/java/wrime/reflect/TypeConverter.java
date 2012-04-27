@@ -5,6 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TypeConverter {
+    public static boolean hasParameterizedBounds(Type[] bounds) {
+        return bounds.length > 1 || (bounds.length == 1 && !Object.class.equals(bounds[0]));
+    }
+
+    public static boolean isInBounds(Type passedType, Type[] bounds) {
+        return false;
+    }
+
     private static interface Tester {
         boolean isAssignable(Type source);
     }

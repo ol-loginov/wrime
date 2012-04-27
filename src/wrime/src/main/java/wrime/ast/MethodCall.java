@@ -1,6 +1,6 @@
 package wrime.ast;
 
-import wrime.reflect.MethodDef;
+import wrime.reflect.MethodLookup;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ public class MethodCall extends Emitter {
     private final String methodName;
     private final List<Emitter> arguments;
 
-    private MethodDef invocation;
+    private MethodLookup invocation;
 
     public MethodCall(Emitter invocable, String methodName, List<Emitter> arguments) {
         this.invocable = invocable;
@@ -33,11 +33,11 @@ public class MethodCall extends Emitter {
         return arguments;
     }
 
-    public MethodDef getInvocation() {
+    public MethodLookup getInvocation() {
         return invocation;
     }
 
-    public void setInvocation(MethodDef invocation) {
+    public void setInvocation(MethodLookup invocation) {
         this.invocation = invocation;
     }
 

@@ -5,11 +5,11 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParameterizedTypeMap {
+public class TypeVariableMap {
     private List<TypeVariable> variables;
     private List<Type> types;
 
-    public ParameterizedTypeMap() {
+    public TypeVariableMap() {
         variables = new ArrayList<TypeVariable>();
         types = new ArrayList<Type>();
     }

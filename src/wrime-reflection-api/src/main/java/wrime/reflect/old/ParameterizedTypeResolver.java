@@ -5,7 +5,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
 public class ParameterizedTypeResolver {
-    public static ParameterizedType resolveType(ParameterizedType type, ParameterizedTypeMap localTypes, Type declaringClass) {
+    public static ParameterizedType resolveType(ParameterizedType type, TypeVariableMap localTypes, Type declaringClass) {
         ParameterizedTypeImpl result = new ParameterizedTypeImpl(type);
         Type[] typeArguments = type.getActualTypeArguments();
         Type[] typeResolved = new Type[typeArguments.length];
@@ -20,7 +20,7 @@ public class ParameterizedTypeResolver {
         return result;
     }
 
-    private static Type findTypeVariable(TypeVariable variable, ParameterizedTypeMap localTypes, Type declaringClass) {
+    public static Type findTypeVariable(TypeVariable variable, TypeVariableMap localTypes, Type declaringClass) {
         for (int i = 0; i < localTypes.size(); ++i) {
             TypeVariable localTypeVariable = localTypes.getVariable(i);
             if (localTypeVariable.getName().equals(variable.getName())) {
