@@ -1,16 +1,17 @@
-package wrime.lang;
+package wrime.reflect.old;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
-class TypeDescriptorDelegate implements TypeDescriptor {
-    private final TypeDescriptor delegate;
+class TypeProxyDelegate implements TypeProxy {
+    private final TypeProxy delegate;
 
-    public TypeDescriptorDelegate(TypeDescriptor delegate) {
+    public TypeProxyDelegate(TypeProxy delegate) {
         this.delegate = delegate;
     }
 
-    public TypeDescriptor getDelegate() {
+    public TypeProxy getDelegate() {
         return delegate;
     }
 
@@ -45,6 +46,11 @@ class TypeDescriptorDelegate implements TypeDescriptor {
     }
 
     @Override
+    public Type getTypeParameter(TypeVariable typeVariable) {
+        return delegate.getTypeParameter(typeVariable);
+    }
+
+    @Override
     public TypeDef getTypeParameterOf(Class generic, int index) {
         return delegate.getTypeParameterOf(generic, index);
     }
@@ -62,5 +68,10 @@ class TypeDescriptorDelegate implements TypeDescriptor {
     @Override
     public boolean isVoid() {
         return delegate.isVoid();
+    }
+
+    @Override
+    public boolean isParameterized() {
+        return delegate.isParameterized();
     }
 }

@@ -1,15 +1,15 @@
 package wrime.ast;
 
-import wrime.lang.TypeDef;
+import java.lang.reflect.Type;
 
 public abstract class Emitter extends Locatable {
-    private TypeDef returnType;
+    private Type returnType;
 
-    public TypeDef getReturnType() {
+    public Type getReturnType() {
         return returnType;
     }
 
-    public void setReturnType(TypeDef returnType) {
+    public void setReturnType(Type returnType) {
         this.returnType = returnType;
     }
 }

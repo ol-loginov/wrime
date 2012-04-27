@@ -1,10 +1,11 @@
-package wrime.lang;
+package wrime.reflect;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 public class MethodDef {
     protected final Method method;
-    private TypeDef returnType;
+    private Type returnType;
 
     public MethodDef(Method method) {
         this.method = method;
@@ -14,11 +15,12 @@ public class MethodDef {
         return method.getName();
     }
 
-    public TypeDef getReturnType() {
+    public Type getReturnType() {
         return returnType;
     }
 
-    public void setReturnType(TypeDef returnType) {
+    public MethodDef setReturnType(Type returnType) {
         this.returnType = returnType;
+        return this;
     }
 }

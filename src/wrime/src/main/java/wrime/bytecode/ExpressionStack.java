@@ -2,7 +2,8 @@ package wrime.bytecode;
 
 import wrime.WrimeException;
 import wrime.ast.ClassName;
-import wrime.lang.TypeDef;
+
+import java.lang.reflect.Type;
 
 public interface ExpressionStack {
     ExpressionScope current();
@@ -11,13 +12,13 @@ public interface ExpressionStack {
 
     ExpressionScope closeScope();
 
-    Class findClass(ClassName className);
+    Type findClass(ClassName className);
 
     void addImport(String className);
 
-    void addParameter(String parameterName, Class parameterClass, String options) throws WrimeException;
+    void addParameter(String parameterName, Type parameterType, String options) throws WrimeException;
 
     boolean inheritAttribute(String attribute);
 
-    TypeDef getFunctorType(String functor);
+    Type getFunctorType(String functor);
 }

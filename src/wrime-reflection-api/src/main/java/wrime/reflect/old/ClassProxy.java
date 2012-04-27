@@ -1,15 +1,13 @@
-package wrime.lang;
-
-import wrime.WrimeException;
+package wrime.reflect.old;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-public class DescriptorForClass extends TypeDescriptorImpl {
+public class ClassProxy extends TypeProxyImpl {
     final Class type;
 
-    public DescriptorForClass(Class type) {
+    public ClassProxy(Class type) {
         this.type = type;
     }
 
@@ -42,9 +40,9 @@ public class DescriptorForClass extends TypeDescriptorImpl {
     public boolean isAssignableFrom(Type other) {
         if (Object.class.equals(type)) {
             return true;
-        } else if (TypeDescriptorImpl.isClass(other)) {
+        } else if (TypeProxyImpl.isClass(other)) {
             return type.isAssignableFrom((Class) other);
-        } else if (TypeDescriptorImpl.isParameterizedType(other)) {
+        } else if (TypeProxyImpl.isParameterizedType(other)) {
             return isAssignableFrom(((ParameterizedType) other).getRawType());
         } else {
             throw new IllegalStateException("Decision is not implemented");
@@ -58,18 +56,18 @@ public class DescriptorForClass extends TypeDescriptorImpl {
     }
 
     @Override
-    public TypeDef getTypeParameterOf(Class generic, int index) throws WrimeException {
+    public TypeDef getTypeParameterOf(Class generic, int index) {
         if (type.equals(generic)) {
             return new TypeDef(type.getTypeParameters()[index]);
         }
         for (Type genericInterface : type.getGenericInterfaces()) {
-            TypeDef result = TypeDescriptorImpl.create(genericInterface).getTypeParameterOf(generic, index);
+            TypeDef result = TypeProxyImpl.create(genericInterface).getTypeParameterOf(generic, index);
             if (result != null) {
                 return result;
             }
         }
         if (null == getSuperclass()) {
-            throw new WrimeException("Type " + type + " has no specified type for generic " + generic, null);
+            throw new NoClassDefFoundError("Type " + type + " has no specified type for generic " + generic);
         }
         return getSuperclass().getTypeParameterOf(generic, index);
     }

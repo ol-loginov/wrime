@@ -1,12 +1,12 @@
-package wrime.lang;
+package wrime.reflect.old;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
-public class DescriptorForTypeVariable extends TypeDescriptorImpl {
+public class TypeVariableProxy extends TypeProxyImpl {
     final TypeVariable type;
 
-    public DescriptorForTypeVariable(TypeVariable type) {
+    public TypeVariableProxy(TypeVariable type) {
         this.type = type;
     }
 
@@ -17,6 +17,6 @@ public class DescriptorForTypeVariable extends TypeDescriptorImpl {
 
     @Override
     public String getJavaSourceName() {
-        return new DescriptorForClass(Object.class).getJavaSourceName();
+        return new ClassProxy(Object.class).getJavaSourceName();
     }
 }

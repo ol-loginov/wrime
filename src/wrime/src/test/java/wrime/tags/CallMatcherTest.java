@@ -11,10 +11,10 @@ import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
 import wrime.ast.Emitter;
 import wrime.functor.StringFunctor;
-import wrime.lang.TypeDef;
 import wrime.model.Bean0;
 import wrime.model.Bean1;
 import wrime.model.Bean2;
+import wrime.reflect.Types;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class CallMatcherTest {
         Emitter emitter = getExpression(expression);
         CallMatcher matcher = new CallMatcher(emitter);
         matcher.matchTypes(new ExpressionKeeperMock());
-        assertTrue(emitter.getReturnType().isA(returnType));
+        assertTrue(Types.isOneOf(emitter.getReturnType(), returnType));
     }
 
     private void match(String expression, Class returnType, ExpressionKeeperMock scope) throws IOException, RecognitionException {
@@ -43,7 +43,7 @@ public class CallMatcherTest {
         CallMatcher matcher = new CallMatcher(emitter);
         matcher.matchTypes(scope);
         assertNotNull(emitter.getReturnType());
-        assertTrue(emitter.getReturnType().isA(returnType));
+        assertTrue(Types.isOneOf(emitter.getReturnType(), returnType));
     }
 
     @Test
@@ -68,11 +68,11 @@ public class CallMatcherTest {
     @Test
     public void variables() throws RecognitionException, IOException {
         ExpressionKeeperMock keeper = new ExpressionKeeperMock();
-        keeper.current().getVariables().put("self", new TypeDef(CallMatcher.class));
-        keeper.current().getVariables().put("bean0", new TypeDef(Bean0.class));
-        keeper.current().getVariables().put("bean1", new TypeDef(Bean1.class));
-        keeper.current().getVariables().put("bean2", new TypeDef(Bean2.class));
-        keeper.getFunctors().put("str", new TypeDef(StringFunctor.class));
+        keeper.current().getVariables().put("self", CallMatcher.class);
+        keeper.current().getVariables().put("bean0", Bean0.class);
+        keeper.current().getVariables().put("bean1", Bean1.class);
+        keeper.current().getVariables().put("bean2", Bean2.class);
+        keeper.getFunctors().put("str", StringFunctor.class);
 
         match("bean2.callSelf(1).call(2)", Void.TYPE, keeper);
         match("self", CallMatcher.class, keeper);

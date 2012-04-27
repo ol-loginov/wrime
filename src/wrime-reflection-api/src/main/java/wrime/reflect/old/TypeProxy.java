@@ -1,10 +1,13 @@
-package wrime.lang;
+package wrime.reflect.old;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
-public interface TypeDescriptor {
+public interface TypeProxy {
     Type getType();
+
+    boolean isParameterized();
 
     boolean isArray();
 
@@ -23,4 +26,6 @@ public interface TypeDescriptor {
     TypeDef getTypeParameterOf(Class generic, int index);
 
     Method[] getDeclaredMethods();
+
+    Type getTypeParameter(TypeVariable typeVariable);
 }

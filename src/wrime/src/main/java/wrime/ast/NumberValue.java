@@ -1,7 +1,6 @@
 package wrime.ast;
 
 import wrime.WrimeException;
-import wrime.lang.TypeDef;
 
 public class NumberValue extends Emitter {
     private final String text;
@@ -19,9 +18,9 @@ public class NumberValue extends Emitter {
 
         if (!longValFailed) {
             if (longVal >= Integer.MAX_VALUE || longVal <= Integer.MIN_VALUE) {
-                setReturnType(new TypeDef(long.class));
+                setReturnType(long.class);
             } else {
-                setReturnType(new TypeDef(int.class));
+                setReturnType(int.class);
             }
             return;
         }
@@ -37,9 +36,9 @@ public class NumberValue extends Emitter {
 
         if (!doubleValFailed) {
             if (doubleVal >= Float.MAX_VALUE || doubleVal <= Float.MIN_VALUE) {
-                setReturnType(new TypeDef(double.class));
+                setReturnType(double.class);
             } else {
-                setReturnType(new TypeDef(float.class));
+                setReturnType(float.class);
             }
             return;
         }

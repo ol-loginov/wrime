@@ -1,6 +1,6 @@
 package wrime.ast;
 
-import wrime.lang.TypeDef;
+import java.lang.reflect.Type;
 
 public class Group extends Emitter {
     private final Emitter inner;
@@ -14,12 +14,12 @@ public class Group extends Emitter {
     }
 
     @Override
-    public TypeDef getReturnType() {
+    public Type getReturnType() {
         return super.getReturnType();
     }
 
     @Override
-    public void setReturnType(TypeDef returnType) {
+    public void setReturnType(Type returnType) {
         super.setReturnType(returnType);
     }
 }

@@ -1,23 +1,23 @@
 package wrime;
 
 import wrime.bytecode.ExpressionScope;
-import wrime.lang.TypeDef;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class ExpressionScopeMock implements ExpressionScope {
-    private final Map<String, TypeDef> variables = new HashMap<String, TypeDef>();
+    private final Map<String, Type> variables = new HashMap<String, Type>();
     private final Set<String> attributes = new TreeSet<String>();
 
-    public Map<String, TypeDef> getVariables() {
+    public Map<String, Type> getVariables() {
         return variables;
     }
 
     @Override
-    public TypeDef getVarType(String name) {
+    public Type getVarType(String name) {
         return variables.get(name);
     }
 
@@ -38,7 +38,7 @@ public class ExpressionScopeMock implements ExpressionScope {
     }
 
     @Override
-    public void addVar(String variable, TypeDef variableClass) {
+    public void addVar(String variable, Type variableClass) {
         variables.put(variable, variableClass);
     }
 }

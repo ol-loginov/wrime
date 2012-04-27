@@ -1,30 +1,28 @@
-package wrime.lang;
-
-import wrime.WrimeException;
+package wrime.reflect.old;
 
 import java.lang.reflect.*;
 
-abstract class TypeDescriptorImpl implements TypeDescriptor {
+abstract class TypeProxyImpl implements TypeProxy {
     public abstract Type getType();
 
-    static TypeDescriptorImpl create(Type type) {
+    static TypeProxyImpl create(Type type) {
         return create(type, true);
     }
 
-    static TypeDescriptorImpl create(Type type, boolean errorIfNull) {
+    static TypeProxyImpl create(Type type, boolean errorIfNull) {
         if (type == null) {
             if (errorIfNull) {
                 throw new IllegalArgumentException("type is null");
             }
             return null;
         } else if (isClass(type)) {
-            return new DescriptorForClass((Class) type);
+            return new ClassProxy((Class) type);
         } else if (isParameterizedType(type)) {
-            return new DescriptorForParameterizedType((ParameterizedType) type);
+            return new ParameterizedTypeProxy((ParameterizedType) type);
         } else if (isWildcard(type)) {
-            return new DescriptorForWildcardType((WildcardType) type);
+            return new WildcardTypeProxy((WildcardType) type);
         } else if (isTypeVariable(type)) {
-            return new DescriptorForTypeVariable((TypeVariable) type);
+            return new TypeVariableProxy((TypeVariable) type);
         } else {
             throw new IllegalStateException("Type support is not implemented");
         }
@@ -48,6 +46,11 @@ abstract class TypeDescriptorImpl implements TypeDescriptor {
 
     @Override
     public boolean isArray() {
+        return false;
+    }
+
+    @Override
+    public boolean isParameterized() {
         return false;
     }
 
@@ -80,7 +83,12 @@ abstract class TypeDescriptorImpl implements TypeDescriptor {
     }
 
     @Override
-    public TypeDef getTypeParameterOf(Class generic, int index) throws WrimeException {
+    public Type getTypeParameter(TypeVariable typeVariable) {
+        throw new IllegalStateException("Type is not generic");
+    }
+
+    @Override
+    public TypeDef getTypeParameterOf(Class generic, int index) {
         throw new IllegalStateException("Type is not generic");
     }
 

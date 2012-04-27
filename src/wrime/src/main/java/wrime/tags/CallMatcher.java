@@ -5,10 +5,12 @@ import wrime.ast.*;
 import wrime.ast.StringValue;
 import wrime.bytecode.ExpressionScope;
 import wrime.bytecode.ExpressionStack;
-import wrime.lang.MethodDef;
-import wrime.lang.MethodLookup;
-import wrime.lang.TypeDef;
+import wrime.reflect.MethodDef;
+import wrime.reflect.MethodLookup;
+import wrime.reflect.TypeConverter;
+import wrime.reflect.Types;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -92,7 +94,7 @@ public class CallMatcher {
     }
 
     private void doMatchTypes(FunctorRef emitter, ExpressionStack scope) {
-        TypeDef functorType = scope.getFunctorType(emitter.getName());
+        Type functorType = scope.getFunctorType(emitter.getName());
         if (functorType == null) {
             throw new WrimeException("No functor '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());
         }
@@ -100,7 +102,7 @@ public class CallMatcher {
     }
 
     private void doMatchTypes(VariableRef emitter, ExpressionScope scope) {
-        TypeDef varType = scope.getVarType(emitter.getName());
+        Type varType = scope.getVarType(emitter.getName());
         if (varType == null) {
             throw new WrimeException("No variable '" + emitter.getName() + "' defined at a point", null, emitter.getLocation());
         }
@@ -115,7 +117,7 @@ public class CallMatcher {
         } else {
             requireBooleanReturnType(emitter.getLeft(), "required for gate " + emitter.getRule());
             requireBooleanReturnType(emitter.getRight(), "required for gate " + emitter.getRule());
-            emitter.setReturnType(new TypeDef(boolean.class));
+            emitter.setReturnType(boolean.class);
         }
     }
 
@@ -134,7 +136,7 @@ public class CallMatcher {
             matchNeeded(emitter.getInner());
         } else {
             requireBooleanReturnType(emitter.getInner(), "required for inverting expression");
-            emitter.setReturnType(new TypeDef(boolean.class));
+            emitter.setReturnType(boolean.class);
         }
     }
 
@@ -146,7 +148,7 @@ public class CallMatcher {
         } else {
             requireNoVoidType(emitter.getLeft(), "required for comparison " + emitter.getRule());
             requireNoVoidType(emitter.getRight(), "required for comparison " + emitter.getRule());
-            emitter.setReturnType(new TypeDef(boolean.class));
+            emitter.setReturnType(boolean.class);
         }
     }
 
@@ -185,7 +187,7 @@ public class CallMatcher {
             Emitter invocable = emitter.getInvocable();
             requireReturnType(invocable, "required for method identification");
 
-            List<TypeDef> argumentTypes = new ArrayList<TypeDef>();
+            List<Type> argumentTypes = new ArrayList<Type>();
             if (emitter.hasArguments()) {
                 for (Emitter argument : emitter.getArguments()) {
                     requireReturnType(argument, "required for method identification");
@@ -196,7 +198,7 @@ public class CallMatcher {
             MethodDef method = MethodLookup.findInvoker(
                     invocable.getReturnType(),
                     emitter.getMethodName(),
-                    argumentTypes.toArray(new TypeDef[argumentTypes.size()]));
+                    argumentTypes.toArray(new Type[argumentTypes.size()]));
             if (method == null) {
                 throw new WrimeException("No suitable method '" + emitter.getMethodName() + "' found in type " + invocable.getReturnType(), null, emitter.getLocation());
             }
@@ -210,78 +212,43 @@ public class CallMatcher {
     }
 
     public static void requireReturnType(Emitter emitter, String need) {
-        if (emitter.getReturnType() == null) {
+        if (emitter.getReturnType() == null || emitter.getReturnType() == Types.NULL_TYPE) {
             throw new WrimeException("component has no defined return type (" + need + ")", null, emitter.getLocation());
         }
     }
 
     public static void requireNoVoidType(Emitter emitter, String need) {
-        if (emitter.getReturnType() == null || emitter.getReturnType().isVoid()) {
+        if (emitter.getReturnType() == null || emitter.getReturnType() == Types.NULL_TYPE || Types.isOneOf(emitter.getReturnType(), Void.TYPE)) {
             throw new WrimeException("component has no defined return type (" + need + ")", null, emitter.getLocation());
         }
     }
 
     public static void requireReturnType(Emitter emitter, Class clazz, String need) {
         requireReturnType(emitter, need);
-        if (!new TypeDef(clazz).isAssignableFrom(emitter.getReturnType())) {
+        if (!TypeConverter.isAssignable(clazz, emitter.getReturnType())) {
             throw new WrimeException("statement is not of type needed (" + need + ")", null, emitter.getLocation());
         }
     }
 
     public void requireBooleanReturnType(String need) {
-        if (!isBoolean(root.getReturnType())) {
+        if (!Types.isBoolean(root.getReturnType())) {
             throw new WrimeException("component is not of boolean type (" + need + ")", null, root.getLocation());
         }
     }
 
     private void requireBooleanReturnType(Emitter emitter, String need) {
-        if (!isBoolean(emitter.getReturnType())) {
+        if (!Types.isBoolean(emitter.getReturnType())) {
             throw new WrimeException("component is not of boolean type (" + need + ")", null, emitter.getLocation());
         }
     }
 
     private void requireNumberReturnType(Emitter emitter, String need) {
-        if (!isAnyNumber(emitter.getReturnType())) {
+        if (!Types.isAnyNumber(emitter.getReturnType())) {
             throw new WrimeException("component is not of number type (" + need + ")", null, emitter.getLocation());
         }
     }
 
-    private TypeDef getWidestNumberType(TypeDef a, TypeDef b) {
-        return getNumberTypeWeight(a) >= getNumberTypeWeight(b) ? a : b;
-    }
-
-    private int getNumberTypeWeight(TypeDef a) {
-        if (a.isA(byte.class) || a.isA(Byte.class))
-            return 0;
-        if (a.isA(short.class) || a.isA(Short.class))
-            return 1;
-        if (a.isA(int.class) || a.isA(Integer.class))
-            return 2;
-        if (a.isA(long.class) || a.isA(Long.class))
-            return 3;
-        if (a.isA(float.class) || a.isA(Float.class))
-            return 4;
-        if (a.isA(double.class) || a.isA(Double.class))
-            return 5;
-        throw new WrimeException("cannot work with number type " + a, null);
-    }
-
-    private boolean isAnyNumber(TypeDef type) {
-        if (type == null || type.isNullType()) {
-            return false;
-        }
-        return type.isA(byte.class) || type.isA(Byte.class)
-                || type.isA(short.class) || type.isA(Short.class)
-                || type.isA(int.class) || type.isA(Integer.class)
-                || type.isA(long.class) || type.isA(Long.class)
-                || type.isA(float.class) || type.isA(Float.class)
-                || type.isA(double.class) || type.isA(Double.class);
-    }
-
-    private boolean isBoolean(TypeDef type) {
-        if (type == null || type.isNullType()) {
-            return false;
-        }
-        return type.isA(boolean.class) || type.isA(Boolean.class);
+    private Type getWidestNumberType(Type a, Type b) {
+        return Types.getNumberTypeWeight(a) >= Types.getNumberTypeWeight(b) ? a : b;
     }
 }

@@ -1,12 +1,12 @@
-package wrime.lang;
+package wrime.reflect.old;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 
-public class DescriptorForWildcardType extends TypeDescriptorImpl {
+public class WildcardTypeProxy extends TypeProxyImpl {
     final WildcardType type;
 
-    public DescriptorForWildcardType(WildcardType type) {
+    public WildcardTypeProxy(WildcardType type) {
         this.type = type;
     }
 
@@ -21,6 +21,6 @@ public class DescriptorForWildcardType extends TypeDescriptorImpl {
         if (uppers == null || uppers.length != 1) {
             throw new IllegalStateException("many upper bounds is not implemented");
         }
-        return TypeDescriptorImpl.create(uppers[0]).getJavaSourceName();
+        return create(uppers[0]).getJavaSourceName();
     }
 }

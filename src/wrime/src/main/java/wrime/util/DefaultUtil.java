@@ -1,6 +1,6 @@
 package wrime.util;
 
-import wrime.lang.TypeDef;
+import java.lang.reflect.Type;
 
 @SuppressWarnings("UnusedDeclaration")
 public class DefaultUtil {
@@ -13,20 +13,20 @@ public class DefaultUtil {
     private static float DEFAULT_FLOAT;
     private static double DEFAULT_DOUBLE;
 
-    public static Object getDefault(TypeDef type) {
-        if (type.isA(boolean.class)) {
+    public static Object getDefault(Type type) {
+        if (boolean.class.equals(type)) {
             return DEFAULT_BOOLEAN;
-        } else if (type.isA(byte.class)) {
+        } else if (byte.class.equals(type)) {
             return DEFAULT_BYTE;
-        } else if (type.isA(short.class)) {
+        } else if (short.class.equals(type)) {
             return DEFAULT_SHORT;
-        } else if (type.isA(int.class)) {
+        } else if (int.class.equals(type)) {
             return DEFAULT_INT;
-        } else if (type.isA(long.class)) {
+        } else if (long.class.equals(type)) {
             return DEFAULT_LONG;
-        } else if (type.isA(float.class)) {
+        } else if (float.class.equals(type)) {
             return DEFAULT_FLOAT;
-        } else if (type.isA(double.class)) {
+        } else if (double.class.equals(type)) {
             return DEFAULT_DOUBLE;
         } else {
             return "null";

@@ -1,27 +1,23 @@
-package wrime.lang;
+package wrime.reflect.old;
 
 import java.lang.reflect.Type;
 
-public class TypeDef extends TypeDescriptorDelegate {
+public class TypeDef extends TypeProxyDelegate {
     public static final TypeDef NULL_TYPE = new TypeDef();
 
     protected TypeDef() {
         super(null);
     }
 
-    protected TypeDef(TypeDescriptor descriptor) {
-        super(descriptor);
-        if (descriptor == null) {
+    protected TypeDef(TypeProxy proxy) {
+        super(proxy);
+        if (proxy == null) {
             throw new IllegalArgumentException("Type is null");
         }
     }
 
     public TypeDef(Type type) {
-        this(TypeDescriptorImpl.create(type, false));
-    }
-
-    public boolean isA(Class clazz) {
-        return clazz.equals(getDelegate().getType());
+        this(TypeProxyImpl.create(type, false));
     }
 
     public boolean isNullType() {

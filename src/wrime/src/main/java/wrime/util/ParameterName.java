@@ -1,13 +1,13 @@
 package wrime.util;
 
-import wrime.lang.TypeDef;
+import java.lang.reflect.Type;
 
 public class ParameterName {
-    private final TypeDef type;
+    private final Type type;
     private final String option;
     private final String name;
 
-    public ParameterName(String name, TypeDef type, String option) {
+    public ParameterName(String name, Type type, String option) {
         this.name = name;
         this.type = type;
         this.option = option == null ? "" : option;
@@ -17,10 +17,11 @@ public class ParameterName {
         return name;
     }
 
-    public TypeDef getType() {
+    public Type getType() {
         return type;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public String getOption() {
         return option;
     }

@@ -27,6 +27,10 @@ public class ClassName {
         this.packageName = packageName;
     }
 
+    public List<ClassName> getGenericTypes() {
+        return genericTypes;
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

@@ -12,6 +12,7 @@
     <name>wrime parent pom</name>
 
     <modules>
+        <module>../wrime-reflection-api</module>
         <module>../wrime</module>
         <module>../wrime-in-spring</module>
         <module>../wrime-in-webmvc</module>

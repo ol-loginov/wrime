@@ -1,6 +1,6 @@
 package wrime.ast;
 
-import wrime.lang.MethodDef;
+import wrime.reflect.MethodDef;
 
 import java.util.List;
 

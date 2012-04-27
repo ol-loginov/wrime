@@ -4,10 +4,12 @@ import wrime.WrimeException;
 import wrime.ast.Emitter;
 import wrime.ast.TagSet;
 import wrime.bytecode.ExpressionStack;
-import wrime.lang.TypeDef;
 import wrime.output.BodyWriter;
+import wrime.reflect.TypeConverter;
+import wrime.reflect.Types;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 public class SetTagProcessor implements TagProcessor {
     private final TagSet tag;
@@ -33,12 +35,12 @@ public class SetTagProcessor implements TagProcessor {
             context.current().addVar(variable, value.getReturnType());
 
             body
-                    .append(value.getReturnType().getJavaSourceName())
+                    .append(Types.getJavaSourceName(value.getReturnType()))
                     .append(" ");
         } else {
             //validate type of assignment
-            TypeDef varTypeInfo = context.current().getVarType(variable);
-            if (!varTypeInfo.isAssignableFrom(value.getReturnType())) {
+            Type varTypeInfo = context.current().getVarType(variable);
+            if (!TypeConverter.isAssignable(varTypeInfo, value.getReturnType())) {
                 throw new WrimeException("Value cannot be cast to variable '" + variable + "'", null, tag.getLocation());
             }
         }
