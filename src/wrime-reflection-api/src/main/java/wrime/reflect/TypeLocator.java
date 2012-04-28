@@ -44,7 +44,7 @@ public class TypeLocator {
         if (instance != null) {
             return instance;
         }
-        String classSelfName = getPublicClassName(genericTypeName);
+        String classSelfName = getClassName(genericTypeName);
         for (String imports : getImports()) {
             if (imports.endsWith("." + classSelfName)) {
                 instance = tryClass(imports, typeParameters);
@@ -81,11 +81,23 @@ public class TypeLocator {
         return StringUtils.trimTrailingCharacter(imports, '*') + classSelfName;
     }
 
-    public static String getPublicClassName(String name) {
-        Matcher matcher = PUBLIC_NAME_PATTERN.matcher(name);
+    public static String getClassName(String className) {
+        Matcher matcher = PUBLIC_NAME_PATTERN.matcher(className);
         if (matcher.find()) {
             return matcher.group();
         }
-        return name;
+        return className;
+    }
+
+    public static String getClassNamePrefix(String className) {
+        Matcher matcher = PUBLIC_NAME_PATTERN.matcher(className);
+        if (matcher.find()) {
+            return className.substring(0, matcher.start() - 1);
+        }
+        return "";
+    }
+
+    public static String byteToCodeName(String name) {
+        return name.replace("$", ".");
     }
 }

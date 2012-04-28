@@ -64,26 +64,20 @@ public class Types {
         return new TypeVisitor<String>(type) {
             @Override
             protected String visitClass(Class target) {
-                String canonicalName = target.getCanonicalName();
-                String publicClassName = TypeLocator.getPublicClassName(canonicalName);
+                String fullName = target.getCanonicalName();
+                String className = TypeLocator.getClassName(fullName);
 
                 Map<String, String> importResolvers = new TreeMap<String, String>();
-                if (publicClassName.contains("$")) {
-
-                }
+                importResolvers.put(fullName, className);
+                importResolvers.put(TypeLocator.getClassNamePrefix(fullName) + ".*", TypeLocator.byteToCodeName(className));
 
                 for (String importPath : imports) {
-                    if (importPath.equals(canonicalName)) {
-                        return publicClassName;
-                    }
-                    if (importPath.endsWith("*")) {
-                        String strippedImport = importPath.substring(0, importPath.length() - 1);
-                        if (canonicalName.equals(strippedImport + publicClassName)) {
-                            return publicClassName;
-                        }
+                    String resolvedName = importResolvers.get(importPath);
+                    if (resolvedName != null) {
+                        return resolvedName;
                     }
                 }
-                return canonicalName.replace("$", ".");
+                return fullName;
             }
 
             @Override
