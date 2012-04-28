@@ -1,32 +1,30 @@
 package wrime.reflect;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
 public class TypeGcdFinder {
     public static List<Type> appendInheritance(List<Type> list, Type source) {
-        if (Types.isClass(source)) {
-            appendInheritance(list, (Class) source);
-        } else if (Types.isParameterizedType(source)) {
-            appendInheritance(list, (ParameterizedType) source);
+        if (source != null) {
+            if (Types.isClass(source) || Types.isParameterizedType(source)) {
+                appendInheritanceWithInterfaces(list, source);
+            } else {
+                throw new IllegalStateException("not implemented");
+            }
         }
         return list;
     }
 
-    private static void appendInheritance(List<Type> list, ParameterizedType source) {
+    private static void appendInheritanceWithInterfaces(List<Type> list, Type source) {
         list.add(source);
-        appendInheritance(list, source.getRawType());
-    }
 
-    private static void appendInheritance(List<Type> list, Class source) {
-        list.add(source);
-        appendInheritance(list, source.getGenericSuperclass());
-        for (Type i : source.getGenericInterfaces()) {
+        if (Types.isClass(source) && ((Class) source).isPrimitive()) {
+            list.add(Object.class);
+        }
+
+        appendInheritance(list, TypeUtil.getSuperclass(source));
+        for (Type i : TypeUtil.getInterfaces(source)) {
             appendInheritance(list, i);
         }
-    }
-
-    public static void removeAll(List<Type> target, List<Type> types) {
     }
 }

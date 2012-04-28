@@ -51,6 +51,7 @@ package wrime.antlr;
 
 import wrime.ast.*;
 import wrime.Location;
+import wrime.reflect.ClassName;
 }
 
 @lexer::header {

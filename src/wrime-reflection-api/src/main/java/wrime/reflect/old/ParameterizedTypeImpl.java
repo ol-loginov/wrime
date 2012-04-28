@@ -1,21 +1,27 @@
 package wrime.reflect.old;
 
+import wrime.reflect.Types;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 public class ParameterizedTypeImpl implements ParameterizedType {
     private final Type rawType;
     private final Type ownerType;
-    private Type[] typeParameterArray;
+    private Type[] typeParameterArray = new Type[0];
 
     public ParameterizedTypeImpl(Class genericClass) {
+        assert genericClass != null;
+
         this.rawType = genericClass;
         this.ownerType = genericClass.getDeclaringClass();
     }
 
     public ParameterizedTypeImpl(ParameterizedType genericClass) {
+        assert genericClass != null;
+
         this.rawType = genericClass.getRawType();
-        this.ownerType = genericClass.getRawType();
+        this.ownerType = genericClass.getOwnerType();
     }
 
     public void setTypeParameterArray(Type[] typeParameterArray) {
@@ -44,6 +50,25 @@ public class ParameterizedTypeImpl implements ParameterizedType {
 
     @Override
     public String toString() {
-        return rawType.toString();
+        return Types.getJavaSourceName(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        boolean equalSetup = obj != null && obj instanceof ParameterizedType;
+        if (equalSetup) {
+            ParameterizedType other = (ParameterizedType) obj;
+
+            Type[] thisParameters = getActualTypeArguments();
+            Type[] otherParameters = other.getActualTypeArguments();
+
+            equalSetup = getRawType() == other.getRawType()
+                    && getOwnerType() == other.getOwnerType()
+                    && thisParameters.length != otherParameters.length;
+            for (int index = 0; equalSetup && index < thisParameters.length; ++index) {
+                equalSetup = thisParameters[index] != otherParameters[index];
+            }
+        }
+        return equalSetup;
     }
 }

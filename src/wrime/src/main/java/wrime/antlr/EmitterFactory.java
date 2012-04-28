@@ -5,6 +5,7 @@ import wrime.Location;
 import wrime.WrimeException;
 import wrime.ast.*;
 import wrime.ast.StringValue;
+import wrime.reflect.ClassName;
 
 import java.util.List;
 
@@ -61,7 +62,7 @@ public class EmitterFactory implements WrimeExpressionParser.EmitterFactory {
     @Override
     public ClassName getClassName(String packageName, LocatableString className) {
         ClassName result = new ClassName();
-        result.setClassName(className);
+        result.setClassName(className.getText());
         result.setPackageName(packageName);
         return result;
     }

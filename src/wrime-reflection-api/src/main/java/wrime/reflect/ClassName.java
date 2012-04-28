@@ -1,21 +1,21 @@
-package wrime.ast;
+package wrime.reflect;
 
 import java.util.List;
 
 public class ClassName {
     private String packageName;
-    private LocatableString className;
+    private String className;
     private List<ClassName> genericTypes;
 
     public void setGenericTypes(List<ClassName> genericTypes) {
         this.genericTypes = genericTypes;
     }
 
-    public LocatableString getClassName() {
+    public String getClassName() {
         return className;
     }
 
-    public void setClassName(LocatableString className) {
+    public void setClassName(String className) {
         this.className = className;
     }
 
@@ -35,7 +35,7 @@ public class ClassName {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append(getPackageName());
-        builder.append(getClassName().getText());
+        builder.append(getClassName());
         if (genericTypes != null && genericTypes.size() > 0) {
             builder.append("<");
             boolean first = true;

@@ -1,5 +1,7 @@
 package wrime.ast;
 
+import wrime.reflect.ClassName;
+
 import java.util.ArrayList;
 import java.util.List;
 

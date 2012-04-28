@@ -1,8 +1,8 @@
 package wrime;
 
-import wrime.ast.ClassName;
 import wrime.bytecode.ExpressionScope;
 import wrime.bytecode.ExpressionStack;
+import wrime.reflect.ClassName;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;

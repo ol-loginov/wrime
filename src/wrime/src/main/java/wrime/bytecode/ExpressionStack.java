@@ -1,7 +1,7 @@
 package wrime.bytecode;
 
 import wrime.WrimeException;
-import wrime.ast.ClassName;
+import wrime.reflect.ClassName;
 
 import java.lang.reflect.Type;
 

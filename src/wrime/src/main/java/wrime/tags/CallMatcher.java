@@ -6,6 +6,7 @@ import wrime.ast.StringValue;
 import wrime.bytecode.ExpressionScope;
 import wrime.bytecode.ExpressionStack;
 import wrime.reflect.MethodLookup;
+import wrime.reflect.MethodLookuper;
 import wrime.reflect.TypeConverter;
 import wrime.reflect.Types;
 
@@ -194,7 +195,7 @@ public class CallMatcher {
                 }
             }
 
-            MethodLookup method = MethodLookup.findInvoker(
+            MethodLookup method = MethodLookuper.findInvoker(
                     invocable.getReturnType(),
                     emitter.getMethodName(),
                     argumentTypes.toArray(new Type[argumentTypes.size()]));

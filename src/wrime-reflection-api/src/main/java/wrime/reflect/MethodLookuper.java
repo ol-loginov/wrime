@@ -8,9 +8,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public abstract class MethodLookuper {
     public static MethodLookup findInvoker(Type caller, String name, Type... arguments) {
@@ -34,6 +32,10 @@ public abstract class MethodLookuper {
         List<MethodLookup> lookup = lookup0(target, name, arguments);
         if (lookup.size() == 0) {
             throw new NoSuchMethodException("no suitable method found by name '" + name + "'");
+        }
+
+        if (lookup.size() == 1) {
+            return lookup.get(0);
         }
 
         MethodLookup result = null;
@@ -91,19 +93,20 @@ public abstract class MethodLookuper {
             }
         }
 
+        Type[] methodParameters = lookup.method.getGenericParameterTypes();
         TypeVariableMap typeVariableMap = new TypeVariableMap();
 
         // first test - for non vararg parameter list
-        int firstTestLength = lookup.method.getGenericParameterTypes().length - (lookup.method.isVarArgs() ? 1 : 0);
+        int firstTestLength = methodParameters.length - (lookup.method.isVarArgs() ? 1 : 0);
         for (int i = 0; i < firstTestLength; ++i) {
-            Type parameterType = lookup.method.getGenericParameterTypes()[i];
+            Type parameterType = methodParameters[i];
             if (Types.isTypeVariable(parameterType)) {
                 TypeVariable parameterTypeVariable = (TypeVariable) parameterType;
                 lookup.decrementWeight(TypeConverter.hasParameterizedBounds(parameterTypeVariable.getBounds()) ? MethodLookup.GENERIC_WITH_RESTRICTION : MethodLookup.GENERIC);
-                if (!TypeConverter.isInBounds(passedTypes[i], parameterTypeVariable.getBounds())) {
+                if (!TypeConverter.passBounds(passedTypes[i], parameterTypeVariable.getBounds())) {
                     return false;
                 }
-                typeVariableMap.add(parameterType, passedTypes[i]);
+                typeVariableMap.put((TypeVariable) parameterType, passedTypes[i]);
             } else if (!TypeConverter.isAssignable(parameterType, passedTypes[i])) {
                 return false;
             }
@@ -111,14 +114,68 @@ public abstract class MethodLookuper {
 
         // second test - for vararg parameter
         if (lookup.method.isVarArgs()) {
-            // let's find GCD list for rest of parameters
-            List<Type> gdcList = null;
-            for (Type varArg : Arrays.copyOfRange(passedTypes, firstTestLength, passedTypes.length)) {
-                if (gdcList == null) {
-                    gdcList = TypeGcdFinder.appendInheritance(new ArrayList<Type>(), varArg);
-                } else {
-                    TypeGcdFinder.removeAll(gdcList, TypeGcdFinder.appendInheritance(new ArrayList<Type>(), varArg));
+            // find vararg singe type
+            Type varargType = TypeUtil.getComponentType(methodParameters[methodParameters.length - 1]);
+
+            // this one will keep actual vararg type (from call signature)
+            Type varargTypeResolved = varargType;
+
+            Type[] gdcCandidates = Arrays.copyOfRange(passedTypes, firstTestLength, passedTypes.length);
+            if (gdcCandidates.length == 0) {
+                // in this case we just use component type as type variable if needed
+            } else {
+                // let's find GCD list for rest of parameters
+                List<Type> gdcList = null;
+                for (Type varArg : gdcCandidates) {
+                    if (gdcList == null) {
+                        gdcList = TypeGcdFinder.appendInheritance(new ArrayList<Type>(), varArg);
+                    } else {
+                        gdcList.retainAll(TypeGcdFinder.appendInheritance(new ArrayList<Type>(), varArg));
+                    }
                 }
+
+                if (gdcList == null || gdcList.isEmpty()) {
+                    return false;
+                }
+
+                // probably this type is specified already
+                if (Types.isTypeVariable(varargTypeResolved)) {
+                    Type varargTypeSpecified = typeVariableMap.getVariableType((TypeVariable) varargType);
+                    if (varargTypeSpecified != null) {
+                        varargTypeResolved = varargTypeSpecified;
+                    }
+                }
+
+                // or we can select it from parameter list
+                if (Types.isTypeVariable(varargTypeResolved)) {
+                    Stack<Type> variableCandidates = new Stack<Type>();
+                    variableCandidates.addAll(gdcList);
+                    Collections.reverse(variableCandidates);
+
+                    boolean varargTypeFound = false;
+                    while (!varargTypeFound && !variableCandidates.empty()) {
+                        Type nextCandidate = variableCandidates.pop();
+                        if (TypeConverter.passBounds(nextCandidate, ((TypeVariable) varargTypeResolved).getBounds())) {
+                            varargTypeResolved = nextCandidate;
+                            varargTypeFound = true;
+                        }
+                    }
+
+                    // if no candidate found - method is wrong
+                    if (!varargTypeFound) {
+                        return false;
+                    }
+                }
+
+                if (Types.isClass(varargTypeResolved) && !gdcList.contains(varargTypeResolved)) {
+                    return false;
+                }
+            }
+
+            // but we still can have a typed variable there
+            // if no parameters was given for
+            if (Types.isTypeVariable(varargTypeResolved)) {
+                typeVariableMap.put((TypeVariable) varargType, ((TypeVariable) varargTypeResolved).getBounds()[0]);
             }
         }
 

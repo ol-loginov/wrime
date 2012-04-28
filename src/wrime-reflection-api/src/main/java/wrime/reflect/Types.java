@@ -4,8 +4,13 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Types {
+    private static final List<String> EMPTY_STRINGS = Arrays.asList(new String[0]);
     public final static Type NULL_TYPE = new Type() {
     };
 
@@ -14,7 +19,7 @@ public class Types {
     }
 
     public static boolean isBoolean(Type type) {
-        return !isNullOrNullType(type) && isOneOf(type, boolean.class, Boolean.TYPE);
+        return !isNullOrNullType(type) && isOneOf(type, boolean.class, Boolean.class);
     }
 
     public static int getNumberTypeWeight(Type a) {
@@ -52,10 +57,50 @@ public class Types {
     }
 
     public static String getJavaSourceName(Type type) {
-        if (isClass(type)) {
-            return ((Class) type).getCanonicalName();
-        }
-        throw new IllegalStateException("not implemented");
+        return getJavaSourceName(type, EMPTY_STRINGS);
+    }
+
+    public static String getJavaSourceName(Type type, final List<String> imports) {
+        return new TypeVisitor<String>(type) {
+            @Override
+            protected String visitClass(Class target) {
+                String canonicalName = target.getCanonicalName();
+                String publicClassName = TypeLocator.getPublicClassName(canonicalName);
+
+                Map<String, String> importResolvers = new TreeMap<String, String>();
+                if (publicClassName.contains("$")) {
+
+                }
+
+                for (String importPath : imports) {
+                    if (importPath.equals(canonicalName)) {
+                        return publicClassName;
+                    }
+                    if (importPath.endsWith("*")) {
+                        String strippedImport = importPath.substring(0, importPath.length() - 1);
+                        if (canonicalName.equals(strippedImport + publicClassName)) {
+                            return publicClassName;
+                        }
+                    }
+                }
+                return canonicalName.replace("$", ".");
+            }
+
+            @Override
+            protected String visitParameterized(ParameterizedType target) {
+                StringBuilder builder = new StringBuilder();
+                for (Type typeParameter : target.getActualTypeArguments()) {
+                    if (builder.length() == 0) {
+                        builder.append("<");
+                    } else {
+                        builder.append(", ");
+                    }
+                    builder.append(getJavaSourceName(typeParameter, imports));
+                }
+                builder.append(">");
+                return getJavaSourceName(target.getRawType()) + builder.toString();
+            }
+        }.visit();
     }
 
     public static boolean isWritable(Type returnType) {

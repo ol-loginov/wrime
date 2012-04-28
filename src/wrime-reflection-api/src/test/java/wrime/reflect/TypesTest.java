@@ -2,8 +2,10 @@ package wrime.reflect;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.util.Arrays;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 public class TypesTest {
     @Test
@@ -12,5 +14,14 @@ public class TypesTest {
         assertTrue(Types.isBoolean(Boolean.class));
         assertFalse(Types.isBoolean(null));
         assertFalse(Types.isBoolean(Types.NULL_TYPE));
+    }
+
+    @Test
+    public void getJavaSourceName() {
+        assertEquals("java.util.Map", Types.getJavaSourceName(Map.class));
+        assertEquals("Map", Types.getJavaSourceName(Map.class, Arrays.asList("java.util.Map")));
+        assertEquals("Map", Types.getJavaSourceName(Map.class, Arrays.asList("java.util.*")));
+
+        assertEquals("Map", Types.getJavaSourceName(Map.Entry.class, Arrays.asList("java.util.*")));
     }
 }

@@ -1,5 +1,6 @@
 package wrime.reflect;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,8 +10,20 @@ public class TypeConverter {
         return bounds.length > 1 || (bounds.length == 1 && !Object.class.equals(bounds[0]));
     }
 
-    public static boolean isInBounds(Type passedType, Type[] bounds) {
-        return false;
+    public static boolean passBounds(Type passedType, Type[] bounds) {
+        for (Type type : bounds) {
+            if (type.equals(Object.class)) {
+                continue;
+            }
+            if (Types.isClass(type)) {
+                if (!isAssignable(type, passedType)) {
+                    return false;
+                }
+            } else {
+                throw new IllegalStateException("not implemented");
+            }
+        }
+        return true;
     }
 
     private static interface Tester {
@@ -48,6 +61,8 @@ public class TypeConverter {
         }
         if (Types.isClass(source)) {
             return destination.isAssignableFrom((Class) source);
+        } else if (Types.isParameterizedType(source)) {
+            return isAssignable(destination, ((ParameterizedType) source).getRawType());
         }
         throw new IllegalStateException("not implemented for Class from " + source);
     }
