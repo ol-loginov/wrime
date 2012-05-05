@@ -6,9 +6,9 @@ import wrime.bytecode.ExpressionStack;
 import wrime.output.BodyWriter;
 import wrime.reflect.TypeConverter;
 import wrime.reflect.TypeUtil;
+import wrime.reflect.Types;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 
 public class ForTagProcessor implements TagProcessor {
@@ -29,13 +29,11 @@ public class ForTagProcessor implements TagProcessor {
                 Type iteratorType;
                 if (TypeConverter.isAssignable(Iterable.class, iterableType)) {
                     iteratorType = TypeUtil.getTypeParameterOf(iterableType, Iterable.class, 0);
-                } else if (TypeConverter.isAssignable(Array.class, iterableType)) {
-                    iteratorType = TypeUtil.getComponentType(iterableType);
                 } else {
-                    throw new WrimeException("iterable neither Array type nor Iterable", null, tag.getIterable().getLocation());
+                    iteratorType = TypeUtil.getComponentType(iterableType);
                 }
 
-                body.append(String.format("for(%s %s : ", iteratorType.toString(), tag.getVariable().getText()))
+                body.append(String.format("for(%s %s : ", Types.getJavaSourceName(iteratorType), tag.getVariable().getText()))
                         .append(tag.getIterable())
                         .line(") {");
 

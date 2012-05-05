@@ -10,11 +10,14 @@ public class MethodLookup {
     public static final int GENERIC = 1;
 
     protected final Method method;
+    protected final int depth;
+
     private Type returnType;
     private int weight;
 
-    public MethodLookup(Method method) {
+    public MethodLookup(Method method, int depth) {
         this.method = method;
+        this.depth = depth;
     }
 
     public String getName() {
@@ -28,6 +31,10 @@ public class MethodLookup {
     public MethodLookup setReturnType(Type returnType) {
         this.returnType = returnType;
         return this;
+    }
+
+    public int getDepth() {
+        return depth;
     }
 
     public int getWeight() {

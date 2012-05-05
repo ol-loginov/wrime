@@ -1,11 +1,9 @@
 package wrime.reflect;
 
 import wrime.reflect.old.ParameterizedTypeImpl;
+import wrime.reflect.old.TypeVariableMap;
 
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 
 public class TypeUtil {
     public static Type getSuperclass(Type type) {
@@ -28,12 +26,18 @@ public class TypeUtil {
                 Type[] rawTypeParameters = parameterizedType.getActualTypeArguments();
                 Type[] parameterizedSuperclassTypeParameters = parameterizedSuperclass.getActualTypeArguments();
 
+                TypeVariableMap localMap = new TypeVariableMap();
+
                 int rawTypeParametersIndex = 0;
                 for (int i = 0; i < parameterizedSuperclassTypeParameters.length; ++i) {
                     if (Types.isClass(parameterizedSuperclassTypeParameters[i])) {
                         // use this as well
                     } else if (Types.isTypeVariable(parameterizedSuperclassTypeParameters[i])) {
-                        parameterizedSuperclassTypeParameters[i] = rawTypeParameters[rawTypeParametersIndex++];
+                        TypeVariable variable = (TypeVariable) parameterizedSuperclassTypeParameters[i];
+                        if (localMap.getVariableType(variable) == null) {
+                            localMap.put(variable, rawTypeParameters[rawTypeParametersIndex++]);
+                        }
+                        parameterizedSuperclassTypeParameters[i] = localMap.getVariableType(variable);
                     } else {
                         throw new IllegalStateException("cannot convert to parameterized type argument");
                     }
@@ -52,12 +56,53 @@ public class TypeUtil {
         } else if (type instanceof Class) {
             return ((Class) type).getComponentType();
         } else {
-            throw new IllegalStateException("unable to extract vararg component type");
+            throw new IllegalStateException("unable to extract component type");
         }
     }
 
-    public static Type getTypeParameterOf(Type type, Type typeVariableDeclaringClass, int index) {
-        throw new IllegalStateException("not implemented");
+    public static Type getTypeParameterOf(Type type, Class typeVariableDeclaringClass, int index) {
+        Type result = getTypeParameterOf0(type, typeVariableDeclaringClass, index);
+        if (result == null) {
+            throw new IllegalArgumentException("No " + Types.getJavaSourceName(typeVariableDeclaringClass) + " found in inheritance chain of " + Types.getJavaSourceName(type));
+        }
+        return result;
+    }
+
+    public static Type getTypeParameterOf0(Type type, final Class typeVariableDeclaringClass, final int index) {
+        return new TypeVisitor<Type>(type) {
+            @Override
+            protected Type visitClass(Class target) {
+                if (target == typeVariableDeclaringClass) {
+                    return typeVariableDeclaringClass.getTypeParameters()[index];
+                }
+                Type result = findFromInterfaces(target);
+                return result != null ? result : findFromSuperclass(target);
+            }
+
+            @Override
+            protected Type visitParameterized(ParameterizedType target) {
+                if (target.getRawType() == typeVariableDeclaringClass) {
+                    return target.getActualTypeArguments()[index];
+                }
+                Type result = findFromInterfaces(target);
+                return result != null ? result : findFromSuperclass(target);
+            }
+
+            private Type findFromInterfaces(Type target) {
+                for (Type one : getInterfaces(target)) {
+                    Type result = getTypeParameterOf0(one, typeVariableDeclaringClass, index);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+                return null;
+            }
+
+            private Type findFromSuperclass(Type target) {
+                Type superClass = getSuperclass(target);
+                return superClass == null ? null : getTypeParameterOf0(superClass, typeVariableDeclaringClass, index);
+            }
+        }.visit();
     }
 
     public static Method[] getDeclaredMethods(Type type) {

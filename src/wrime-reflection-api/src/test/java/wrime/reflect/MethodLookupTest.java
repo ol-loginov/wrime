@@ -41,7 +41,7 @@ public class MethodLookupTest {
     public void simple() {
         assertMethod("getInteger", "int",
                 typeOf(ConcreteClass.class), "integer");
-        assertMethod("getIntegerRef", "java.lang.Integer",
+        assertMethod("getIntegerRef", "Integer",
                 typeOf(ConcreteClass.class), "integerRef");
         assertMethod("strings", "void",
                 typeOf(ConcreteClass.class), "strings", String.class, String.class);
@@ -49,9 +49,9 @@ public class MethodLookupTest {
 
     @Test
     public void overrides() {
-        assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, String.class), "foo", "java.lang.String");
-        assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, Integer.class), "foo", "java.lang.Object");
-        assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, int.class), "foo", "java.lang.Object");
+        assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, String.class), "foo", "String");
+        assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, Integer.class), "foo", "Object");
+        assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, int.class), "foo", "Object");
         assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, Object.class), "foo", "void");
         assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, Object.class, Object.class), "foo", "void");
         assertMethod(MethodLookuper.findInvoker(typeOf(OverrideClass.class), "foo", String.class, Object.class, int.class), "foo", "void");
@@ -61,20 +61,20 @@ public class MethodLookupTest {
     @Test
     public void genericMethods() {
         assertNoMethod("Type variable T is unresolvable", typeOf(GenericMethods.class), "unresolvable", int.class);
-        assertMethod(MethodLookuper.findInvoker(typeOf(GenericMethods.class), "foo", int.class), "foo", "java.lang.String");
+        assertMethod(MethodLookuper.findInvoker(typeOf(GenericMethods.class), "foo", int.class), "foo", "String");
         assertMethod("foo2", "int", typeOf(GenericMethods.class), "foo2", int.class);
         assertMethod("foo2", "wrime.reflect.model.I1", typeOf(GenericMethods.class), "foo2", I1.class);
     }
 
     @Test
     public void genericClass() {
-        assertMethod("iterator", "java.util.Iterator<java.lang.Integer>", typeOf(GenericClass.class, nameOf(Integer.class)), "iterator");
-        assertMethod("iterator", "java.util.Iterator<wrime.reflect.model.Enum1>", typeOf(GenericClass.class, nameOf(Enum1.class)), "iterator");
-        assertMethod("iterator", "java.util.Iterator<wrime.reflect.model.GenericClass<java.lang.String>>", typeOf(GenericClass.class, nameOf(GenericClass.class, nameOf(String.class))), "iterator");
+        assertMethod("iterator", "Iterator<Integer>", typeOf(GenericClass.class, nameOf(Integer.class)), "iterator");
+        assertMethod("iterator", "Iterator<wrime.reflect.model.Enum1>", typeOf(GenericClass.class, nameOf(Enum1.class)), "iterator");
+        assertMethod("iterator", "Iterator<wrime.reflect.model.GenericClass<String>>", typeOf(GenericClass.class, nameOf(GenericClass.class, nameOf(String.class))), "iterator");
 
-        assertMethod("genericIterator", "java.util.Iterator<java.lang.Integer>", typeOf(GenericClass.class, nameOf(Enum1.class)), "genericIterator", Integer.class);
-        assertMethod("genericIterator", "java.util.Iterator<wrime.reflect.model.Enum1>", typeOf(GenericClass.class, nameOf(Enum1.class)), "genericIterator", Enum1.class);
-        assertMethod("genericIterator", "java.util.Iterator<wrime.reflect.model.Enum1>", typeOf(GenericClass.class, nameOf(GenericClass.class, nameOf(String.class))), "genericIterator", Enum1.class);
+        assertMethod("genericIterator", "Iterator<Integer>", typeOf(GenericClass.class, nameOf(Enum1.class)), "genericIterator", Integer.class);
+        assertMethod("genericIterator", "Iterator<wrime.reflect.model.Enum1>", typeOf(GenericClass.class, nameOf(Enum1.class)), "genericIterator", Enum1.class);
+        assertMethod("genericIterator", "Iterator<wrime.reflect.model.Enum1>", typeOf(GenericClass.class, nameOf(GenericClass.class, nameOf(String.class))), "genericIterator", Enum1.class);
     }
 
     @Test
@@ -91,8 +91,8 @@ public class MethodLookupTest {
 
     @Test
     public void concreteMap() {
-        //assertMethod("values", "java.util.Collection<wrime.reflect.model.I1>", typeOf(Map.class, nameOf(String.class), nameOf(I1.class)), "values");
-        assertMethod("entrySet", "Set<Map.Entry<String, wrime.reflect.model.I1>>", typeOf(Map.class, nameOf(String.class), nameOf(I1.class)), "entrySet");
+        assertMethod("values", "Collection<wrime.reflect.model.I1>", typeOf(Map.class, nameOf(String.class), nameOf(I1.class)), "values");
+        assertMethod("entrySet", "Set<java.util.Map.Entry<String, wrime.reflect.model.I1>>", typeOf(Map.class, nameOf(String.class), nameOf(I1.class)), "entrySet");
     }
 }
 

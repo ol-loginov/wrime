@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TypeLocator {
-    private final static Pattern PUBLIC_NAME_PATTERN = Pattern.compile("[^.]+$");
+    private final static Pattern PUBLIC_NAME_PATTERN = Pattern.compile("(.*\\.)([^.]+)$");
     private final ClassLoader classLoader;
     private final List<String> imports = new ArrayList<String>();
 
@@ -84,7 +84,7 @@ public class TypeLocator {
     public static String getClassName(String className) {
         Matcher matcher = PUBLIC_NAME_PATTERN.matcher(className);
         if (matcher.find()) {
-            return matcher.group();
+            return matcher.group(2);
         }
         return className;
     }
@@ -92,7 +92,8 @@ public class TypeLocator {
     public static String getClassNamePrefix(String className) {
         Matcher matcher = PUBLIC_NAME_PATTERN.matcher(className);
         if (matcher.find()) {
-            return className.substring(0, matcher.start() - 1);
+            String prefix = matcher.group(1);
+            return prefix.endsWith(".") ? prefix.substring(0, prefix.length() - 1) : prefix;
         }
         return "";
     }

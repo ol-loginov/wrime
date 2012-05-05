@@ -43,6 +43,7 @@ public class Types {
                 byte.class, Byte.class,
                 short.class, Short.class,
                 long.class, Long.class,
+                int.class, Integer.class,
                 float.class, Float.class,
                 double.class, Double.class);
     }
@@ -92,13 +93,13 @@ public class Types {
                     builder.append(getJavaSourceName(typeParameter, imports));
                 }
                 builder.append(">");
-                return getJavaSourceName(target.getRawType()) + builder.toString();
+                return getJavaSourceName(target.getRawType(), imports) + builder.toString();
             }
         }.visit();
     }
 
     public static boolean isWritable(Type returnType) {
-        return returnType != null && !isOneOf(returnType, Void.class);
+        return returnType != null && !isOneOf(returnType, Void.class, void.class);
     }
 
     public static boolean isParameterizedType(Type type) {
@@ -115,5 +116,14 @@ public class Types {
 
     public static boolean isWildcard(Type type) {
         return WildcardType.class.isAssignableFrom(type.getClass());
+    }
+
+    public static boolean isReferenceType(Type type) {
+        return new TypeVisitorSilent<Boolean>(type, true) {
+            @Override
+            protected Boolean visitClass(Class target) {
+                return target.getCanonicalName().contains(".");
+            }
+        }.visit();
     }
 }

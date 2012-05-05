@@ -3,6 +3,7 @@ package wrime.reflect;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
 public abstract class TypeVisitor<T> {
     private final Type target;
@@ -18,9 +19,15 @@ public abstract class TypeVisitor<T> {
             return visitParameterized((ParameterizedType) target);
         } else if (Types.isTypeVariable(target)) {
             return visitTypeVariable((TypeVariable) target);
+        } else if (Types.isWildcard(target)) {
+            return visitWildcard((WildcardType) target);
         } else {
             throw new IllegalStateException("visitor is confused");
         }
+    }
+
+    protected T visitWildcard(WildcardType target) {
+        throw new IllegalStateException("visitor not ready for wildcard type");
     }
 
     protected T visitTypeVariable(TypeVariable target) {

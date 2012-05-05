@@ -6,6 +6,7 @@ import wrime.reflect.TypeVisitor2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
 public class ParameterizedTypeResolver {
     public static ParameterizedType resolveType(ParameterizedType type, final TypeVariableMap localTypes, final Type declaringClass) {
@@ -30,6 +31,14 @@ public class ParameterizedTypeResolver {
                 @Override
                 protected Type visitParameterized(ParameterizedType target) {
                     return resolveType(target, declaringTypeMap, declaringClass);
+                }
+
+                @Override
+                protected Type visitWildcard(WildcardType target) {
+                    if (target.getUpperBounds().length > 0) {
+                        return target.getUpperBounds()[0];
+                    }
+                    return Object.class;
                 }
             }.visit();
         }

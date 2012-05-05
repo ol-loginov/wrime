@@ -69,7 +69,7 @@ public class CallMatcher {
         } else if (request.emitter instanceof BoolValue) {
             requireReturnType(request.emitter, "should be hardcoded");
         } else if (request.emitter instanceof NullValue) {
-            requireReturnType(request.emitter, "should be hardcoded");
+            requireReturnTypeAny(request.emitter, "should be hardcoded");
         } else if (request.emitter instanceof StringValue) {
             requireReturnType(request.emitter, "should be hardcoded");
         } else if (request.emitter instanceof Group) {
@@ -146,8 +146,10 @@ public class CallMatcher {
             matchNeeded(emitter.getLeft());
             matchNeeded(emitter.getRight());
         } else {
-            requireNoVoidType(emitter.getLeft(), "required for comparison " + emitter.getRule());
-            requireNoVoidType(emitter.getRight(), "required for comparison " + emitter.getRule());
+            boolean nullTypeAcceptable = emitter.getRule() == Comparison.Rule.Equal || emitter.getRule() == Comparison.Rule.NotEqual;
+            requireNoVoidType(emitter.getLeft(), "required for comparison " + emitter.getRule(), nullTypeAcceptable);
+            requireNoVoidType(emitter.getRight(), "required for comparison " + emitter.getRule(), nullTypeAcceptable);
+
             emitter.setReturnType(boolean.class);
         }
     }
@@ -190,7 +192,7 @@ public class CallMatcher {
             List<Type> argumentTypes = new ArrayList<Type>();
             if (emitter.hasArguments()) {
                 for (Emitter argument : emitter.getArguments()) {
-                    requireReturnType(argument, "required for method identification");
+                    requireReturnTypeAny(argument, "required for method identification");
                     argumentTypes.add(argument.getReturnType());
                 }
             }
@@ -200,7 +202,7 @@ public class CallMatcher {
                     emitter.getMethodName(),
                     argumentTypes.toArray(new Type[argumentTypes.size()]));
             if (method == null) {
-                throw new WrimeException("No suitable method '" + emitter.getMethodName() + "' found in type " + invocable.getReturnType(), null, emitter.getLocation());
+                throw new WrimeException("No suitable method '" + emitter.getMethodName() + "' found in type " + Types.getJavaSourceName(invocable.getReturnType()), null, emitter.getLocation());
             }
             emitter.setInvocation(method);
             emitter.setReturnType(method.getReturnType());
@@ -211,14 +213,23 @@ public class CallMatcher {
         requireReturnType(root, need);
     }
 
-    public static void requireReturnType(Emitter emitter, String need) {
-        if (emitter.getReturnType() == null || emitter.getReturnType() == Types.NULL_TYPE) {
+    public static void requireReturnTypeAny(Emitter emitter, String need) {
+        if (emitter.getReturnType() == null) {
             throw new WrimeException("component has no defined return type (" + need + ")", null, emitter.getLocation());
         }
     }
 
-    public static void requireNoVoidType(Emitter emitter, String need) {
-        if (emitter.getReturnType() == null || emitter.getReturnType() == Types.NULL_TYPE || Types.isOneOf(emitter.getReturnType(), Void.TYPE)) {
+    public static void requireReturnType(Emitter emitter, String need) {
+        if (emitter.getReturnType() == null || emitter.getReturnType() == Types.NULL_TYPE) {
+            throw new WrimeException("component has no defined return type (" + need + ") or type is NULL_TYPE", null, emitter.getLocation());
+        }
+    }
+
+    public static void requireNoVoidType(Emitter emitter, String need, boolean nullTypeAcceptable) {
+        if (nullTypeAcceptable && emitter.getReturnType() == Types.NULL_TYPE) {
+            return;
+        }
+        if (emitter.getReturnType() == null || Types.isOneOf(emitter.getReturnType(), Void.TYPE)) {
             throw new WrimeException("component has no defined return type (" + need + ")", null, emitter.getLocation());
         }
     }

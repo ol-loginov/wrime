@@ -3,6 +3,7 @@ package wrime.reflect;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
 public class TypeVisitorSilent<T> extends TypeVisitor<T> {
     private final T defaultReturnValue;
@@ -24,6 +25,11 @@ public class TypeVisitorSilent<T> extends TypeVisitor<T> {
 
     @Override
     protected T visitParameterized(ParameterizedType target) {
+        return defaultReturnValue;
+    }
+
+    @Override
+    protected T visitWildcard(WildcardType target) {
         return defaultReturnValue;
     }
 }

@@ -421,7 +421,7 @@ public class SourceComposer implements SourceExpressionListener {
             new CallMatcher(expression).matchTypes(sourceExpression);
 
             StringWriter writer = new StringWriter();
-            boolean renderReturnValue = !Types.isWritable(expression.getReturnType());
+            boolean renderReturnValue = Types.isWritable(expression.getReturnType());
 
             new EmitterWriter(writer).write(expression);
 

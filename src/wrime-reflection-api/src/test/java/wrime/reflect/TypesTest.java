@@ -22,6 +22,6 @@ public class TypesTest {
         assertEquals("Map", Types.getJavaSourceName(Map.class, Arrays.asList("java.util.Map")));
         assertEquals("Map", Types.getJavaSourceName(Map.class, Arrays.asList("java.util.*")));
 
-        assertEquals("Map.Entry", Types.getJavaSourceName(Map.Entry.class, Arrays.asList("java.util.*")));
+        assertEquals("java.util.Map.Entry", Types.getJavaSourceName(Map.Entry.class, Arrays.asList("java.util.*")));
     }
 }

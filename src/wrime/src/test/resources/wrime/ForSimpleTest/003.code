@@ -3,7 +3,7 @@ import java.lang.*;
 import java.util.*;
 
 public class W$ForSimpleTest$003_txt extends wrime.output.WrimeWriter {
-  private wrime.model.MapHolder holder;
+  private wrime.model.MapHolder<java.lang.Integer> holder;
 
   public W$ForSimpleTest$003_txt(Writer writer) {
     super(writer);
@@ -16,11 +16,11 @@ public class W$ForSimpleTest$003_txt extends wrime.output.WrimeWriter {
 
   protected void assignFields(Map<String, Object> model) {
     super.assignFields(model);
-    this.holder=(wrime.model.MapHolder)model.get("holder");
+    this.holder=(wrime.model.MapHolder<java.lang.Integer>)model.get("holder");
   }
 
   protected void renderContent() throws Exception {
-    for(java.lang.String a : holder.getMap().values()) {
+    for(java.lang.Integer a : holder.getMap().values()) {
     }
   }
 }

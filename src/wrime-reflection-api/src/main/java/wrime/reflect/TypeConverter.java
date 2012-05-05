@@ -59,7 +59,9 @@ public class TypeConverter {
         if (tester != null) {
             return tester.isAssignable(source);
         }
-        if (Types.isClass(source)) {
+        if (Types.NULL_TYPE == source) {
+            return Types.isReferenceType(destination);
+        } else if (Types.isClass(source)) {
             return destination.isAssignableFrom((Class) source);
         } else if (Types.isParameterizedType(source)) {
             return isAssignable(destination, ((ParameterizedType) source).getRawType());

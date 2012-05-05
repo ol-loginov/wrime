@@ -29,7 +29,7 @@ public abstract class MethodLookuper {
     }
 
     private static MethodLookup lookup(Type target, String name, Type... arguments) throws NoSuchMethodException {
-        List<MethodLookup> lookup = lookup0(target, name, arguments);
+        List<MethodLookup> lookup = lookup0(target, 0, name, arguments);
         if (lookup.size() == 0) {
             throw new NoSuchMethodException("no suitable method found by name '" + name + "'");
         }
@@ -46,7 +46,7 @@ public abstract class MethodLookuper {
             if (result == null) {
                 result = m;
             } else {
-                if (m.getWeight() == result.getWeight()) {
+                if (m.getWeight() == result.getWeight() && m.getDepth() == result.getDepth()) {
                     throw new IllegalStateException("Two methods found of same signature");
                 }
                 result = m.getWeight() > result.getWeight() ? m : result;
@@ -55,7 +55,7 @@ public abstract class MethodLookuper {
         return result;
     }
 
-    private static List<MethodLookup> lookup0(Type target, String name, Type... arguments) throws NoSuchMethodException {
+    private static List<MethodLookup> lookup0(Type target, int depth, String name, Type... arguments) throws NoSuchMethodException {
         List<MethodLookup> result = new ArrayList<MethodLookup>();
 
         Method[] targetMethods = TypeUtil.getDeclaredMethods(target);
@@ -64,7 +64,7 @@ public abstract class MethodLookuper {
                 continue;
             }
 
-            MethodLookup lookup = new MethodLookup(m);
+            MethodLookup lookup = new MethodLookup(m, depth);
             if (hasSignatureMatch(target, lookup, arguments)) {
                 result.add(lookup);
             }
@@ -72,7 +72,7 @@ public abstract class MethodLookuper {
 
         target = TypeUtil.getSuperclass(target);
         if (target != null) {
-            result.addAll(lookup0(target, name, arguments));
+            result.addAll(lookup0(target, depth + 1, name, arguments));
         }
 
         return result;
