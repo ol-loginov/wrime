@@ -18,11 +18,11 @@ public class StringFunctor {
         return str.toString();
     }
 
-    public String concat(String... strings) {
+    public String concat(Object... values) {
         StringBuilder result = new StringBuilder();
-        for (String str : strings) {
-            if (str != null) {
-                result.append(str);
+        for (Object v : values) {
+            if (v != null) {
+                result.append(v);
             }
         }
         return result.toString();
