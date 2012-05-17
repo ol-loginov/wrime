@@ -13,8 +13,14 @@ import java.util.*;
 public abstract class MethodLookuper {
     public static MethodLookup findInvoker(Type caller, String name, Type... arguments) {
         if (arguments.length == 0) {
-            String getterMethod = (Types.isBoolean(caller) ? "is" : "get") + StringUtils.capitalize(name);
+            String getterMethod = "is" + StringUtils.capitalize(name);
+            try {
+                return lookup(caller, getterMethod, arguments);
+            } catch (NoSuchMethodException e) {
+                // no method - ok
+            }
 
+            getterMethod = "get" + StringUtils.capitalize(name);
             try {
                 return lookup(caller, getterMethod, arguments);
             } catch (NoSuchMethodException e) {
