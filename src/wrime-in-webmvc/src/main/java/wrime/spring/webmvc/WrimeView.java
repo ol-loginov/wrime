@@ -24,7 +24,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.TreeMap;
 
 @SuppressWarnings("UnusedDeclaration")
 public class WrimeView extends AbstractTemplateView implements MessageSourceAware {
@@ -36,10 +35,9 @@ public class WrimeView extends AbstractTemplateView implements MessageSourceAwar
     private MessageSource messageSource;
 
     protected void registerWebRequestFunctors() {
-        getWrimeEngine().setFunctors(new TreeMap<String, Object>() {{
-            put(RESPONSE_FUNCTOR, new ResponseFunctor());
-            put(MESSAGE_FUNCTOR, new L18nFunctor());
-        }});
+        getWrimeEngine()
+                .registerFunctor(RESPONSE_FUNCTOR, ResponseFunctor.class, new ResponseFunctor())
+                .registerFunctor(MESSAGE_FUNCTOR, L18nFunctor.class, new L18nFunctor());
     }
 
     protected void setupWebRequestFunctors(ModelMap map, HttpServletRequest request, HttpServletResponse response) {

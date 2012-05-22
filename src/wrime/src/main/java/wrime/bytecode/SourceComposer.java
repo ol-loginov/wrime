@@ -3,10 +3,7 @@ package wrime.bytecode;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
-import wrime.Location;
-import wrime.ScriptResource;
-import wrime.WrimeEngine;
-import wrime.WrimeException;
+import wrime.*;
 import wrime.antlr.EmitterFactory;
 import wrime.antlr.WrimeExpressionLexer;
 import wrime.antlr.WrimeExpressionParser;
@@ -22,8 +19,8 @@ import wrime.tags.TagFactory;
 import wrime.tags.TagProcessor;
 import wrime.util.DefaultUtil;
 import wrime.util.EscapeUtils;
-import wrime.util.FunctorName;
-import wrime.util.ParameterName;
+import wrime.util.FunctorField;
+import wrime.util.ParameterField;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -50,16 +47,16 @@ public class SourceComposer implements SourceExpressionListener {
     private String className;
 
     private String functorPrefix;
-    private Map<String, FunctorName> functorNames = new HashMap<String, FunctorName>();
+    private Map<String, FunctorField> functorNames = new HashMap<String, FunctorField>();
 
     private Map<String, TagFactory> tagFactories = new TreeMap<String, TagFactory>();
 
-    public SourceComposer(ClassLoader classLoader, Map<String, Object> functors, Map<String, TagFactory> customTags) throws WrimeException {
+    public SourceComposer(ClassLoader classLoader, Map<String, FunctorClass> functors, Map<String, TagFactory> customTags) throws WrimeException {
         renderContentBody = new Body();
         sourceExpression = new SourceExpression(classLoader, functorNames, this);
 
-        for (Map.Entry<String, Object> kv : functors.entrySet()) {
-            functorNames.put(kv.getKey(), new FunctorName(kv.getKey(), kv.getValue().getClass(), toFieldIdentifier(kv.getKey())));
+        for (Map.Entry<String, FunctorClass> kv : functors.entrySet()) {
+            functorNames.put(kv.getKey(), new FunctorField(kv.getKey(), kv.getValue().getFunctorType(), toFieldIdentifier(kv.getKey())));
         }
 
         tagFactories.putAll(customTags);
@@ -291,7 +288,7 @@ public class SourceComposer implements SourceExpressionListener {
     private class ModelParameterListDeclarator implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (ParameterName parameter : sourceExpression.getParameters().values()) {
+            for (ParameterField parameter : sourceExpression.getParameters().values()) {
                 String className = Types.getJavaSourceName(parameter.getType());
                 body.line(String.format("private %s %s;", className, parameter.getName()));
             }
@@ -301,7 +298,7 @@ public class SourceComposer implements SourceExpressionListener {
     private class ModelParameterListCleaner implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (ParameterName parameter : sourceExpression.getParameters().values()) {
+            for (ParameterField parameter : sourceExpression.getParameters().values()) {
                 body.line(String.format("this.%s=%s;", parameter.getName(), DefaultUtil.getDefault(parameter.getType())));
             }
         }
@@ -310,7 +307,7 @@ public class SourceComposer implements SourceExpressionListener {
     private class ModelParameterListInitializer implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (ParameterName parameter : sourceExpression.getParameters().values()) {
+            for (ParameterField parameter : sourceExpression.getParameters().values()) {
                 body.line(String.format("this.%s=(%s)model.get(\"%s\");",
                         parameter.getName(),
                         Types.getJavaSourceName(parameter.getType()),
@@ -322,7 +319,7 @@ public class SourceComposer implements SourceExpressionListener {
     private class ModelFunctorListDeclarator implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (FunctorName functor : functorNames.values()) {
+            for (FunctorField functor : functorNames.values()) {
                 body.line(String.format("private %s %s;", Types.getJavaSourceName(functor.getType()), functor.getField()));
             }
         }
@@ -331,7 +328,7 @@ public class SourceComposer implements SourceExpressionListener {
     private class ModelFunctorListCleaner implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (FunctorName functor : functorNames.values()) {
+            for (FunctorField functor : functorNames.values()) {
                 body.line(String.format("this.%s=null;", functor.getField()));
             }
         }
@@ -340,7 +337,7 @@ public class SourceComposer implements SourceExpressionListener {
     private class ModelFunctorListInitializer implements BodyCallback {
         @Override
         public void in(BodyWriter body) throws IOException {
-            for (FunctorName functor : functorNames.values()) {
+            for (FunctorField functor : functorNames.values()) {
                 String functorKey = functorPrefix + functor.getName();
                 body.line(String.format("this.%s=(%s)model.get(\"%s\");", functor.getField(), Types.getJavaSourceName(functor.getType()), functorKey));
             }

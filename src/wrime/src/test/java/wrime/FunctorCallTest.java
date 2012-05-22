@@ -3,16 +3,12 @@ package wrime;
 import org.junit.Test;
 import wrime.functor.I18Nizer;
 
-import java.util.TreeMap;
-
 public class FunctorCallTest extends TestClass {
     @Override
     protected WrimeEngine getEngine() throws WrimeException {
         return super
                 .getEngine()
-                .setFunctors(new TreeMap<String, Object>() {{
-                    put("i18n", new I18Nizer());
-                }});
+                .registerFunctor("i18n", I18Nizer.class, new I18Nizer());
     }
 
     @Test

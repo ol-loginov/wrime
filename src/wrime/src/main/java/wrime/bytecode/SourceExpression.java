@@ -3,8 +3,8 @@ package wrime.bytecode;
 import wrime.WrimeException;
 import wrime.reflect.ClassName;
 import wrime.reflect.TypeLocator;
-import wrime.util.FunctorName;
-import wrime.util.ParameterName;
+import wrime.util.FunctorField;
+import wrime.util.ParameterField;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -15,10 +15,10 @@ public class SourceExpression implements ExpressionStack {
     private final SourceExpressionListener listener;
     private final TypeLocator typeLocator;
 
-    private final Map<String, ParameterName> parameters = new HashMap<String, ParameterName>();
-    private final Map<String, FunctorName> functors;
+    private final Map<String, ParameterField> parameters = new HashMap<String, ParameterField>();
+    private final Map<String, FunctorField> functors;
 
-    public SourceExpression(ClassLoader classLoader, Map<String, FunctorName> functors, SourceExpressionListener listener) {
+    public SourceExpression(ClassLoader classLoader, Map<String, FunctorField> functors, SourceExpressionListener listener) {
         this.typeLocator = new TypeLocator(classLoader);
         this.listener = listener;
         this.functors = functors;
@@ -29,7 +29,7 @@ public class SourceExpression implements ExpressionStack {
                 if (def != null) {
                     return def;
                 }
-                ParameterName parameter = parameters.get(name);
+                ParameterField parameter = parameters.get(name);
                 return parameter != null ? parameter.getType() : null;
             }
         });
@@ -39,7 +39,7 @@ public class SourceExpression implements ExpressionStack {
         return typeLocator.getImports();
     }
 
-    public Map<String, ParameterName> getParameters() {
+    public Map<String, ParameterField> getParameters() {
         return parameters;
     }
 
@@ -64,7 +64,7 @@ public class SourceExpression implements ExpressionStack {
 
     @Override
     public Type getFunctorType(String functor) {
-        FunctorName instance = functors.get(functor);
+        FunctorField instance = functors.get(functor);
         return instance == null ? null : instance.getType();
     }
 
@@ -86,7 +86,7 @@ public class SourceExpression implements ExpressionStack {
         if (parameters.containsKey(parameterName)) {
             SourceComposer.throwError("duplicate for model parameter " + parameterName);
         }
-        parameters.put(parameterName, new ParameterName(parameterName, parameterType, option));
+        parameters.put(parameterName, new ParameterField(parameterName, parameterType, option));
     }
 
     @Override

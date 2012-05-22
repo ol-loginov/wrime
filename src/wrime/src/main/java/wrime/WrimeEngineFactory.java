@@ -21,12 +21,11 @@ public class WrimeEngineFactory {
     }
 
     public void initializeFunctors(WrimeEngine engine) {
-        engine.setFunctors(new TreeMap<String, Object>() {{
-            put("o", new ObjectFunctor());
-            put("s", new StringFunctor());
-            put("l", new LogicFunctor());
-            put("m", new MathFunctor());
-        }});
+        engine
+                .registerFunctor("o", ObjectFunctor.class, new ObjectFunctor())
+                .registerFunctor("s", StringFunctor.class, new StringFunctor())
+                .registerFunctor("l", LogicFunctor.class, new LogicFunctor())
+                .registerFunctor("m", MathFunctor.class, new MathFunctor());
     }
 
     public void initializeTags(WrimeEngine engine) {

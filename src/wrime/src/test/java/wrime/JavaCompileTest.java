@@ -15,10 +15,8 @@ public class JavaCompileTest extends TestClass {
     protected WrimeEngine getEngine() throws WrimeException {
         return super
                 .getEngine()
-                .setFunctors(new TreeMap<String, Object>() {{
-                    put("str", new StringFunctor());
-                    put("l", new LogicFunctor());
-                }});
+                .registerFunctor("str", StringFunctor.class, new StringFunctor())
+                .registerFunctor("l", LogicFunctor.class, new LogicFunctor());
     }
 
     @Test

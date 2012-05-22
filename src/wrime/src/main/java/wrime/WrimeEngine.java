@@ -30,7 +30,7 @@ public class WrimeEngine {
     private final Object COMPILER_LOCK;
 
     private final Map<String, WriterRecord> urlToClassMappings;
-    private Map<String, Object> functors;
+    private Map<String, FunctorClass> functors;
     private Map<String, TagFactory> tags;
 
     private File rootPath;
@@ -42,7 +42,7 @@ public class WrimeEngine {
     WrimeEngine() {
         COMPILER_LOCK = new Object();
         urlToClassMappings = new HashMap<String, WriterRecord>();
-        functors = new HashMap<String, Object>();
+        functors = new HashMap<String, FunctorClass>();
         tags = new TreeMap<String, TagFactory>();
         scannerOptions = new TreeMap<Scanner, String>();
         compilerOptions = new TreeMap<Compiler, String>();
@@ -78,8 +78,8 @@ public class WrimeEngine {
 
     private Map<String, Object> createFunctorMap() {
         Map<String, Object> result = new HashMap<String, Object>();
-        for (Map.Entry<String, Object> functor : getFunctors().entrySet()) {
-            result.put(getFunctorPrefix() + functor.getKey(), functor.getValue());
+        for (Map.Entry<String, FunctorClass> functor : functors.entrySet()) {
+            result.put(getFunctorPrefix() + functor.getKey(), functor.getValue().getFunctorInstance());
         }
         return result;
     }
@@ -153,7 +153,7 @@ public class WrimeEngine {
     }
 
     protected SourceComposer compose(ScriptResource resource) throws WrimeException {
-        SourceComposer compiler = new SourceComposer(getRootLoader(), getFunctors(), getTags());
+        SourceComposer compiler = new SourceComposer(getRootLoader(), functors, getTags());
         compiler.configure(compilerOptions);
         scan(resource, compiler.createReceiver());
         return compiler;
@@ -218,12 +218,18 @@ public class WrimeEngine {
         return this;
     }
 
-    protected Map<String, Object> getFunctors() {
+    /*
+    protected Map<String, FunctorClass> getFunctors() {
         return Collections.unmodifiableMap(functors);
-    }
+    }     */
 
-    public WrimeEngine setFunctors(Map<String, Object> functors) {
-        this.functors.putAll(functors);
+
+    public <T> WrimeEngine registerFunctor(String functorName, Class<T> functorClass, T defaultInstance) {
+        FunctorClass rec = new FunctorClass();
+        rec.setFunctorId(functorName);
+        rec.setFunctorType(functorClass);
+        rec.setFunctorInstance(defaultInstance);
+        functors.put(functorName, rec);
         return this;
     }
 

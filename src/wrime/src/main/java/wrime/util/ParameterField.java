@@ -2,12 +2,12 @@ package wrime.util;
 
 import java.lang.reflect.Type;
 
-public class ParameterName {
+public class ParameterField {
     private final Type type;
     private final String option;
     private final String name;
 
-    public ParameterName(String name, Type type, String option) {
+    public ParameterField(String name, Type type, String option) {
         this.name = name;
         this.type = type;
         this.option = option == null ? "" : option;
