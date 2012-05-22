@@ -35,6 +35,8 @@ public class IncludeTagProcessor implements TagProcessor {
                     body.append(String.format("%s", assignment.getVar().getText()));
                 } else {
                     // we include function call
+                    new CallMatcher(assignment.getEmitter())
+                            .matchTypes(context);
                     body.append(assignment.getEmitter());
                 }
                 body.line(");");

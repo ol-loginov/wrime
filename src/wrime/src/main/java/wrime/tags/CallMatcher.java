@@ -199,10 +199,10 @@ public class CallMatcher {
 
             MethodLookup method = MethodLookuper.findInvoker(
                     invocable.getReturnType(),
-                    emitter.getMethodName(),
+                    emitter.getDesiredName(),
                     argumentTypes.toArray(new Type[argumentTypes.size()]));
             if (method == null) {
-                throw new WrimeException("No suitable method '" + emitter.getMethodName() + "' found in type " + Types.getJavaSourceName(invocable.getReturnType()), null, emitter.getLocation());
+                throw new WrimeException("No suitable method '" + emitter.getDesiredName() + "' found in type " + Types.getJavaSourceName(invocable.getReturnType()), null, emitter.getLocation());
             }
             emitter.setInvocation(method);
             emitter.setReturnType(method.getReturnType());

@@ -22,7 +22,9 @@ public class EmitTest {
         assertNotNull(cmd.expression);
 
         StringWriter writer = new StringWriter();
-        new EmitterWriter(writer).write(cmd.expression);
+        new EmitterWriter(writer)
+                .setUseDesiredFunctionName(true)
+                .write(cmd.expression);
         assertEquals(expected, writer.toString());
     }
 

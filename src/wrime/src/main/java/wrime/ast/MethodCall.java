@@ -6,14 +6,14 @@ import java.util.List;
 
 public class MethodCall extends Emitter {
     private final Emitter invocable;
-    private final String methodName;
+    private final String desiredName;
     private final List<Emitter> arguments;
 
     private MethodLookup invocation;
 
-    public MethodCall(Emitter invocable, String methodName, List<Emitter> arguments) {
+    public MethodCall(Emitter invocable, String desiredName, List<Emitter> arguments) {
         this.invocable = invocable;
-        this.methodName = methodName;
+        this.desiredName = desiredName;
         this.arguments = arguments;
     }
 
@@ -25,16 +25,12 @@ public class MethodCall extends Emitter {
         return invocable;
     }
 
-    public String getMethodName() {
-        return methodName;
+    public String getDesiredName() {
+        return desiredName;
     }
 
     public List<Emitter> getArguments() {
         return arguments;
-    }
-
-    public MethodLookup getInvocation() {
-        return invocation;
     }
 
     public void setInvocation(MethodLookup invocation) {
@@ -42,6 +38,6 @@ public class MethodCall extends Emitter {
     }
 
     public String getInvocationName() {
-        return invocation == null ? getMethodName() : invocation.getName();
+        return invocation.getName();
     }
 }

@@ -9,9 +9,15 @@ import java.util.*;
 
 public class EmitterWriter {
     private final Writer writer;
+    private boolean useDesiredFunctionName = false;
 
     public EmitterWriter(Writer writer) {
         this.writer = writer;
+    }
+
+    public EmitterWriter setUseDesiredFunctionName(boolean useDesiredFunctionName) {
+        this.useDesiredFunctionName = useDesiredFunctionName;
+        return this;
     }
 
     public void write(Emitter emitter) throws IOException {
@@ -81,9 +87,13 @@ public class EmitterWriter {
     }
 
     private List<Object> toJavaWords0(MethodCall func) {
+        String function = func.getDesiredName();
+        if (!useDesiredFunctionName) {
+            function = func.getInvocationName();
+        }
         List<Object> result = new ArrayList<Object>();
         result.add(func.getInvocable());
-        result.add("." + func.getInvocationName());
+        result.add("." + function);
         result.add("(");
         if (func.getArguments() != null) {
             boolean first = true;
