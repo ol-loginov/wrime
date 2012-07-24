@@ -21,4 +21,8 @@ public class L18nFunctor {
     public String t(String code, Object... args) {
         return source.getMessage(code, args, code, locale);
     }
+
+    public Locale locale() {
+        return Locale.getDefault();
+    }
 }

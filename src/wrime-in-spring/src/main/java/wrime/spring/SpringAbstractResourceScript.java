@@ -7,10 +7,10 @@ import wrime.WrimeException;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class AbstractScriptSource implements ScriptResource {
+public class SpringAbstractResourceScript implements ScriptResource {
     private final AbstractResource resource;
 
-    public AbstractScriptSource(AbstractResource resource) {
+    public SpringAbstractResourceScript(AbstractResource resource) {
         this.resource = resource;
     }
 
@@ -35,7 +35,7 @@ public class AbstractScriptSource implements ScriptResource {
     @Override
     public ScriptResource getResource(String path) throws WrimeException {
         try {
-            return new AbstractScriptSource((AbstractResource) resource.createRelative(path));
+            return new SpringAbstractResourceScript((AbstractResource) resource.createRelative(path));
         } catch (IOException e) {
             throw new WrimeException("unable to get resource " + path, null);
         }
@@ -46,7 +46,7 @@ public class AbstractScriptSource implements ScriptResource {
         try {
             return resource.lastModified();
         } catch (IOException e) {
-            throw new WrimeException("unable to get last modified of " + getPath(), null);
+            return -1;
         }
     }
 }
