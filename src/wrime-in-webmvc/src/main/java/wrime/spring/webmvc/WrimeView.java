@@ -15,7 +15,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
 import wrime.ScriptResource;
 import wrime.WrimeEngine;
 import wrime.WrimeEngineFactory;
-import wrime.spring.AbstractScriptSource;
+import wrime.spring.SpringAbstractResourceScript;
 import wrime.spring.webmvc.functors.L18nFunctor;
 import wrime.spring.webmvc.functors.ResponseFunctor;
 
@@ -102,7 +102,7 @@ public class WrimeView extends AbstractTemplateView implements MessageSourceAwar
         response.setCharacterEncoding(WrimeEngine.UTF_8.name());
 
         Resource resource = resourceLoader.getResource(getUrl());
-        ScriptResource script = new AbstractScriptSource((AbstractResource) resource);
+        ScriptResource script = new SpringAbstractResourceScript((AbstractResource) resource);
         wrimeEngine.render(script, response.getWriter(), map);
     }
 }
