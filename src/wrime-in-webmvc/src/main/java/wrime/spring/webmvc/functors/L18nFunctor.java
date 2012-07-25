@@ -25,4 +25,8 @@ public class L18nFunctor {
     public Locale getLocale() {
         return locale;
     }
+
+    public Locale getLocale() {
+        return locale;
+    }
 }
